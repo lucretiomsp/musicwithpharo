@@ -1,5 +1,5 @@
 ---
-layout: home  # Ensure this matches your theme's homepage layout
+remote_theme: "dracula/gh-pages"
 title: Music (and Sounds) with Pharo
 ---
 
