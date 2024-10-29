@@ -4,3 +4,54 @@
 @import
   "minima/skins/{{ site.minima.skin | default: 'classic' }}",
   "minima/initialize";
+/* assets/css/custom.css */
+
+/* Sidebar container */
+.sidebar {
+    background-color: #f8f9fa; /* Light background color */
+    padding: 20px; /* Padding around the content */
+    border-right: 2px solid #dee2e6; /* Optional right border */
+    width: 250px; /* Fixed width for sidebar */
+    float: left; /* Position sidebar to the left */
+    height: auto; /* Allow height to adjust based on content */
+}
+
+/* Sidebar heading */
+.sidebar h2 {
+    font-size: 1.5em; /* Font size for the title */
+    margin-bottom: 15px; /* Space below the title */
+    color: #333; /* Title color */
+}
+
+/* List styling */
+.sidebar ul {
+    list-style-type: none; /* Remove default bullets */
+    padding: 0; /* Remove padding */
+}
+
+/* Individual list items */
+.sidebar ul li {
+    margin: 10px 0; /* Space between items */
+}
+
+/* Links styling */
+.sidebar ul li a {
+    text-decoration: none; /* Remove underline */
+    color: #007bff; /* Link color */
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Hover effect */
+.sidebar ul li a:hover {
+    color: #0056b3; /* Darker shade on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%; /* Full width on small screens */
+        float: none; /* Remove float */
+        border-right: none; /* Remove right border */
+    }
+}
