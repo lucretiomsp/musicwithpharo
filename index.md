@@ -4,7 +4,7 @@ title: Music (and Sounds) with Pharo
 
 ## Latest Posts
 
-Here are some of my latest posts:
+
 
 <ul>
 {% for post in site.posts %}
