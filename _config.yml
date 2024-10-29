@@ -1,3 +1,6 @@
 remote_theme: "dracula/gh-pages"
 author: Domenico Cipriani
 description: "A guide to composing music and generating sounds in Pharo: blog and manual for Coypu and Phausto"
+collections:
+  posts:
+    output: true
