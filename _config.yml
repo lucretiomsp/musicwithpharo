@@ -1,4 +1,4 @@
-
+theme: minima
 author: Domenico Cipriani
 title: Music (and Sounds) with Pharo
 description: "A guide to composing music and generating sounds in Pharo: blog and manuals for Coypu and Phausto"
