@@ -1,0 +1,53 @@
+---
+---
+
+@import
+  "minima/skins/{{ site.minima.skin | default: 'classic' }}",
+  "minima/initialize";
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: #f8f9fa; /* Adjust to your preferred color */
+  padding-top: 60px; /* Adjust based on header height */
+}
+
+.site-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-nav .page-link {
+  padding: 15px;
+  color: #333;
+  text-decoration: none;
+}
+
+.site-nav .page-link:hover {
+  background-color: #e9ecef; /* Hover background */
+}
+
+.site-header {
+  margin-left: 250px; /* Offset the header to align with the sidebar */
+}
+
+.wrapper {
+  max-width: calc(100% - 250px); /* Adjust header width */
+}
+
+/* Optional: Hide sidebar on smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .site-header, .wrapper {
+    margin-left: 0;
+  }
+}
