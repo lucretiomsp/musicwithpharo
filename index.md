@@ -8,5 +8,5 @@ title: Music (and Sounds) with Pharo
         <li><a href="/documentation/coypu.md">Coypu</a></li>
         <li><a href="/documentation/phausto.md">Phausto</a></li>
         <li><a href="/documentation/pharosound.md">Pharo-Sound</a></li>
-    
+    </ul>
 </div>
