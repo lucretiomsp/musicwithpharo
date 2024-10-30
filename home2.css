@@ -1,26 +1,32 @@
 body {
+   margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: start; /* Aligns content at the top */
+  height: 100vh;
   background-color: rgb(153, 196, 210);;
 }
 
+/* Container grid setup */
 .container {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* 1/3 for sidebar, 1/3 centered for home, and 1/3 margin */
+  grid-template-columns: 1fr 2fr 1fr; /* Three-column layout */
+  gap: 10px;
   width: 100%;
-  max-width: 1200px; /* Optional max width */
-  height: 100vh; /* Full viewport height */
-  align-items: start; /* Ensures elements are aligned at the top */
+  max-width: 1200px; /* Optional: set max width for larger screens */
 }
 
 /* Sidebar styling */
 .sidebar {
-  grid-column: 1 / 2;
-  background-color: white;
+  grid-column: 1 / 2; /* Positions sidebar in the first column */
+  background-color: #f0f0f0;
   padding: 20px;
 }
 
 /* Home styling */
 .home {
-  grid-column: 2 / 3;
-  background-color: lightblue;
+  grid-column: 2 / 3; /* Positions home in the middle column */
+  background-color: #e0e0ff;
   padding: 20px;
 }
