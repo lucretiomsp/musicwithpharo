@@ -1,4 +1,5 @@
 ---
+layout: home2
 title: "Pharo-Sound: send and receive MIDI and much more"
 ---
 This library contains methods that are useful to send and receive MIDI messages. We mainly use methods that open streams
