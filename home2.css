@@ -2,6 +2,13 @@
   box-sizing: border-box;
 }
 
+h1 {
+  background-color: blue;
+  color: white;
+  text-align: center;
+  font-family: "Helvetica", "Arial", sans-serif;
+}
+
 body {
   background-color: blue
 }
