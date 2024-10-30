@@ -3,7 +3,7 @@
 }
 
 h1 {
-  background-color: blue;
+  background-color: #1e81b0;
   color: white;
   text-align: center;
   font-family: "Helvetica", "Arial", sans-serif;
@@ -13,17 +13,18 @@ body {
   background-color: blue
 }
 
+.sidebar {
+  width: 25%;
+  float: left;
+  background-color: white
+}
 
 .home {
   width: 75%;
   float: left;
   background-color: lightblue
 }
-.sidebar {
-  width: 25%;
-  float: left;
-  background-color: white
-}
+
 
 
 
