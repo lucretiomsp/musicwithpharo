@@ -1,5 +1,5 @@
 ---
-title:  Pharo music
+title:  Latest posts
 layout: home2
 ---
 
