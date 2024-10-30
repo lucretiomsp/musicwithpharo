@@ -1,35 +1,3 @@
-/* Reset body to fill the viewport */
 body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: start;
-}
-
-/* Container grid setup with two main sections */
-.container {
-  display: grid;
-  grid-template-columns: 1fr 2fr; /* Sidebar takes 1/3, posts take 2/3 */
-  gap: 10px;
-  width: 100%;
-  max-width: 1200px; /* Optional max-width for larger screens */
-  height: 100vh; /* Full viewport height */
-}
-
-/* Sidebar styling */
-.sidebar {
-  background-color: white;
-  padding: 20px;
-  height: 100%; /* Ensure full height for sidebar */
-  box-sizing: border-box; /* Makes padding part of the sidebar's total width */
-}
-
-/* Posts styling */
-.posts {
-  background-color: lightblue;
-  padding: 20px;
-  height: 100%; /* Ensure full height for posts */
-  box-sizing: border-box;
+  background-color: lightblue
 }
