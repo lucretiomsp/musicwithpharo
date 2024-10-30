@@ -16,7 +16,7 @@ body {
 
 .sidebar {
   width: 25%;
-  float: left;
+  height: 100%;
   padding: 15px;
   background-color: white
 }
