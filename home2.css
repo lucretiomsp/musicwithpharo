@@ -1,32 +1,35 @@
+/* Reset body to fill the viewport */
 body {
-   margin: 0;
+  margin: 0;
   padding: 0;
+  height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: start; /* Aligns content at the top */
-  height: 100vh;
-  background-color: rgb(153, 196, 210);;
+  align-items: start;
 }
 
-/* Container grid setup */
+/* Container grid setup with two main sections */
 .container {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* Three-column layout */
+  grid-template-columns: 1fr 2fr; /* Sidebar takes 1/3, posts take 2/3 */
   gap: 10px;
   width: 100%;
-  max-width: 1200px; /* Optional: set max width for larger screens */
+  max-width: 1200px; /* Optional max-width for larger screens */
+  height: 100vh; /* Full viewport height */
 }
 
 /* Sidebar styling */
 .sidebar {
-  grid-column: 1 / 2; /* Positions sidebar in the first column */
-  background-color: #f0f0f0;
+  background-color: white;
   padding: 20px;
+  height: 100%; /* Ensure full height for sidebar */
+  box-sizing: border-box; /* Makes padding part of the sidebar's total width */
 }
 
-/* Home styling */
-.home {
-  grid-column: 2 / 3; /* Positions home in the middle column */
-  background-color: #e0e0ff;
+/* Posts styling */
+.posts {
+  background-color: lightblue;
   padding: 20px;
+  height: 100%; /* Ensure full height for posts */
+  box-sizing: border-box;
 }
