@@ -1,12 +1,13 @@
 * {
   box-sizing: border-box;
+  font-family: "Helvetica", "Arial", sans-serif
 }
 
 h1 {
   background-color: #1e81b0;
   color: white;
   text-align: center;
-  font-family: "Helvetica", "Arial", sans-serif;
+  
 }
 
 body {
@@ -16,12 +17,14 @@ body {
 .sidebar {
   width: 25%;
   float: left;
+  padding: 15px;
   background-color: white
 }
 
 .home {
   width: 75%;
   float: left;
+  padding: 15px;
   background-color: lightblue
 }
 
