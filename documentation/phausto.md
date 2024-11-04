@@ -1,5 +1,5 @@
 ---
-layout: documain
+layout: docuMain
 title: "Phausto: fast and accesible DSP programming"
 ---
 Phausto is a Pharo package and API crafted to enable fast and accessible Digital Signal Processor (DSP) design. It is powered by an embedded [Faust](https://faustdoc.grame.fr/) engine, granting users direct access to cutting-edge algorithms that researchers worldwide have implemented into the Faust standard libraries.
