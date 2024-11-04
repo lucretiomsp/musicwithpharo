@@ -1,5 +1,5 @@
 ---
-layout: home2
+layout: documain
 title: "Coypu: programming music on-the-fly"
 ---
 Coypu is a Pharo package designed for programming music on-the-fly. It serves as a client that can connect to various audio engines, including [SuperDirt](https://github.com/musikinformatik/SuperDirt)/[SuperCollider](https://supercollider.github.io/), [Kyma](https://kyma.symbolicsound.com/), 
