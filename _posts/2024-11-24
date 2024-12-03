@@ -1,0 +1,25 @@
+# Participating in IFC24: The International Faust Conference
+
+On **November 21–22, 2024**, we had the pleasure of taking part in **IFC24**, the [International Faust Conference](https://faust.grame.fr/community/ifc/), held in Torino, Italy. Organized in collaboration with **[SoundMit](https://www.soundmit.com/en)**, this event brought together developers, researchers, and audio enthusiasts to explore the creative possibilities of the Faust programming language in audio DSP.
+(Functional Audio Stream) is a functional programming language specifically designed for building high-performance audio and music DSP applications. It allows developers to create real-time audio effects, instruments, and other sound-processing tools, and it can target multiple platforms, from embedded systems (as [Bela](https://bela.io/)  and [Daisy](https://electro-smith.com/collections/daisy) ), to Android or iOS, to [RNBO](https://rnbo.cycling74.com/) and WebAssembly.
+
+We would like to thank the **IFC24 organizers** for the opportunity to present and participate in such a wonderful event. A big thank you also to all the **participants** for their engaging talks and for creating such a positive and inspiring atmosphere. It was truly a great experience. The event was an exciting opportunity to engage with the Faust community, share ideas, and demonstrate Phausto in action. We extend our thanks to the organizers of IFC24 and SoundMit for creating a fantastic event and to all attendees for their enthusiasm and participation.
+
+## Day 1: Performance - *Riding the Mooflod*
+
+The first day featured our 20-minute experimental performance titled *Riding the Mooflod*. This performance highlighted the integration of **Phausto**, **Coypu**, and a custom set of widgets built with **[Bloc](https://github.com/pharo-graphics/Bloc)**. It was a unique opportunity to showcase innovative ways of combining real-time DSP with interactive visual elements.
+
+## Day 2: Workshop - *Getting Started with Phausto*
+
+The second day, we hosted a **1-hour workshop** to introduce participants to *Phausto*. This session covered practical aspects of working with Phausto and its potential for DSP development. Key topics included:
+
+- **Installing Pharo and Phausto**: A guided setup process.  
+- **Introduction to Basic Syntax**: Walking through the fundamentals of Phausto programming.  
+- **[MasterLu](https://github.com/lucretiomsp/MasterLu) Tutorial**: Progressing through the first 7 lessons to build hands-on experience.  
+- **Exporting DSP to [Cmajor](https://cmajor.dev/)**: Demonstrating the creation of a **Cmajor patch** from a Phausto DSP.  
+- **Using VST3 Plugins in a DAW**: Showing how to export and load the Cmajor patch as a VST3 plugin in a Digital Audio Workstation.
+
+### Youtube videos:
+IFC24 - [Day 1](https://www.youtube.com/watch?v=zli5sFc5dlE&t=10828s).
+IFC24 = [Day2](https://www.youtube.com/watch?v=QeKmola3WOc&t=7373s)
+
