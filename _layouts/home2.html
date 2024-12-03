@@ -16,7 +16,7 @@
 
   {{ content }}
 
-
+<p>{{ posts.size }}</p>
   {% if site.paginate %}
     {% assign posts = paginator.posts %}
   {% else %}
