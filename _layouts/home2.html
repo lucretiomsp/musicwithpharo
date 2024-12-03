@@ -16,7 +16,7 @@
 
   {{ content }}
 
-<p>{{ posts.size }}</p>
+
   {% if site.paginate %}
     {% assign posts = paginator.posts %}
   {% else %}
@@ -70,6 +70,7 @@
 <div class="sidebar">
     <h2>Topics</h2>
     <ul>
+      <p>{{ posts.size }}</p>
         <li><a href="https://lucretiomsp.github.io/musicwithpharo/documentation/coypu.html">Coypu</a></li>
         <li><a href="https://lucretiomsp.github.io/musicwithpharo/documentation/phausto.html">Phausto</a></li>
         <li><a href="https://lucretiomsp.github.io/musicwithpharo/documentation/pharosound.html">Pharo-Sound</a></li>
