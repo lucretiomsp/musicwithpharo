@@ -14,4 +14,4 @@ We also introduced a bit of the history of Smalltalk and Pharo, highlighting its
 We hope to create more video tutorials in the future, as we strongly believe this *plug-in development stack* can empower artists and producers to bring their audio ideas to life without the hassle of C++ programming and app code signing/notarizing.
 
 
-See and download the slides [here]([See the poster here](https://lucretiomsp.github.io/musicwithpharo/assets/Phausto_AudioProgrammerMeetUp012025.pdf)
+See and download the slides [here](https://lucretiomsp.github.io/musicwithpharo/assets/Phausto_AudioProgrammerMeetUp012025.pdf)
