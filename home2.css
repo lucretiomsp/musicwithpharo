@@ -19,7 +19,7 @@ body {
   /* background-color: blue */
    background: linear-gradient(lightblue, white);
    height: 100%;
-   display: flex;
+
 }
 
 .sidebar {
