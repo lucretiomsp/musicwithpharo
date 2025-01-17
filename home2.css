@@ -13,7 +13,7 @@ h1 {
 
 body {
   /* background-color: blue */
-   background-image: linear-gradient(blue, white);
+   background: linear-gradient(blue, white);
 }
 
 .sidebar {
