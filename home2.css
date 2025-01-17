@@ -9,7 +9,7 @@ header {
 }
 
 h1 {
-  background-color: #1e81b0;
+  background:linear-gradient(blue, lightblue);
   color: white;
   text-align: center;
   
