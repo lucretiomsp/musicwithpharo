@@ -19,6 +19,9 @@ html {
   height: 100%;
 }
 
+.topbar {
+background-color: black;
+}
 body {
   /* background-color: blue */
    background: linear-gradient(lightblue, white);
