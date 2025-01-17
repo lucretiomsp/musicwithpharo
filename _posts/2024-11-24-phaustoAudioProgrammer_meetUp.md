@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: "Phausto at the Audio Prgrammer meetup"
