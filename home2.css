@@ -15,6 +15,11 @@ h1 {
   
 }
 
+.toplist {
+  display: inline; /* Make the list items inline */
+  margin-right: 10px; /* Add space between items */
+}
+
 html {
   height: 100%;
 }
