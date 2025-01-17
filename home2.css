@@ -24,6 +24,10 @@ html {
   height: 100%;
 }
 
+a {
+  text-decoration: none;
+  color: #FFFFFF;
+}
 .topbar {
 background-color: black;
 color: white;  
