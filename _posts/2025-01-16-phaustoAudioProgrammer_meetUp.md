@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: mypost
 title: "Phausto at the Audio Programmer meetup"
 date: 2025-01-16
 ---
