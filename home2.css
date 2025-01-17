@@ -15,6 +15,7 @@ body {
   /* background-color: blue */
    background: linear-gradient(lightblue, white);
    height: 100%;
+   display: flex;
 }
 
 .sidebar {
@@ -22,7 +23,7 @@ body {
   height: 100%;
   float: left;
   padding: 15px;
-  background-color: white
+  background-color:  linear-gradient(blue, white);
 }
 
 .home {
@@ -30,7 +31,7 @@ body {
   height: 100%;
   float: right;
   padding: 15px;
-  background:  linear-gradient(lightblue, blue);
+  background:  linear-gradient(blue, lightblue);
 }
 
 
