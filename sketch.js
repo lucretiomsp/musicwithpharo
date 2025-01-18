@@ -3,7 +3,7 @@ let waves = [];
 let waveTypes = ["sine", "square", "triangle", "sawtooth"]; // Types of waves
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight /2);
   noFill();
   strokeWeight(3);
 
