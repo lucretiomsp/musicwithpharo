@@ -15,7 +15,7 @@ function setup() {
 }
 
 function draw() {
-  background(255); // Black background
+  background(0); // Black background
   stroke(200, 250, 10); // White lines
 
   // Draw each wave
