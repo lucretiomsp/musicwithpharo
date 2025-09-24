@@ -1,0 +1,107 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww17960\viewh15720\viewkind0
+\deftab720
+\pard\tx4136\pardeftab720\partightenfactor0
+
+\f0\fs36 \cf0 \expnd0\expndtw0\kerning0
+SLIDE 2.\
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 I am Domenico Cipriani, also known as Lucretio, I\'92ve been a DJ, producer, and live performer since the early 2000s, releasing more than 150 records and touring underground clubs around the world. Since 2020, I\'92ve also been active as a live coder and audio developer, bringing programming into my creative practice. Currently, I\'92m focused on developing audio and musical libraries and APIs for Pharo, as part of my work with Evref/Inria.\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 \
+SLIDE 3 - OVERVIEW\
+\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf2 \kerning1\expnd0\expndtw0 Here\'92s an overview of today\'92s talk.\
+First, we\'92ll look at the problem: audio plugin development is often complex and inaccessible for many sound artists who don\'92t have deep coding experience.\
+Then, we\'92ll review existing solutions \'97 the tools and frameworks available today, along with their strengths and their limitations.\
+Next, I\'92ll introduce Phausto in combination with Cmajor \'97 our approach to making plugin development simpler, and focus on sound not on the boilerplate.\
+We\'92ll also touch on monetisation \'97 exploring sustainable models that can support both developers and musicians.\
+And finally, we\'92ll consider the new challenges ahead.\cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \outl0\strokewidth0 \
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 SLIDE 4 - THE PROBLEM.  \
+\pard\pardeftab720\partightenfactor0
+\cf0 Many sound artists and musicians want to create their own tools, but developing audio plug-ins can be daunting\'97especially for those without a strong coding background. Traditionally, this work relies on C++, a powerful but notoriously difficult language to learn, master, and use safely. Even small mistakes can easily lead to crashes or unstable software, making the process risky and time-consuming. Frameworks like JUCE provide valuable support, but they don\'92t solve everything: cross-platform issues, macOS notarisation, and other technical hurdles still require significant time and effort.\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 \
+SLIDE 5 - COMPARISON\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 On this slide, we\'92re looking at the very same synthesizer \'97 a Pulse Oscillator with an ADSR envelope \'97 but implemented in four different ways. With a generic C++ UI, it takes about 458 lines of code. In Cmajor, the same synth drops to around 50 lines. With Faust, it\'92s just 24 lines. And with Phausto, we can express it in only 5 lines.\
+This is, of course, just one example, but it shows something important: Phausto lets us abstract away much of the underlying complexity. Instead of fighting with hundreds of lines of low-level code, we can focus on the musical ideas and the sound itself.\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 \
+SLIDE 6\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf2 \kerning1\expnd0\expndtw0 Most existing tools out there come with significant limitations. Take Max4Live, for example: it\'92s powerful, but it\'92s not free, and only works in Ableton Live, which immediately restricts your workflow. Then there\'92s PlugData\'97it offers flexibility, but libraries available are scarce and its performance is questionable. Similarly, Faust\'97can produce produce audio plug-ins \'97with FaustVST or combining it with HISE but functional programming can be hard to learn .  Cmajor is much  easier to approach, and it allows you to get started faster, but even here, beginners can struggle, also because you still need a solid understanding of JavaScript to build functional UIs. Essentially, every existing solution forces a trade-off: power versus accessibility, performance versus ease of use. The real solution for artists is a tool that balances open access, easy learning, cross-platform functionality, and intuitive UI design\'97a platform where creativity comes before coding frustration.\cf0 \expnd0\expndtw0\kerning0
+\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 \
+\
+\
+SLIDE 7 - WHAT IS PHAUSTO\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \outl0\strokewidth0 \strokec2 Phausto is a new library for DSP programming in Pharo Smalltalk that is really easy to learn and use.\uc0\u8232 At its core, Phausto integrates a full FAUST compiler, with access to hundreds of advanced unit generators from FAUST\'92s standard libraries. From basic oscillators to complex reverbs and a wide range of filters, everything runs smoothly inside a friendly, dynamic Smalltalk environment.\
+\pard\pardeftab720\partightenfactor0
+\cf0 \strokec2 Phausto stands out for its export capabilities.. Our creations can target multiple languages, including Cmajor, which opens up professional audio development possibilities. And since Cmajor patches run perfectly on the free loader plugin from the Cmajor team, you can deploy your audio applications immediately without expensive software licenses.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 But Phausto doesn\'92t just create Cmajor code (including helpers for polyphony) \'97 it also builds complete user interfaces and automatically generates JavaScript files. This seamless workflow takes you from concept to deployment without switching tools or environments.\
+And I don\'92t see an exclusion between Phausto, Faust, and Cmajor. They complement each other, and maybe attracting more people to audio development through Phausto will help them finally grasp a bit of C++.\
+Phausto bridges three powerful worlds: Smalltalk\'92s elegant development environment, FAUST\'92s audio processing expertise, and Cmajor\'92s modern deployment ecosystem. It\'92s audio programming without complexity barriers.\
+I see Phausto as a tool that welcomes beginners and sound artists, giving them an easy entry into audio programming. At the same time, learning Faust and Cmajor through Phausto opens the door to more advanced tools \'97 like creating a custom reverb in Faust or adding audio file support in Cmajor.\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf0 \outl0\strokewidth0 \
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 \
+SLIDE 8 -WHAT IS CMAJOR\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf2 \kerning1\expnd0\expndtw0 Cmajor is a C-family programming language created specifically for writing DSP code. From the words of its creators, Its main goal is to improve the current status quo for audio development by making it more accessible without sacrificing performance. Unlike traditional C or C++, Cmajor was designed with students and beginners in mind, offering an easier learning curve while still matching the efficiency and speed of traditional languages. This makes it possible for new developers to dive into audio programming without being overwhelmed with thing like data races or out of bounds arrays, while experienced programmers still get the performance they need. On top of that, the Cmajor VST and AU plugin allows you to load patches directly into any standard DAW, bridging the gap between code and practical music production. Essentially, Cmajor combines accessibility, high performance, and real-world usability, giving artists and developers a powerful tool to bring their audio ideas to life.\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf0 \expnd0\expndtw0\kerning0
+\
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 SLIDE 9\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 Pharo is a pure object-oriented programming language that comes with a powerful IDE designed for simplicity and immediate feedback. \'93Pharo represents a contemporary, evolving take on Smalltalk, with a focus on modern tools and workflows.\'94.It\'92s free, open-source, and multi-platform, with a simple syntax that\'92s easy to pick up. Its IDE is very powerful, offering integrated Git support and advanced run-time reflection, making development smooth and efficient. On top of that, Phausto brings DSP programming into Pharo, making audio development accessible to artists and programmers. Learning Pharo is fast\'97you can get a solid foundation in 7 weeks or even less through its online MOOC. And with Phausto, you can be productive in just 7 days using the MasterLu tool inside Pharo. \
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 \
+SLIDE 10 - JUMP TO PHARO\
+\pard\pardeftab720\partightenfactor0
+\cf0 \'93Alright, let\'92s jump into Pharo and walk through creating a plug-in in Phausto, exporting it to a Cmajor patch, and then loading it inside a DAW.\'94\
+\
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 SLIDE 12\
+\pard\pardeftab720\sl283\slmult1\partightenfactor0
+\cf2 \kerning1\expnd0\expndtw0 To share our Cmajor patches, we can distribute a ZIP file that includes all the plugin files, the UI assets, and the license texts. This makes it easy to share our plugins with friends or our fan community. Once users have downloaded the Cmajor plugin, they can freely drag and drop different patches whenever they like, customizing their experience.\
+It\'92s important to note that portions of the FAUST libraries we use are copyrighted. To distribute these Phausto Unit Generators legally, we  must include a copy of the original license with your plug-in. We\'92re also working on automating the inclusion and generation of license text files whenever they\'92re needed.\cf0 \expnd0\expndtw0\kerning0
+\
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 \
+\
+SLIDE 15 - MONETIZATION:\
+\pard\pardeftab720\partightenfactor0
+\cf0 \outl0\strokewidth0 \strokec2 But what if we want to sell our Cmajor patch? One option is Bandcamp.\
+Here\'92s the page of SoftComputing, the indie-punk software house I run with DJ Haus.\
+We can release a few audio demos of the patch, and attach a ZIP with all the necessary files.\
+When someone buys the release, Bandcamp delivers the music and the patch together in the same package.\
+And unlike corporate plugin stores, here the price stays lower \'97 closer to music culture than to software industry mark-ups.\
+In the release notes, we can also add a direct link to the free Cmajor plugin.\
+So instruments and effects built with Phausto can be distributed like music: affordable, independent, and artist-driven.\
+\outl0\strokewidth0 \
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 SLIDE 16 - CHALLENGES\
+When we talk about the future of plug-in development, a big question comes up: does this still make sense in the age of AI? I believe it does \'97 especially if you want to stay part of the creative process, rather than automate everything. In my opinion, AI can broaden our perspective, but it shouldn\'92t replace the hands-on exploration that makes music unique.\
+Looking ahead, I can see two big challenges. First, building more complex and expressive user interfaces while keeping the underlying API simple for developers. Second, ensuring native DAW support for new standards, like Cmajor patches, which are already coming to Waveform DAW. If enough Cmajor patches are out there, other DAWs manufacturer will have to support them too. \
+THANKS!\
+\pard\tx4136\pardeftab720\partightenfactor0
+\cf0 Thanks everyone,  especially  to the ADC organizers and the tech crew for keeping things running smooth. Huge thanks as well to Evref for backing my work, and to Stephane Letz and Cesare Ferrari for their technical help . I\'92ll be hanging out in Gather Town and at the poster tent \'97 come find me, ask questions, or just have a chat.\
+\pard\tx4136\pardeftab720\sa240\partightenfactor0
+\cf0 \
+\
+}
