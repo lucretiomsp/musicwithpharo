@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Library — Coypu Docs</title>
+<link rel="stylesheet" href="coypu-shared.css">
+<style>
+  /* rhythm grid */
+  .rhythm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1.2rem 0 2rem;
+  }
+
+  .rhythm-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem 1rem;
+    background: var(--white);
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .rhythm-card:hover {
+    border-color: var(--sage);
+    box-shadow: 0 2px 10px rgba(78,124,95,.1);
+  }
+
+  .rhythm-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+
+  .rhythm-name {
+    font-family: var(--mono);
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--sage);
+    white-space: nowrap;
+  }
+
+  .rhythm-origin {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    background: var(--sage-pale);
+    padding: .15em .55em;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .rhythm-desc {
+    font-size: .84rem;
+    color: var(--text);
+    line-height: 1.55;
+    margin-bottom: .7rem;
+  }
+
+  /* step visualiser — 16 boxes */
+  .step-vis {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+
+  .step-vis .s {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--sage-pale);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .step-vis .s.on {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  .step-vis .beat-sep {
+    width: 1px;
+    height: 14px;
+    background: transparent;
+    flex-shrink: 0;
+  }
+
+  .rhythm-code {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--muted);
+    margin-top: .6rem;
+  }
+
+  .rhythm-code span { color: var(--sage); }
+
+  /* region grouping */
+  .region-heading {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    margin: 2.4rem 0 .8rem;
+  }
+
+  .region-heading h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1.2rem;
+  }
+
+  .region-flag {
+    font-size: 1.4rem;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: 1.2rem 0 .4rem;
+  }
+
+  .search-bar input {
+    flex: 1;
+    padding: .5rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: .875rem;
+    background: var(--white);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  .search-bar input:focus { border-color: var(--sage); }
+  .search-bar input::placeholder { color: var(--muted); }
+
+  #no-results {
+    display: none;
+    color: var(--muted);
+    font-size: .9rem;
+    padding: 1rem 0;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html" class="active">Rhythm Library</a>
+      <a href="rhythms-advanced.html">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Docs</a> › <a href="rhythms-basics.html">Rhythm Reference</a></div>
+    <h1>🌍 Rhythm Library</h1>
+    <p class="subtitle">All named rhythms in <code>Rhythm list</code> — patterns, origins, and ethnomusicological notes.</p>
+  </div>
+
+  <div class="content-wrap">
+    <article class="content">
+
+      <p>
+        Coypu ships with a library of named rhythms drawn from global percussion traditions. Each one is accessed
+        by sending <code>asRhythm</code> to a Pharo symbol, or by sending the symbol directly to
+        <code>to:</code> as a shorthand. The source code of each method includes detailed ethnomusicological
+        comments — inspect <code>Rhythm list</code> in a Pharo image to read them.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>
+          In the step visualisers below, <strong>filled squares</strong> are triggers and empty squares are rests.
+          Groups of 4 steps correspond to one beat in 4/4 time.
+        </span>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="rhythmSearch" placeholder="Filter by name or region…" oninput="filterRhythms()">
+      </div>
+      <div id="no-results">No rhythms match your filter.</div>
+
+      <!-- ===== AFRO-CARIBBEAN ===== -->
+      <div class="region-heading" data-region="afro-caribbean">
+        <span class="region-flag">🌴</span>
+        <h2 id="afro-caribbean">Afro-Caribbean</h2>
+      </div>
+      <div class="rhythm-grid" id="grid-afro-caribbean">
+
+        <div class="rhythm-card" data-name="rumba" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#rumba</span>
+            <span class="rhythm-origin">Cuba</span>
+          </div>
+          <p class="rhythm-desc">
+            The son clave in rumba form — a 16-step pattern rooted in the secular Afro-Cuban tradition
+            of <em>rumba</em> drumming. Originated in late 19th-century urban Havana and Matanzas,
+            combining African (Abakuá, yuka) and Spanish elements. The foundational rhythm of Cuban popular music.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 1 0 0 1 0 0 0 1 0 1 0 0 0  (son clave 3-2) -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#rumba</span> asRhythm to: #conga.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="cumbiaClave" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#cumbiaClave</span>
+            <span class="rhythm-origin">Colombia</span>
+          </div>
+          <p class="rhythm-desc">
+            The clave pattern of Colombian cumbia — a three-beat cross-rhythm over 16 steps. Cumbia
+            fuses Indigenous, African, and Spanish elements and is the foundational rhythm of Colombia's
+            Caribbean coast. The clave is the rhythmic skeleton all other parts lock around.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0  -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#cumbiaClave</span> asRhythm to: #conga.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="plena" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#plena</span>
+            <span class="rhythm-origin">Puerto Rico</span>
+          </div>
+          <p class="rhythm-desc">
+            The plena rhythm from Puerto Rico — an Afro-Caribbean musical form that emerged in the
+            early 20th century in coastal towns like Ponce. The <em>pandereta</em> (frame drum) pattern
+            is syncopated and call-and-response in nature, reflecting its oral-history storytelling function.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 1 0  1 0 0 1  0 1 0 1  0 1 0 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#plena</span> to: #conga.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="guaguanco" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#guaguanco</span>
+            <span class="rhythm-origin">Cuba</span>
+          </div>
+          <p class="rhythm-desc">
+            The clave pattern for guaguancó, a subgenre of Cuban rumba. More syncopated than the son
+            clave, with characteristic anticipation on beat 4. Guaguancó is a dance form tied to
+            competitive courting rituals (<em>vacunao</em>) performed in Afro-Cuban communities.
+          </p>
+          <div class="step-vis">
+            <!-- rumba clave 3-2: 1 0 0 1 0 0 1 0 0 0 0 1 0 1 0 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#guaguanco</span> asRhythm to: #conga.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="bossaNova" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#bossaNova</span>
+            <span class="rhythm-origin">Brazil</span>
+          </div>
+          <p class="rhythm-desc">
+            The rhythmic DNA of bossa nova — the style developed in late-1950s Rio de Janeiro by João
+            Gilberto and Tom Jobim. A relaxed, syncopated samba derivative played on guitar with a calm,
+            intimate feel. The pattern here reflects the characteristic guitar-strum rhythm.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 1 0  0 1 0 1  1 0 1 0  0 1 0 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#bossaNova</span> asRhythm to: #snare.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="tresillo" data-region="afro-caribbean">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#tresillo</span>
+            <span class="rhythm-origin">Cuba / Pan-African diaspora</span>
+          </div>
+          <p class="rhythm-desc">
+            Three pulses in 8 steps — one of the most widespread rhythmic cells in the African diaspora.
+            The tresillo underlies Cuban son, New Orleans second-line, reggae, and many other genres.
+            Godfried Toussaint identified it as a Euclidean rhythm E(3,8).
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 1 0 0 1 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#tresillo</span> asRhythm to: #kick.</div>
+        </div>
+
+      </div>
+
+      <!-- ===== LATIN / SOUTH AMERICAN ===== -->
+      <div class="region-heading" data-region="latin">
+        <span class="region-flag">🎺</span>
+        <h2 id="latin">Latin &amp; South American</h2>
+      </div>
+      <div class="rhythm-grid" id="grid-latin">
+
+        <div class="rhythm-card" data-name="banda" data-region="latin">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#banda</span>
+            <span class="rhythm-origin">Mexico</span>
+          </div>
+          <p class="rhythm-desc">
+            The bass drum and snare pattern of banda sinaloense — the brass-heavy Mexican genre from
+            Sinaloa state. Known for its powerful two-beat feel and close relationship with
+            <em>polka</em> and <em>corrido</em> traditions. A staple of Northern Mexican dance music.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 0  1 0 1 0  1 0 0 0  1 0 1 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#banda</span> to: #kick.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="cumbia" data-region="latin">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#cumbia</span>
+            <span class="rhythm-origin">Colombia</span>
+          </div>
+          <p class="rhythm-desc">
+            The basic cumbia groove — a caja (drum) pattern from the Caribbean coast of Colombia.
+            Cumbia blends Indigenous flutes, African percussion and Spanish harmony. It spread across
+            Latin America in the 20th century, spawning dozens of regional variants from Argentina
+            to Mexico.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 1  0 0 1 0  0 1 0 0  1 0 0 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#cumbia</span> asRhythm to: #conga.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="samba" data-region="latin">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#samba</span>
+            <span class="rhythm-origin">Brazil</span>
+          </div>
+          <p class="rhythm-desc">
+            The surdo (bass drum) and caixa (snare) pattern from Brazilian samba. Emerged in early
+            20th-century Rio de Janeiro with Afro-Brazilian communities from Bahia. The driving force
+            behind Carnaval, samba schools, and countless derivative styles worldwide.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 1 0  1 1 0 1  0 0 1 0  1 1 0 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s on"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#samba</span> asRhythm to: #snare.</div>
+        </div>
+
+      </div>
+
+      <!-- ===== MIDDLE EAST / NORTH AFRICA ===== -->
+      <div class="region-heading" data-region="mena">
+        <span class="region-flag">🌙</span>
+        <h2 id="mena">Middle East &amp; North Africa</h2>
+      </div>
+      <div class="rhythm-grid" id="grid-mena">
+
+        <div class="rhythm-card" data-name="baladi" data-region="mena">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#baladi</span>
+            <span class="rhythm-origin">Egypt</span>
+          </div>
+          <p class="rhythm-desc">
+            An Egyptian folk rhythm used in <em>baladi</em> (folk/classical) music and dance.
+            Typically played on the tabla (goblet drum), it features a characteristic doum-tek-tek
+            pattern across 8 steps. Central to Egyptian sha'bi and belly-dance music traditions.
+          </p>
+          <div class="step-vis">
+            <!-- D . T . . D . T   1 0 1 0  0 1 0 1 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div>
+          </div>
+          <div class="rhythm-code"><span>#baladi</span> asRhythm to: #tabla.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="samai" data-region="mena">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#samai</span>
+            <span class="rhythm-origin">Arab world / Turkey</span>
+          </div>
+          <p class="rhythm-desc">
+            A 10/8 meter (or its 10-step equivalent) common in Arabic and Ottoman classical music.
+            The samai form is a composed instrumental genre with fixed movements. The rhythmic
+            cycle <em>sama'i thaqil</em> groups as 3+2+2+3 — producing a characteristic lilt.
+          </p>
+          <div class="step-vis">
+            <!-- 3+2+2+3 grouping over 10 steps -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#samai</span> asRhythm to: #tabla.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="karsilama" data-region="mena">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#karsilama</span>
+            <span class="rhythm-origin">Turkey / Balkans</span>
+          </div>
+          <p class="rhythm-desc">
+            A 9/8 Anatolian folk dance rhythm grouped as 2+2+2+3. The <em>karşılama</em> is a face-to-face
+            couple dance from Turkish and Balkan traditions. Its asymmetric meter creates a limping,
+            energetic feel characteristic of Anatolian and Greek folk music.
+          </p>
+          <div class="step-vis">
+            <!-- 2+2+2+3 over 9 steps -->
+            <div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#karsilama</span> asRhythm to: #darbuka.</div>
+        </div>
+
+      </div>
+
+      <!-- ===== SUB-SAHARAN AFRICA ===== -->
+      <div class="region-heading" data-region="africa">
+        <span class="region-flag">🥁</span>
+        <h2 id="africa">Sub-Saharan Africa</h2>
+      </div>
+      <div class="rhythm-grid" id="grid-africa">
+
+        <div class="rhythm-card" data-name="shiko" data-region="africa">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#shiko</span>
+            <span class="rhythm-origin">West Africa (Ghana/Nigeria)</span>
+          </div>
+          <p class="rhythm-desc">
+            A West African bell pattern — E(4,8) — used in the music of the Ewe people of Ghana and Togo.
+            Toussaint documented it as one of the most widespread Euclidean rhythms in African traditional
+            music. Often played on an iron bell (<em>gankogui</em>) as the timeline against which all
+            other drums interlock.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 1 0  1 0 1 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#shiko</span> asRhythm to: #bell.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="soukous" data-region="africa">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#soukous</span>
+            <span class="rhythm-origin">Democratic Republic of Congo</span>
+          </div>
+          <p class="rhythm-desc">
+            The percussion pattern from Congolese soukous — a high-energy guitar-driven dance music
+            that evolved from rumba and spread across Africa in the 1960s–80s. The rhythm supports
+            the characteristic interlocking guitar lines and the animated <em>kwassa kwassa</em>
+            dance style.
+          </p>
+          <div class="step-vis">
+            <!-- 1 0 0 1  0 1 0 0  1 0 0 1  0 0 1 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#soukous</span> asRhythm to: #conga.</div>
+        </div>
+
+      </div>
+
+      <!-- ===== EUROPE ===== -->
+      <div class="region-heading" data-region="europe">
+        <span class="region-flag">🎻</span>
+        <h2 id="europe">Europe</h2>
+      </div>
+      <div class="rhythm-grid" id="grid-europe">
+
+        <div class="rhythm-card" data-name="tarantella" data-region="europe">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#tarantella</span>
+            <span class="rhythm-origin">Italy (Southern)</span>
+          </div>
+          <p class="rhythm-desc">
+            The driving 6/8 rhythm of the Southern Italian tarantella — a fast folk dance from
+            Campania, Calabria, and Puglia. Historically associated with the tarantism trance ritual.
+            Its relentless forward motion is produced by interlocking tambourine (tammorra) patterns
+            at breakneck speed.
+          </p>
+          <div class="step-vis">
+            <!-- 6/8 as 12 steps: 1 0 1 0 1 0  1 0 1 0 1 0 -->
+            <div class="s on"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div>
+            <div class="beat-sep"></div>
+            <div class="s on"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div><div class="s"></div>
+          </div>
+          <div class="rhythm-code"><span>#tarantella</span> asRhythm to: #tamb.</div>
+        </div>
+
+        <div class="rhythm-card" data-name="buleria" data-region="europe">
+          <div class="rhythm-card-top">
+            <span class="rhythm-name">#buleria</span>
+            <span class="rhythm-origin">Spain (Flamenco)</span>
+          </div>
+          <p class="rhythm-desc">
+            The most complex and fastest compás in flamenco — a 12-beat cycle grouped as 3+3+2+2+2
+            with a characteristic accent on beats 3, 6, 8, 10, 12. The bulerías emerged in Jerez de
+            la Frontera and is considered the <em>madre</em> (mother) of all flamenco palos due to
+            its improvisational flexibility.
+          </p>
+          <div class="step-vis">
+            <!-- 12-beat: accent on 1,3,5,7,9,11 loosely -->
+            <div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div>
+            <div class="beat-sep"></div>
+            <div class="s"></div><div class="s on"></div>
+          </div>
+          <div class="rhythm-code"><span>#buleria</span> asRhythm to: #cajon.</div>
+        </div>
+
+      </div>
+
+      <!-- ===== HOW TO EXPLORE ===== -->
+      <h2 id="explore">Exploring in Pharo</h2>
+      <p>
+        The definitive list — including future additions — is always accessible inside your Pharo image.
+        Evaluate in a Playground and open an Inspector:
+      </p>
+
+<pre><code>Rhythm list.   <span class="cmt">"CMD+I or CTRL+I to inspect"</span></code></pre>
+
+      <p>
+        Each method in the <code>Rhythm</code> class contains detailed ethnomusicological comments.
+        Open the Class Browser, navigate to <code>Rhythm</code>, and read the comments alongside
+        the binary pattern defined with Time Unit Box notation.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>
+          The patterns documented here are representative approximations. The actual binary arrays in the
+          source code are the authoritative versions — verify in your image when precision matters.
+        </span>
+      </div>
+
+      <div class="page-nav">
+        <a href="rhythms-basics.html">
+          <span class="nav-dir">← Previous</span>
+          <span class="nav-title">Rhythm Basics</span>
+        </a>
+        <a href="rhythms-advanced.html" class="next">
+          <span class="nav-dir">Next →</span>
+          <span class="nav-title">Advanced Patterns</span>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#afro-caribbean">🌴 Afro-Caribbean</a></li>
+        <li><a href="#latin">🎺 Latin &amp; South American</a></li>
+        <li><a href="#mena">🌙 Middle East &amp; North Africa</a></li>
+        <li><a href="#africa">🥁 Sub-Saharan Africa</a></li>
+        <li><a href="#europe">🎻 Europe</a></li>
+        <li><a href="#explore">Exploring in Pharo</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+function filterRhythms() {
+  const q = document.getElementById('rhythmSearch').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.rhythm-card');
+  const headings = document.querySelectorAll('.region-heading');
+  const grids = document.querySelectorAll('.rhythm-grid');
+  let anyVisible = false;
+
+  cards.forEach(c => {
+    const name = c.dataset.name.toLowerCase();
+    const region = c.dataset.region.toLowerCase();
+    const text = c.innerText.toLowerCase();
+    const match = !q || name.includes(q) || region.includes(q) || text.includes(q);
+    c.style.display = match ? '' : 'none';
+    if (match) anyVisible = true;
+  });
+
+  // Hide section headings if all cards in that region are hidden
+  grids.forEach(grid => {
+    const id = grid.id.replace('grid-', '');
+    const visibleInGrid = [...grid.querySelectorAll('.rhythm-card')]
+      .some(c => c.style.display !== 'none');
+    const heading = document.querySelector(`.region-heading[data-region="${id}"]`);
+    if (heading) heading.style.display = visibleInGrid ? '' : 'none';
+    grid.style.display = visibleInGrid ? '' : 'none';
+  });
+
+  document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
+}
+</script>
+
+</body>
+</html>

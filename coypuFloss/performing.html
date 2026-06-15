@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Control — Coypu Docs</title>
+<link rel="stylesheet" href="coypu-shared.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html">Rhythm Library</a>
+      <a href="rhythms-advanced.html">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html" class="active">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Docs</a> › Performing</div>
+    <h1>🎛️ Performance Control</h1>
+    <p class="subtitle">Start, stop, mute, solo, loop, BPM — everything you need on stage.</p>
+  </div>
+
+  <div class="content-wrap">
+    <article class="content">
+
+      <p>
+        All live performance actions are sent to the <strong>Performance object</strong> — typically
+        stored in a variable named <code>ep</code>. Think of it as the mixing desk for your session:
+        it holds all active Sequencers and exposes controls that take effect immediately on the next bar.
+      </p>
+
+      <!-- START / STOP -->
+      <h2 id="start-stop">Start &amp; Stop</h2>
+
+      <h3 id="start">Start</h3>
+      <div class="method-sig">EcoPhausto start.
+ep := EcoPhausto new.
+ep playFor: N bars.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>EcoPhausto start</td><td>Initialises the audio engine. Must be called once per session before anything else.</td></tr>
+          <tr><td>EcoPhausto new</td><td>Creates a new Performance object. Assign it to a variable so you can control it.</td></tr>
+          <tr><td>ep playFor: N bars</td><td>Starts the clock running for N bars. Sequencers added at any point during the run will join immediately.</td></tr>
+        </tbody>
+      </table>
+
+<pre><code>EcoPhausto start.
+ep := EcoPhausto new.
+ep playFor: <span class="num">128</span> bars.   <span class="cmt">"Runs for 128 bars then stops automatically"</span></code></pre>
+
+      <h3 id="stop">Stop</h3>
+      <div class="method-sig">ep stop.</div>
+
+<pre><code>ep stop.   <span class="cmt">"Stops all sequencers and the internal clock immediately"</span></code></pre>
+
+      <div class="callout warning">
+        <span class="callout-icon">⚠️</span>
+        <span><code>ep stop</code> is immediate — no fade. For a live context consider muting first, then stopping after a bar.</span>
+      </div>
+
+      <!-- BPM -->
+      <h2 id="bpm">Tempo — <code>bpm:</code></h2>
+      <p>Change the tempo of the running performance at any time. The change takes effect from the next beat.</p>
+
+      <div class="method-sig">ep bpm: value.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>value</td><td>Number</td><td>Beats per minute. No practical limit, but 60–200 is typical.</td></tr>
+        </tbody>
+      </table>
+
+<pre><code>ep bpm: <span class="num">120</span>.
+ep bpm: <span class="num">90</span>.    <span class="cmt">"Slow down mid-performance"</span>
+ep bpm: <span class="num">140</span>.   <span class="cmt">"Ramp up the energy"</span></code></pre>
+
+      <!-- MUTE -->
+      <h2 id="mute">Mute &amp; Unmute</h2>
+      <p>
+        Silence one or more instruments without removing them from the performance.
+        The sequencers keep running — un-muting brings them back at the right phase.
+      </p>
+
+      <div class="method-sig">ep mute: #( #instA #instB ... ).
+ep unmute: #( #instA #instB ... ).</div>
+
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>#( symbols )</td><td>Array of Symbols</td><td>The instrument names to mute or unmute</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt">"Mute kick, snare and bleep together"</span>
+ep mute: #(<span class="sym">#kick</span> <span class="sym">#snare</span> <span class="sym">#bleep</span>).
+
+<span class="cmt">"Bring kick and snare back in"</span>
+ep unmute: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
+
+<span class="cmt">"Un-mute everything at once"</span>
+ep unmute: ep allInstrumentNames.</code></pre>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>Muted instruments are <em>still sequencing internally</em> — their step counter advances. When unmuted they re-enter on the correct beat, never out of phase.</span>
+      </div>
+
+      <!-- SOLO -->
+      <h2 id="solo">Solo &amp; Unsolo</h2>
+      <p>
+        Solo focuses the output to only the named instruments; everything else is silenced.
+        Multiple instruments can be soloed together — they all play, the rest are muted.
+      </p>
+
+      <div class="method-sig">ep solo: #( #instA #instB ... ).
+ep unsolo: #( #instA #instB ... ).</div>
+
+<pre><code><span class="cmt">"Solo the synth and cowbell — hear only those two"</span>
+ep solo: #(<span class="sym">#psg</span> <span class="sym">#cowbell</span>).
+
+<span class="cmt">"Release the solo — all instruments return to their prior mute state"</span>
+ep unsolo: #(<span class="sym">#psg</span> <span class="sym">#cowbell</span>).</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>Use solo to build up a performance piece by piece: start soloed on the kick, add hi-hat, unsolo, add melody… great for club contexts where the build matters.</span>
+      </div>
+
+      <!-- LOOP -->
+      <h2 id="loop">Loop &amp; Unloop</h2>
+      <p>
+        Lock the performance into a repeating section of a given number of steps.
+        Useful for drilling into a moment while you re-code other parts.
+      </p>
+
+      <div class="method-sig">ep loop: N.
+ep unloop.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>N</td><td>Integer</td><td>Number of steps to loop</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt">"Loop the next 5 steps forever"</span>
+ep loop: <span class="num">5</span>.
+
+<span class="cmt">"Return to normal playback"</span>
+ep unloop.</code></pre>
+
+      <!-- SAVE / RESTORE -->
+      <h2 id="save-restore">Save &amp; Restore</h2>
+      <p>
+        Take a snapshot of the current performance state — all sequencers, levels, mute statuses —
+        and restore it later. Essential for recovering a working state after an experiment goes wrong.
+      </p>
+
+      <div class="method-sig">ep temporarySave.
+ep restore.</div>
+
+<pre><code><span class="cmt">"Capture the current state"</span>
+ep temporarySave.
+
+<span class="cmt">"Experiment — change rhythms, BPM, anything"</span>
+ep bpm: <span class="num">200</span>.
+<span class="str">'FFFF'</span> hexBeat to: #kick.
+
+<span class="cmt">"Something went wrong — go back to saved state"</span>
+ep restore.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>Call <code>temporarySave</code> before every risky live edit. It costs nothing and saves your performance from a wrong evaluation.</span>
+      </div>
+
+      <!-- GLOBAL RHYTHM -->
+      <h2 id="global-rhythm">Global rhythm assignment</h2>
+      <p>
+        Apply the same rhythm pattern to all active sequencers in the performance at once.
+        A blunt, high-energy tool for sudden shifts.
+      </p>
+
+      <div class="method-sig">ep rhythm: aPattern.</div>
+
+<pre><code><span class="cmt">"Force all sequencers to a hex pattern simultaneously"</span>
+ep rhythm: <span class="str">'1312'</span> hexBeat.
+
+<span class="cmt">"Assign the same named rhythm to an array of specific instruments"</span>
+#(<span class="sym">#kick</span> <span class="sym">#ch</span> <span class="sym">#cowbell</span>) rhythm: #banda.</code></pre>
+
+      <!-- LEVEL -->
+      <h2 id="level-control">Level control</h2>
+      <p>
+        Set the per-step amplitude for a specific instrument already in the performance.
+        The message can be sent to the instrument symbol directly.
+      </p>
+
+      <div class="method-sig">#instrumentName level: 'v1 v2 v3 ...'.</div>
+
+<pre><code>#clap level: <span class="str">'0.3 0.1 0.4'</span>.
+#kick level: <span class="str">'1.0'</span>.     <span class="cmt">"All steps at full volume"</span>
+#psg  level: <span class="str">'0.6 0.2 0.8 0.4'</span>.</code></pre>
+
+      <hr class="section-divider">
+
+      <!-- WORKFLOW -->
+      <h2 id="workflow">Typical performance workflow</h2>
+      <p>A structured example of a full set, from soundcheck to closure:</p>
+
+<pre><code><span class="cmt">"──── SOUNDCHECK ────"</span>
+EcoPhausto start.
+ep := EcoPhausto new.
+ep bpm: <span class="num">110</span>.
+ep playFor: <span class="num">512</span> bars.
+
+<span class="cmt">"──── BUILD UP ────"</span>
+#(<span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>) asSeq to: #kick.
+
+ep temporarySave.   <span class="cmt">"save clean starting point"</span>
+
+#cumbiaClave asRhythm to: #conga.
+#plena to: #snare.
+<span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.9 0.4 0.6 0.3'</span>.
+
+<span class="cmt">"──── SOLO FOR TENSION ────"</span>
+ep solo: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
+
+<span class="cmt">"──── FULL DROP ────"</span>
+ep unsolo: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
+<span class="num">64</span> randomTrigs
+    notes: (<span class="num">32</span> randomWalksOn: Scale pentatonicMajor octaves: <span class="num">2</span> root: <span class="num">60</span>)
+    to: #psg; level: <span class="str">'0.6'</span>.
+
+<span class="cmt">"──── COOL DOWN ────"</span>
+ep mute: #(<span class="sym">#psg</span> <span class="sym">#ch</span>).
+ep bpm: <span class="num">90</span>.
+
+<span class="cmt">"──── END ────"</span>
+ep stop.</code></pre>
+
+      <div class="page-nav">
+        <a href="rhythms-advanced.html">
+          <span class="nav-dir">← Previous</span>
+          <span class="nav-title">Advanced Patterns</span>
+        </a>
+        <span></span>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#start-stop">Start &amp; Stop</a></li>
+        <li><a href="#bpm">Tempo — bpm:</a></li>
+        <li><a href="#mute">Mute &amp; Unmute</a></li>
+        <li><a href="#solo">Solo &amp; Unsolo</a></li>
+        <li><a href="#loop">Loop &amp; Unloop</a></li>
+        <li><a href="#save-restore">Save &amp; Restore</a></li>
+        <li><a href="#global-rhythm">Global rhythm</a></li>
+        <li><a href="#level-control">Level control</a></li>
+        <li><a href="#workflow">Typical workflow</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Basics — Coypu Docs</title>
+<link rel="stylesheet" href="coypu-shared.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html" class="active">Rhythm Basics</a>
+      <a href="rhythms-advanced.html">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Docs</a> › Rhythm Reference</div>
+    <h1>🥁 Rhythm Basics</h1>
+    <p class="subtitle">Every method for creating and routing a Sequencer to an instrument.</p>
+  </div>
+
+  <div class="content-wrap">
+    <article class="content">
+
+      <p>
+        In Coypu, sound is produced by attaching a <strong>Sequencer</strong> to an instrument name (a Pharo
+        symbol like <code>#kick</code> or <code>#snare</code>). The sequencer defines <em>when</em> the
+        instrument triggers; EcoPhausto (or SuperDirt / Kyma) handles <em>how</em> it sounds.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>
+          <em>"If Pharo's syntax fits on a postcard, Coypu's fits on a business card."</em>
+          All sequencer creation methods follow the same pattern: create a pattern → send <code>to: #instrumentName</code>.
+        </span>
+      </div>
+
+      <!-- asSeq -->
+      <h2 id="asSeq">Binary array — <code>asSeq</code></h2>
+      <p>
+        The simplest way to define a rhythm: an array of <code>1</code>s (trigger) and <code>0</code>s (rest).
+        Send <code>asSeq</code> to it to create a Sequencer, then route it with <code>to: #name</code>.
+      </p>
+
+      <div class="method-sig">#( 1 0 0 1 0 0 0 0 ) asSeq to: #kick.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Element</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Trigger the instrument on this step</td></tr>
+          <tr><td>0</td><td>Rest — do not trigger</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt">"Four-on-the-floor kick"</span>
+#(<span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>) asSeq to: #kick.
+
+<span class="cmt">"Snare on beats 2 and 4 (16-step grid)"</span>
+#(<span class="num">0</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">0</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>  <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>) asSeq to: #snare.</code></pre>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>Array length is flexible — 8, 16, 32 steps all work. Shorter arrays loop faster relative to the BPM grid.</span>
+      </div>
+
+      <!-- asRhythm -->
+      <h2 id="asRhythm">Named rhythms — <code>asRhythm</code></h2>
+      <p>
+        Coypu ships with a library of named rhythm patterns inspired by global music traditions.
+        Send <code>asRhythm</code> to a Pharo symbol to get a ready-made Sequencer.
+      </p>
+
+      <div class="method-sig">#rumba asRhythm to: #conga.
+#cumbiaClave asRhythm to: #conga.
+#banda asRhythm to: #kick.</div>
+
+      <p>
+        To see the full list of available rhythms, evaluate in a Playground — or browse the
+        <a href="rhythm-library.html"><strong>Rhythm Library</strong></a> for step-by-step
+        visualisations and ethnomusicological notes on every pattern.
+      </p>
+
+<pre><code>Rhythm list.   <span class="cmt">"CMD+I or CTRL+I to open an Inspector on the result"</span></code></pre>
+
+      <h4>Shorthand: <code>to:</code> directly on a symbol</h4>
+      <p>You can skip <code>asRhythm</code> and send <code>to:</code> directly to the symbol — less iconic but faster to type:</p>
+
+<pre><code>#plena to: #conga.
+#banda to: #kick.</code></pre>
+
+      <!-- hexBeat -->
+      <h2 id="hexBeat">Hex patterns — <code>hexBeat</code></h2>
+      <p>
+        Encode a 16-step binary pattern as a hexadecimal string. Each hex digit represents 4 bits (4 steps).
+        This is a compact, memorable notation for complex patterns.
+      </p>
+
+      <div class="method-sig">'&lt;hex-string&gt;' hexBeat to: #instrumentName.</div>
+
+<pre><code><span class="str">'F000'</span> hexBeat to: #kick.
+<span class="cmt">"F = 1111, 0 = 0000 → triggers on first 4 steps of 16"</span>
+
+<span class="str">'020F'</span> hexBeat to: #snare.
+<span class="cmt">"0=0000 2=0010 0=0000 F=1111 → syncopated pattern"</span>
+
+<span class="str">'FFFF'</span> hexBeat to: #ch.
+<span class="cmt">"All 16 steps active — 16th-note closed hi-hat"</span></code></pre>
+
+      <table class="param-table">
+        <thead><tr><th>Hex digit</th><th>Binary (4 steps)</th><th>Pattern</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0000</td><td>All rest</td></tr>
+          <tr><td>8</td><td>1000</td><td>Only first step</td></tr>
+          <tr><td>A</td><td>1010</td><td>Every other step</td></tr>
+          <tr><td>F</td><td>1111</td><td>All four steps</td></tr>
+        </tbody>
+      </table>
+
+      <!-- quavers / semiquavers -->
+      <h2 id="quavers">Step helpers — <code>quavers</code> &amp; <code>semiquavers</code></h2>
+      <p>
+        Create a fully-on sequencer of a given note resolution. Useful as a base to which you apply
+        an <code>index:</code> or cascade other modifiers.
+      </p>
+
+      <div class="method-sig">16 quavers to: #ch.
+16 semiquavers to: #oh.</div>
+
+<pre><code><span class="num">8</span>  quavers to: #ch.      <span class="cmt">"8 triggers on quaver grid"</span>
+<span class="num">16</span> semiquavers to: #oh.  <span class="cmt">"16 triggers on semiquaver grid"</span>
+<span class="num">32</span> quavers to: #ride.    <span class="cmt">"32 triggers"</span></code></pre>
+
+      <!-- Joining sequences -->
+      <h2 id="joining">Joining sequencers — <code>,</code></h2>
+      <p>
+        Pharo's comma is the binary message for concatenating collections. Use it to chain two
+        sequencers together into one longer pattern.
+      </p>
+
+      <div class="method-sig">seqA , seqB to: #instrumentName.</div>
+
+<pre><code><span class="cmt">"16 quavers followed by 16 semiquavers → 32-step open hi-hat"</span>
+<span class="num">16</span> quavers , <span class="num">16</span> semiquavers to: #oh.
+
+<span class="cmt">"Combine a named rhythm with an array sequencer"</span>
+#rumba asRhythm , #(<span class="num">1</span> <span class="num">0</span> <span class="num">1</span> <span class="num">0</span>) asSeq to: #conga.</code></pre>
+
+      <!-- randomTrigs -->
+      <h2 id="randomTrigs">Random triggers — <code>randomTrigs</code></h2>
+      <p>
+        Generate a pattern of random triggers of a given step-count. Each time the line is evaluated
+        a new random pattern is produced.
+      </p>
+
+      <div class="method-sig">N randomTrigs to: #instrumentName.</div>
+
+<pre><code><span class="num">16</span> randomTrigs to: #ch.
+
+<span class="cmt">"With probability (0-100): 65% chance of trigger on each step"</span>
+(<span class="num">16</span> randomTrigsWithProbability: <span class="num">65</span>) to: #ch.</code></pre>
+
+      <h4>Level control via cascade</h4>
+      <p>
+        After <code>to:</code> you can cascade <code>level:</code> with a space-separated string of
+        amplitude values (one per step, cycling as needed):
+      </p>
+
+<pre><code><span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.8 0.4 0.3'</span>.
+<span class="cmt">"Triggers at alternating levels 0.8 → 0.4 → 0.3 → 0.8 → …"</span></code></pre>
+
+      <!-- index -->
+      <h2 id="index">Sample index — <code>index:</code></h2>
+      <p>
+        When an instrument folder contains multiple samples (e.g. <code>ch_0</code>, <code>ch_1</code>, …),
+        use <code>index:</code> to select which sample plays at each step.
+      </p>
+
+      <div class="method-sig">sequencer index: '0 1 2 3' to: #instrumentName.
+N quavers index: risingArray to: #instrumentName.</div>
+
+<pre><code><span class="cmt">"Cycle through samples 0 1 2 3 on each trigger"</span>
+<span class="num">16</span> quavers index: <span class="str">'0 1 2 3 '</span> to: #bleep.
+
+<span class="cmt">"Use asRisingArray to automatically build an ascending index list"</span>
+#ch index: <span class="num">7</span> asRisingArray.</code></pre>
+
+      <!-- to: routing -->
+      <h2 id="routing">Routing to multiple instruments</h2>
+      <p>
+        The same rhythm can be routed to several instruments at once using the plural form
+        <code>rhythm:</code> on the Performance object or an array of symbols.
+      </p>
+
+<pre><code>#(<span class="sym">#kick</span> <span class="sym">#ch</span> <span class="sym">#cowbell</span>) rhythm: #banda.
+
+<span class="cmt">"Or set a hex pattern across all sequencers in the Performance"</span>
+ep rhythm: <span class="str">'1312'</span> hexBeat.</code></pre>
+
+      <hr class="section-divider">
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>
+          Sequencers are <em>live-replaceable</em>: evaluate a new <code>to: #name</code> line at any
+          time and the pattern updates on the next bar boundary without stopping the performance.
+        </span>
+      </div>
+
+      <div class="page-nav">
+        <a href="setup.html">
+          <span class="nav-dir">← Previous</span>
+          <span class="nav-title">Setup &amp; Installation</span>
+        </a>
+        <a href="rhythms-advanced.html" class="next">
+          <span class="nav-dir">Next →</span>
+          <span class="nav-title">Advanced Patterns</span>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#asSeq">Binary array — asSeq</a></li>
+        <li><a href="#asRhythm">Named rhythms — asRhythm</a></li>
+        <li><a href="#hexBeat">Hex patterns — hexBeat</a></li>
+        <li><a href="#quavers">Step helpers</a></li>
+        <li><a href="#joining">Joining sequencers</a></li>
+        <li><a href="#randomTrigs">Random triggers</a></li>
+        <li><a href="#index">Sample index</a></li>
+        <li><a href="#routing">Routing to multiple instruments</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+</body>
+</html>

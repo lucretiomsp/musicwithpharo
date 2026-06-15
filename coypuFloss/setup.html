@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup — Coypu Docs</title>
+<link rel="stylesheet" href="coypu-shared.css">
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html" class="active">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html">Rhythm Library</a>
+      <a href="rhythms-advanced.html">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
+  </div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<div class="main">
+
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Docs</a> › Getting Started</div>
+    <h1>🚀 Setup &amp; Installation</h1>
+    <p class="subtitle">Get Coypu running inside a Pharo image in a few minutes.</p>
+  </div>
+
+  <div class="content-wrap">
+    <article class="content">
+
+      <!-- WHAT IS COYPU -->
+      <h2 id="what-is-coypu">What is Coypu?</h2>
+      <p>
+        Coypu is a package of methods and classes for <a href="https://pharo.org" target="_blank">Pharo</a>
+        designed for live-coding music on the fly. It was originally built as a controller for
+        <a href="https://kyma.symbolicsound.com" target="_blank">SymbolicSound Kyma</a> via OSC, but today
+        it can drive any OSC-compatible application, external MIDI hardware, or its built-in audio engine
+        <strong>EcoPhausto</strong>.
+      </p>
+      <p>
+        Its string-oriented syntax is heavily inspired by
+        <a href="https://tidalcycles.org" target="_blank">TidalCycles</a>, and the name is a tribute to
+        Kyma's Capytalk dialect — the coypu being a rodent closely related to the capybara.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>Coypu is tested on <strong>Pharo 11, 12 and 13</strong>. All examples in this documentation target Pharo 13 unless noted otherwise.</span>
+      </div>
+
+      <!-- REQUIREMENTS -->
+      <h2 id="requirements">Requirements</h2>
+
+      <h3 id="pharo">Pharo</h3>
+      <p>
+        Download and install Pharo from <a href="https://pharo.org/download" target="_blank">pharo.org/download</a>.
+        Grab the latest stable version (13 recommended). The Pharo launcher is the easiest way to manage images.
+      </p>
+
+      <h3 id="audio-engine">Audio engine — choosing your backend</h3>
+      <p>Coypu can send sound through several backends. Pick one:</p>
+
+      <table class="param-table">
+        <thead>
+          <tr><th>Backend</th><th>What it does</th><th>Requires</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>EcoPhausto</td>
+            <td>Built-in audio engine, zero external setup</td>
+            <td>Nothing extra — comes with Coypu</td>
+          </tr>
+          <tr>
+            <td>SuperDirt / SuperCollider</td>
+            <td>Full-featured sampler &amp; synth via OSC</td>
+            <td><a href="https://supercollider.github.io" target="_blank">SuperCollider</a> + <a href="https://github.com/musikinformatik/SuperDirt" target="_blank">SuperDirt</a></td>
+          </tr>
+          <tr>
+            <td>Kyma</td>
+            <td>SymbolicSound hardware/software</td>
+            <td>Kyma system + OSC licence</td>
+          </tr>
+          <tr>
+            <td>MIDI hardware</td>
+            <td>Trigger any MIDI device</td>
+            <td>pharo-sound (PortMidi)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>If you are just getting started, use <strong>EcoPhausto</strong> — it requires no external software and starts playing immediately inside your Pharo image.</span>
+      </div>
+
+      <!-- INSTALLATION -->
+      <h2 id="installation">Installing Coypu</h2>
+
+      <h3 id="metacello">Using Metacello (recommended)</h3>
+      <p>
+        Open a <strong>Playground</strong> (<kbd>CMD+P</kbd> on macOS / <kbd>CTRL+P</kbd> on Linux &amp; Windows),
+        paste the snippet below, select all and press <kbd>CMD+D</kbd> / <kbd>CTRL+D</kbd> to evaluate:
+      </p>
+
+<pre><code><span class="kw">Metacello</span> new
+    baseline: <span class="str">'Coypu'</span>;
+    repository: <span class="str">'github://lucretiomsp/coypu:master'</span>;
+    load</code></pre>
+
+      <p>
+        Metacello will download and install all required packages. Depending on your connection this takes
+        1–3 minutes. A progress bar appears in the bottom-right corner of the Pharo window.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-icon">⚠️</span>
+        <span>If you see SSL certificate errors, make sure your Pharo image can reach GitHub. You may need to accept a security dialog on first run.</span>
+      </div>
+
+      <!-- FIRST SOUND -->
+      <h2 id="first-sound">Your first sound</h2>
+      <p>
+        Once installed, open a Playground and evaluate these lines <strong>one by one</strong>
+        (select a single line and press <kbd>CMD+D</kbd> / <kbd>CTRL+D</kbd>):
+      </p>
+
+<pre><code><span class="cmt">"Start EcoPhausto — you should hear all preset sounds playing."</span>
+EcoPhausto start.
+
+<span class="cmt">"Create a new Performance object."</span>
+ep := EcoPhausto new.
+
+<span class="cmt">"Launch the performance. It is empty for now."</span>
+ep playFor: <span class="num">128</span> bars.
+
+<span class="cmt">"Add your first sequencer — a kick on beats 1 and 4."</span>
+#(<span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>) asSeq to: #kick.
+
+<span class="cmt">"Add a snare on a clave rhythm."</span>
+#cumbiaClave asRhythm to: #conga.
+
+<span class="cmt">"Stop everything."</span>
+ep stop.</code></pre>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>
+          <strong>CMD+I</strong> (macOS) or <strong>CTRL+I</strong> (Win/Linux) on any expression opens a Pharo Inspector — great for exploring return values in real time.
+        </span>
+      </div>
+
+      <!-- LISTING INSTRUMENTS -->
+      <h2 id="instruments">Listing available instruments</h2>
+      <p>To see what instruments EcoPhausto provides, evaluate:</p>
+
+<pre><code>EcoPhausto listAllInstruments.</code></pre>
+
+      <p>
+        The result is printed to the <strong>Transcript</strong> (open it with <kbd>CMD+O+T</kbd> / <kbd>CTRL+O+T</kbd>).
+        Each instrument name is the symbol you pass to <code>to:</code> when creating a sequencer.
+      </p>
+
+      <!-- SUPERDIRT SETUP -->
+      <h2 id="superdirt">Optional: connecting SuperDirt</h2>
+      <p>
+        If you want to use Coypu with SuperDirt's sample library, start SuperCollider with SuperDirt
+        booted first, then use <code>asDirtNotes</code> and <code>asDirtIndex</code> to route sequences
+        to SuperDirt instruments. No extra configuration is needed inside Pharo — the messages are sent
+        over OSC on the default port.
+      </p>
+
+<pre><code><span class="cmt">"Send a melodic pattern to SuperDirt's 'acid' synth."</span>
+<span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span> asDirtNotes to: #acid; envMod: <span class="str">'0.8 0.2 0.3'</span>.</code></pre>
+
+      <!-- NEXT STEPS -->
+      <h2 id="next-steps">Next steps</h2>
+      <p>You now have a working Coypu setup. Continue with:</p>
+      <ul>
+        <li><a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html">Rhythm Library</a> — learn every way to create a sequencer</li>
+        <li><a href="rhythms-advanced.html">Advanced Patterns</a> — Euclidean rhythms, notes, arpeggios</li>
+        <li><a href="performing.html">Performance Control</a> — mute, solo, loop, BPM and more</li>
+      </ul>
+
+      <div class="page-nav">
+        <span></span>
+        <a href="rhythms-basics.html" class="next">
+          <span class="nav-dir">Next →</span>
+          <span class="nav-title">Rhythm Basics</span>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#what-is-coypu">What is Coypu?</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#installation">Installing Coypu</a></li>
+        <li><a href="#first-sound">Your first sound</a></li>
+        <li><a href="#instruments">Listing instruments</a></li>
+        <li><a href="#superdirt">Connecting SuperDirt</a></li>
+        <li><a href="#next-steps">Next steps</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+</body>
+</html>
