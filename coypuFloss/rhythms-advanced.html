@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Patterns — Coypu Docs</title>
+<link rel="stylesheet" href="coypu-shared.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html">Rhythm Library</a>
+      <a href="rhythms-advanced.html" class="active">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Docs</a> › Rhythm Reference</div>
+    <h1>🔁 Advanced Patterns</h1>
+    <p class="subtitle">Euclidean rhythms, note sequences, dirt patterns, arpeggios, and random walks.</p>
+  </div>
+
+  <div class="content-wrap">
+    <article class="content">
+
+      <!-- EUCLIDEAN -->
+      <h2 id="euclidean">Euclidean rhythms</h2>
+      <p>
+        Euclidean rhythms distribute <em>n</em> pulses as evenly as possible across <em>k</em> steps.
+        Many traditional rhythms (clave, tresillo, bossa nova) are Euclidean patterns.
+        Pass an array <code>#(pulses steps)</code> and send <code>euclidean</code>.
+      </p>
+
+      <div class="method-sig">#( pulses steps ) euclidean to: #instrumentName.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>pulses</td><td>Integer</td><td>Number of triggers to distribute</td></tr>
+          <tr><td>steps</td><td>Integer</td><td>Total number of steps in the pattern</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt">"Classic tresillo — 3 pulses in 8 steps"</span>
+#(<span class="num">3</span> <span class="num">8</span>) euclidean to: #conga.
+
+<span class="cmt">"Cinquillo — 5 pulses in 16 steps (a Cuban staple)"</span>
+#(<span class="num">5</span> <span class="num">16</span>) euclidean to: #bongo.
+
+<span class="cmt">"With a custom sample index on each trigger"</span>
+#(<span class="num">5</span> <span class="num">16</span>) euclidean index: <span class="str">' 1 3 5 2'</span>; to: #bongo.</code></pre>
+
+      <h3 id="euclidean-offset">Offset</h3>
+      <p>
+        Rotate the Euclidean pattern forward (positive) or backward to shift the phase of the rhythm.
+        Cascade <code>offset:</code> before <code>to:</code>.
+      </p>
+
+      <div class="method-sig">#( pulses steps ) euclidean offset: N; to: #instrumentName.</div>
+
+<pre><code><span class="cmt">"Offset by 1 step forward — useful to stagger layered Euclidean patterns"</span>
+#(<span class="num">5</span> <span class="num">16</span>) euclidean offset: <span class="num">1</span>; to: #cowbell.
+
+<span class="cmt">"Same rhythm, different phase"</span>
+#(<span class="num">5</span> <span class="num">16</span>) euclidean offset: <span class="num">3</span>; to: #bongo.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>Layer two Euclidean patterns on the same instrument with different offsets for polyrhythmic textures without any external tools.</span>
+      </div>
+
+      <!-- DIRT NOTES -->
+      <h2 id="asDirtNotes">Dirt notes — <code>asDirtNotes</code></h2>
+      <p>
+        Route a melodic pattern to a SuperDirt instrument using a compact string notation.
+        Each token is a MIDI note number; <code>-</code> is a rest; <code>/N</code> sets duration in beats;
+        <code>*N</code> repeats the previous note N times.
+      </p>
+
+      <div class="method-sig">'pattern-string' asDirtNotes to: #instrumentName.</div>
+
+<pre><code><span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span> asDirtNotes to: #acid; envMod: <span class="str">'0.8 0.2 0.3'</span>.
+
+<span class="cmt">"Tokens: rest(8 beats) → note 38 → note 56 twice → rest(4 beats) → 41 → 66"</span></code></pre>
+
+      <table class="param-table">
+        <thead><tr><th>Token</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>38</td><td>MIDI note 38 (one step)</td></tr>
+          <tr><td>-</td><td>Rest (one step)</td></tr>
+          <tr><td>-/8</td><td>Rest lasting 8 steps</td></tr>
+          <tr><td>56*2</td><td>Note 56 repeated 2 times</td></tr>
+          <tr><td>,</td><td>Separator between tokens</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="asDirtIndex">Dirt index — <code>asDirtIndex</code></h3>
+      <p>
+        Like <code>asDirtNotes</code> but selects sample <em>indices</em> within a SuperDirt folder
+        rather than MIDI note pitches. Combine with <code>notes:</code> to add a pitch layer.
+      </p>
+
+      <div class="method-sig">'index-string' asDirtIndex notes: 'note-string' to: #instrumentName.</div>
+
+<pre><code><span class="str">'1 , -/16 . 7 , -/9 , 12 , -/12, 18'</span> asDirtIndex
+    notes: <span class="str">'38 45 78 62 81'</span>
+    to: #speakspell.</code></pre>
+
+      <!-- NOTES ON SEQUENCERS -->
+      <h2 id="notes">Adding notes — <code>notes:</code></h2>
+      <p>
+        Any Sequencer can have MIDI note values assigned to its triggers. By default all steps play
+        note <code>60</code> (C3). Pass a space-separated string to <code>notes:</code> — values cycle
+        across triggers.
+      </p>
+
+      <div class="method-sig">sequencer notes: 'n1 n2 n3 ...' to: #instrumentName.</div>
+
+<pre><code><span class="num">16</span> quavers notes: <span class="str">'60 64 67 72'</span> to: #piano.
+<span class="cmt">"Plays a C major arpeggio across 16 steps"</span>
+
+#plena asRhythm notes: <span class="str">'36 48 60'</span> to: #bass.</code></pre>
+
+      <!-- ARPEGGIATE -->
+      <h2 id="arpeggiate">Arpeggiation — <code>arpeggiate:</code></h2>
+      <p>
+        Walk through a chord voicing across the triggers of a sequencer.
+        Pass chord names as a space-separated string; Coypu resolves them to MIDI note sets.
+      </p>
+
+      <div class="method-sig">sequencer arpeggiate: 'chord1 chord2 ...'; to: #instrumentName.</div>
+
+<pre><code>#cumbiaClave asRhythm arpeggiate: <span class="str">'12-sus4 0-min'</span>; to: #psg; level: <span class="str">'0.4'</span>.
+<span class="cmt">"Alternates between a sus4 arpeggio and a minor arpeggio"</span></code></pre>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <span>Chord names follow the pattern <code>root-quality</code>, e.g. <code>0-maj</code>, <code>7-min</code>, <code>12-sus4</code>, <code>4-dim</code>. The root is a semitone offset from the base note.</span>
+      </div>
+
+      <!-- RANDOM WALK -->
+      <h2 id="randomWalk">Random melodic walk — <code>randomWalksOn:octaves:root:</code></h2>
+      <p>
+        Generate a list of MIDI notes by randomly walking up and down a scale over a specified octave
+        range from a root note. This produces organic, scale-coherent melodies that evolve differently
+        on each evaluation.
+      </p>
+
+      <div class="method-sig">N randomWalksOn: Scale &lt;scale&gt; octaves: octaves root: rootMidi.</div>
+
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>N</td><td>Integer</td><td>Number of steps to generate</td></tr>
+          <tr><td>scale</td><td>Scale constant</td><td>e.g. <code>Scale pentatonicMajor</code>, <code>Scale sakura</code></td></tr>
+          <tr><td>octaves</td><td>Integer</td><td>Octave range to walk within</td></tr>
+          <tr><td>rootMidi</td><td>Integer</td><td>Root note as MIDI number (e.g. 48 = C3)</td></tr>
+        </tbody>
+      </table>
+
+<pre><code><span class="cmt">"64-step random walk on Sakura scale, 2 octaves from C3"</span>
+<span class="num">64</span> randomTrigs
+    notes: (<span class="num">32</span> randomWalksOn: Scale sakura octaves: <span class="num">2</span> root: <span class="num">48</span>)
+    to: #psg.
+
+<span class="cmt">"Minor pentatonic walk, 3 octaves"</span>
+<span class="num">16</span> quavers
+    notes: (<span class="num">16</span> randomWalksOn: Scale minorPentatonic octaves: <span class="num">3</span> root: <span class="num">36</span>)
+    to: #piano.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <span>Re-evaluate this line during a performance to generate a fresh melodic variation on the fly — no two evaluations produce the same walk.</span>
+      </div>
+
+      <!-- LEVEL -->
+      <h2 id="level">Dynamics — <code>level:</code></h2>
+      <p>
+        Set per-trigger amplitude values by cascading <code>level:</code> on any sequencer.
+        Values are floats (0.0 – 1.0) and cycle across triggers.
+      </p>
+
+      <div class="method-sig">sequencer to: #instrumentName; level: 'v1 v2 v3 ...'.</div>
+
+<pre><code><span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.8 0.4 0.3'</span>.
+
+#(<span class="num">1</span> <span class="num">0</span> <span class="num">1</span> <span class="num">0</span>) asSeq to: #snare; level: <span class="str">'1.0 0.5'</span>.
+<span class="cmt">"Alternates full and half velocity"</span>
+
+<span class="cmt">"Set level directly on a named instrument after routing"</span>
+#clap level: <span class="str">'0.3 0.1 0.4'</span>.</code></pre>
+
+      <!-- envMod -->
+      <h2 id="envMod">Envelope modulation — <code>envMod:</code></h2>
+      <p>
+        Available for SuperDirt instruments. Controls envelope modulation depth per step.
+        Cascades in the same way as <code>level:</code>.
+      </p>
+
+<pre><code><span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span>
+    asDirtNotes
+    to: #acid;
+    envMod: <span class="str">'0.8 0.2 0.3'</span>.</code></pre>
+
+      <hr class="section-divider">
+
+      <h2 id="chaining">Chaining all together</h2>
+      <p>Here is a complete performance sketch combining multiple advanced pattern techniques:</p>
+
+<pre><code>ep := EcoPhausto new.
+ep playFor: <span class="num">128</span> bars.
+
+<span class="cmt">"Kick: Euclidean 3-in-8"</span>
+#(<span class="num">3</span> <span class="num">8</span>) euclidean to: #kick.
+
+<span class="cmt">"Snare: hex pattern"</span>
+<span class="str">'020F'</span> hexBeat to: #snare.
+
+<span class="cmt">"Hi-hat: random triggers with swing dynamics"</span>
+<span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.9 0.4 0.7 0.3'</span>.
+
+<span class="cmt">"Bass: notes on a named rhythm"</span>
+#cumbiaClave asRhythm notes: <span class="str">'36 36 43 36'</span> to: #bass.
+
+<span class="cmt">"Lead: random walk on pentatonic over 2 octaves"</span>
+<span class="num">16</span> randomTrigs
+    notes: (<span class="num">16</span> randomWalksOn: Scale pentatonicMajor octaves: <span class="num">2</span> root: <span class="num">60</span>)
+    to: #psg; level: <span class="str">'0.6'</span>.</code></pre>
+
+      <div class="page-nav">
+        <a href="rhythms-basics.html">
+          <span class="nav-dir">← Previous</span>
+          <span class="nav-title">Rhythm Basics</span>
+        </a>
+        <a href="performing.html" class="next">
+          <span class="nav-dir">Next →</span>
+          <span class="nav-title">Performance Control</span>
+        </a>
+      </div>
+
+    </article>
+
+    <aside class="toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#euclidean">Euclidean rhythms</a></li>
+        <li><a href="#euclidean-offset">— Offset</a></li>
+        <li><a href="#asDirtNotes">Dirt notes</a></li>
+        <li><a href="#asDirtIndex">Dirt index</a></li>
+        <li><a href="#notes">Adding notes</a></li>
+        <li><a href="#arpeggiate">Arpeggiation</a></li>
+        <li><a href="#randomWalk">Random walk</a></li>
+        <li><a href="#level">Dynamics — level:</a></li>
+        <li><a href="#envMod">Envelope modulation</a></li>
+        <li><a href="#chaining">Chaining all together</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+</body>
+</html>
