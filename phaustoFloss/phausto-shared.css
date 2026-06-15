@@ -15,8 +15,8 @@
   --amber:        #c4862a;
   --cream:        #f7f2f3;
   --white:        #fdfbfb;
-  --code-bg:      #1e1215;
-  --code-line:    #2a1820;
+  --code-bg:      #ddeef8;
+  --code-line:    #cce3f2;
   --border:       #e0d0d3;
   --text:         #2e2024;
   --muted:        #8a6068;
@@ -199,7 +199,7 @@ pre {
   padding: 1.2rem 1.4rem;
   overflow-x: auto;
   margin: 1rem 0 1.4rem;
-  border: 1px solid rgba(255,255,255,.06);
+  border: 1px solid #b8d8ee;
   position: relative;
 }
 
@@ -207,7 +207,7 @@ pre code {
   font-family: var(--mono);
   font-size: .82rem;
   line-height: 1.75;
-  color: #e8d5d8;
+  color: #1a2a3a;
 }
 
 code {
@@ -222,22 +222,22 @@ code {
 pre code { background: none; color: inherit; padding: 0; font-size: .82rem; }
 
 /* Syntax highlighting within pre */
-pre code .cmt  { color: #7a5560; font-style: italic; }
-pre code .kw   { color: #e07090; font-weight: 500; }
-pre code .str  { color: #c4906a; }
-pre code .num  { color: #80c0a0; }
-pre code .cls  { color: #d090b0; font-weight: 500; }
-pre code .sel  { color: #a0c8e0; }
+pre code .cmt  { color: #6a8a9a; font-style: italic; }
+pre code .kw   { color: #c0003a; font-weight: 500; }
+pre code .str  { color: #a05010; }
+pre code .num  { color: #206840; }
+pre code .cls  { color: #6030a0; font-weight: 500; }
+pre code .sel  { color: #005580; }
 
 /* ---- METHOD SIGNATURE ---- */
 .method-sig {
-  background: var(--ink-mid);
-  color: var(--crimson-light);
+  background: #b8d8ee;
+  color: #1a2a3a;
   font-family: var(--mono);
   font-size: .85rem;
   padding: .5rem 1rem;
   border-radius: var(--radius) var(--radius) 0 0;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid #8bbcda;
   display: flex;
   align-items: center;
   gap: .6rem;
@@ -451,12 +451,12 @@ pre code .sel  { color: #a0c8e0; }
   align-items: center;
   gap: 1rem;
   margin: 1.4rem 0;
-  border: 1px solid rgba(255,255,255,.06);
+  border: 1px solid #b8d8ee;
 }
 
 .install-banner code {
   background: none;
-  color: #e8d5d8;
+  color: #1a2a3a;
   font-size: .82rem;
   padding: 0;
   flex: 1;
