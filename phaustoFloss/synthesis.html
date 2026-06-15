@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synthesis Techniques — Phausto Docs</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
+    <p>FAUST × Pharo</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Start</div>
+    <a href="index.html">Overview</a>
+    <a href="setup.html">Installation</a>
+
+    <div class="nav-section">Basics</div>
+    <a href="basics.html">Getting Started</a>
+    <a href="basics.html#hello">Hello Phausto</a>
+    <a href="basics.html#stereo">Stereo</a>
+    <a href="basics.html#ugens">Unit Generators</a>
+    <a href="basics.html#controls">At the Controls</a>
+    <a href="basics.html#ui">Display the UI</a>
+
+    <div class="nav-section">Synthesis</div>
+    <a href="synthesis.html" class="active">Synthesis Techniques</a>
+    <a href="synthesis.html#waveforms" class="sub">Basic Waveforms</a>
+    <a href="synthesis.html#subtractive" class="sub">Subtractive</a>
+    <a href="synthesis.html#additive" class="sub">Additive</a>
+    <a href="synthesis.html#modal" class="sub">Modal</a>
+    <a href="synthesis.html#fm" class="sub">FM Synthesis</a>
+    <a href="synthesis.html#pitch-env" class="sub">Pitch Envelope</a>
+
+    <div class="nav-section">Sequencing</div>
+    <a href="sequencing.html">Sequencing & Sampling</a>
+    <a href="sequencing.html#chuck">ChucK Operator</a>
+    <a href="sequencing.html#playnotes">Play Notes</a>
+    <a href="sequencing.html#sampler">TpSampler</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Synthesis Techniques</div>
+    <h1>Synthesis Techniques <span class="subtitle">Subtractive, additive, modal, FM synthesis — and waveform selection.</span></h1>
+  </div>
+
+  <div class="content">
+
+    <div class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#waveforms">Basic Waveforms &amp; Selection</a></li>
+        <li><a href="#subtractive">Subtractive Synthesis</a></li>
+        <li><a href="#additive">Additive Synthesis</a></li>
+        <li><a href="#modal">Modal Synthesis</a></li>
+        <li><a href="#fm">FM Synthesis</a></li>
+        <li><a href="#pitch-env">Pitch Envelope</a></li>
+      </ul>
+    </div>
+
+    <!-- ===== BASIC WAVEFORMS ===== -->
+    <h2 id="waveforms">Basic Waveforms &amp; Selection</h2>
+    <p><span class="tag">Lesson 6</span> The four classic oscillator shapes — sine, triangle, square, sawtooth — have distinct harmonic content and timbre.</p>
+
+    <table class="param-table">
+      <thead><tr><th>Class</th><th>Waveform</th><th>Character</th></tr></thead>
+      <tbody>
+        <tr><td>SineOsc</td><td>Sine</td><td>Pure tone, no harmonics</td></tr>
+        <tr><td>TriOsc</td><td>Triangle</td><td>Odd harmonics, soft and hollow</td></tr>
+        <tr><td>SquareOsc</td><td>Square</td><td>Odd harmonics, bright and reedy</td></tr>
+        <tr><td>SawOsc</td><td>Sawtooth</td><td>All harmonics, rich and buzzy</td></tr>
+        <tr><td>PulseOsc</td><td>Pulse</td><td>Variable duty cycle square</td></tr>
+        <tr><td>Noise</td><td>White noise</td><td>All frequencies equal power</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Switching waveforms with PhSelect4</h3>
+    <p>Combine four oscillators in parallel with the comma operator <code>,</code> and use a <code>PhNumEntry</code> UI parameter to switch between them in real time:</p>
+
+    <pre><code><span class="cmt">"Create the four oscillators"</span>
+sine := <span class="cls">SineOsc</span> new.
+tri  := <span class="cls">TriOsc</span> new.
+sqr  := <span class="cls">SquareOsc</span> new.
+saw  := <span class="cls">SawOsc</span> new.
+
+<span class="cmt">"A numerical UI parameter — the index to select the active oscillator"</span>
+index := <span class="cls">PhNumEntry</span> new label: <span class="str">'Wave'</span> init: <span class="num">0</span> min: <span class="num">0</span> max: <span class="num">3</span> step: <span class="num">1</span>.
+
+<span class="cmt">"Combine the oscillators in parallel using the comma operator"</span>
+oscillators := sine , tri , sqr , saw.
+
+<span class="cmt">"Connect index + oscillators to the 4-input selector"</span>
+selector := index , oscillators connectTo: <span class="cls">PhSelect4</span> new.
+
+dsp := selector stereo asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open the UI — use the 'Wave' entry to switch waveform (0–3)"</span>
+dsp displayUI.
+dsp stop.
+dsp destroy.</code></pre>
+
+    <h3>Selecting from more than 4 with PhSelectN</h3>
+    <p>When you need more than 4 options — for example adding <code>Noise</code> as a fifth source — use <code>PhSelectN</code>:</p>
+
+    <pre><code>sine  := <span class="cls">SineOsc</span> new.
+tri   := <span class="cls">TriOsc</span> new.
+sqr   := <span class="cls">SquareOsc</span> new.
+saw   := <span class="cls">SawOsc</span> new.
+noise := <span class="cls">Noise</span> new.
+
+index := <span class="cls">PhNumEntry</span> new label: <span class="str">'Wave'</span> init: <span class="num">0</span> min: <span class="num">0</span> max: <span class="num">4</span> step: <span class="num">1</span>.
+oscillators := sine , tri , sqr , saw , noise.
+
+<span class="cmt">"PhSelectN accepts any number of inputs"</span>
+selector := (<span class="cls">PhSelectN</span> new: oscillators) index: index.
+
+dsp := selector stereo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+dsp stop.
+dsp destroy.</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">The comma operator</div>
+      The <code>,</code> operator in Phausto places UGens <em>in parallel</em> (side-by-side channels). This is distinct from the <code>=></code> ChucK operator, which chains UGens <em>in series</em>.
+    </div>
+
+    <!-- ===== SUBTRACTIVE ===== -->
+    <h2 id="subtractive">Subtractive Synthesis</h2>
+    <p><span class="tag">Lesson 7</span> Start with a harmonically rich source (pulse, saw, noise), shape its amplitude with an envelope, then sculpt the timbre with a filter. This is the classic analogue synthesiser model.</p>
+
+    <pre><code><span class="cmt">"1. An oscillator — the sound source"</span>
+oscillator := <span class="cls">PulseOsc</span> new.
+
+<span class="cmt">"2. An ADSR envelope — shapes amplitude over time"</span>
+envelope := <span class="cls">ADSREnv</span> new.
+
+<span class="cmt">"3. A Moog VCF low-pass filter — removes high frequencies"</span>
+filter := <span class="cls">MoogVcf</span> new.
+
+<span class="cmt">"Chain them with the ChucK operator =>
+ oscillator => envelope multiplies osc by envelope signal
+ => filter feeds the result into the filter input"</span>
+synth := oscillator => envelope => filter.
+
+dsp := synth stereo asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open the UI — press the gate button to trigger the envelope"</span>
+dsp displayUI.
+
+<span class="cmt">"Experiment with attack, decay, sustain, release, and filter cutoff"</span>
+dsp stop.</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">Reading the => chain</div>
+      In Pharo, binary operators have left-to-right precedence, so <code>a => b => c</code> is <code>(a => b) => c</code> — signal flows left to right, exactly as written.
+    </div>
+
+    <!-- ===== ADDITIVE ===== -->
+    <h2 id="additive">Additive Synthesis</h2>
+    <p><span class="tag">Lessons 8 &amp; 9</span> Additive synthesis builds complex timbres by summing multiple sine waves — each with its own frequency, amplitude, and phase. It is the direct expression of Fourier's theorem: any periodic waveform is a sum of sine waves.</p>
+
+    <h3>Stacking with a loop</h3>
+    <pre><code><span class="cmt">"Start with one oscillator and add 9 more, each detuned by 90 Hz"</span>
+sine1 := <span class="cls">SineOsc</span> new freq: <span class="num">200</span>; uLevel: <span class="num">0.5</span>.
+detuning := <span class="num">90</span>.
+(<span class="num">1</span> to: <span class="num">9</span>) do: [ :i |
+  sine1 := sine1 + (<span class="cls">SineOsc</span> new freq: <span class="num">200</span> + (i * detuning); uLevel: <span class="num">0.05</span>)
+].
+<span class="cmt">"sine1 is now the sum of 10 detuned SineOscs"</span>
+dsp := sine1 stereo asDsp.
+dsp init.
+dsp start.
+dsp stop.</code></pre>
+
+    <h3>Using asSumOfUGen</h3>
+    <p>Create an Array of UGens and sum them in one message:</p>
+
+    <pre><code>detuning := <span class="num">14</span>.
+groupOfSine := (<span class="num">1</span> to: <span class="num">10</span>) collect: [ :i |
+  <span class="cls">SineOsc</span> new freq: <span class="num">200</span> + (i * detuning); uLevel: <span class="num">0.05</span>
+].
+
+<span class="cmt">"asSumOfUGen reduces the Array by summing all elements"</span>
+dsp := groupOfSine asSumOfUGen stereo asDsp.
+dsp init.
+dsp start.
+dsp stop.</code></pre>
+
+    <div class="method-sig"><span class="badge">method</span> asSumOfUGen</div>
+    <pre><code><span class="cmt">"Sent to a Collection of UGens.
+ Returns a single UGen that is the sum (mix) of all elements."</span>
+arrayOfUGens asSumOfUGen.</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">Design tip</div>
+      Keep individual <code>uLevel</code> values small when stacking many oscillators to avoid clipping. For 10 oscillators at equal amplitude, start around <code>uLevel: 0.05</code>.
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <h2 id="modal">Modal Synthesis</h2>
+    <p><span class="tag">Lesson 10</span> Modal synthesis models the resonant <em>modes</em> of physical objects — bells, drums, strings, metal bars. Each mode is a resonant filter with its own frequency, amplitude, and decay time (t60). An impulse triggers all modes simultaneously.</p>
+
+    <pre><code><span class="cmt">"A pulse generator fed through an impulsifier to create a click trigger"</span>
+trig := (<span class="cls">Pulse</span> new period: <span class="num">0.18</span>) => <span class="cls">PhImpulsify</span> new.
+
+<span class="cmt">"Define mode properties — frequencies, amplitudes, decay times"</span>
+freqs := #(<span class="num">230</span> <span class="num">600</span> <span class="num">700</span> <span class="num">920</span>).
+gains := #(<span class="num">0.5</span> <span class="num">0.4</span> <span class="num">0.2</span> <span class="num">0.5</span>).
+t60s  := #(<span class="num">0.2</span> <span class="num">0.5</span> <span class="num">0.3</span> <span class="num">0.6</span>).
+
+<span class="cmt">"Create a resonant mode filter for each mode"</span>
+modes := (<span class="num">1</span> to: <span class="num">4</span>) collect: [ :i |
+  <span class="cls">PhModeFilter</span> new
+    freq:  (freqs at: i);
+    gain:  (gains at: i);
+    t60:   (t60s  at: i);
+    input: trig
+].
+
+<span class="cmt">"Sum all modes to form the final synth"</span>
+synth := modes asSumOfUGen.
+dsp := synth asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+dsp stop.</code></pre>
+
+    <table class="param-table">
+      <thead><tr><th>Parameter</th><th>Class</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>freq:</td><td><code>PhModeFilter</code></td><td>Resonant frequency of this mode (Hz)</td></tr>
+        <tr><td>gain:</td><td><code>PhModeFilter</code></td><td>Amplitude of this mode (0–1)</td></tr>
+        <tr><td>t60:</td><td><code>PhModeFilter</code></td><td>Decay time in seconds (time to -60 dB)</td></tr>
+        <tr><td>input:</td><td><code>PhModeFilter</code></td><td>Excitation signal (trigger, noise, etc.)</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ===== FM ===== -->
+    <h2 id="fm">FM Synthesis</h2>
+    <p><span class="tag">Lesson 11</span> Frequency Modulation (FM) synthesis uses one oscillator (the <em>modulator</em>) to vary the frequency or phase of another (the <em>carrier</em>). Even two operators can produce a rich spectrum of timbres.</p>
+
+    <pre><code><span class="cmt">"A slider to set the base frequency of both operators"</span>
+frequencyKnob := <span class="cls">PhHSlider</span> new label: <span class="str">'Freq'</span> values: #(<span class="num">100</span> <span class="num">20</span> <span class="num">4000</span> <span class="num">0.1</span>).
+
+<span class="cmt">"Ratio between carrier and modulator frequency"</span>
+ratioKnob := <span class="cls">PhHSlider</span> new label: <span class="str">'Ratio'</span> values: #(<span class="num">1</span> <span class="num">0.1</span> <span class="num">32</span> <span class="num">0.1</span>).
+
+<span class="cmt">"The modulator: a SineOsc at frequency * ratio"</span>
+modulator := <span class="cls">SineOsc</span> new freq: frequencyKnob * ratioKnob.
+
+<span class="cmt">"The carrier: a Dx7Op whose phase is modulated by the SineOsc"</span>
+carrier := <span class="cls">Dx7Op</span> new phaseMod: modulator; freq: frequencyKnob.
+
+dsp := carrier stereo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.   <span class="cmt">"Sweep Freq and Ratio to explore the timbral space"</span>
+dsp stop.
+dsp destroy.</code></pre>
+
+    <h3>PhHSlider values: array format</h3>
+    <table class="param-table">
+      <thead><tr><th>Index</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>#( init … )</td><td>Initial value</td></tr>
+        <tr><td>#( … min … )</td><td>Minimum value</td></tr>
+        <tr><td>#( … max … )</td><td>Maximum value</td></tr>
+        <tr><td>#( … step )</td><td>Step size</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">FM Tip</div>
+      Integer ratios (1, 2, 3…) produce harmonic spectra. Non-integer ratios (1.41, 2.7…) produce inharmonic, bell-like or metallic timbres. Try extreme ratios above 16 for noise-like textures.
+    </div>
+
+    <!-- ===== PITCH ENVELOPE ===== -->
+    <h2 id="pitch-env">Pitch Envelope</h2>
+    <p><span class="tag">Lesson 12</span> Use an <code>ADSREnv</code> to modulate pitch over time — essential for percussion synthesis (kick drum pitch drops, tom swells) and expressive melodic timbres.</p>
+
+    <pre><code><span class="cmt">"Scale the ADSR output to control pitch range"</span>
+<span class="cmt">"asBox wraps a number as a constant signal (a 'box' in FAUST terminology)"</span>
+pitchEnv := <span class="num">200</span> asBox * <span class="cls">ADSREnv</span> new.
+
+<span class="cmt">"Add the pitch envelope to a base frequency offset"</span>
+osc := <span class="cls">TriOsc</span> new freq: (<span class="num">100</span> asBox + pitchEnv).
+
+dsp := osc stereo asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open the UI — press the ADSR trigger to hear the pitch sweep"</span>
+dsp displayUI.
+dsp stop.</code></pre>
+
+    <div class="method-sig"><span class="badge">method</span> asBox</div>
+    <pre><code><span class="cmt">"Wraps a Pharo Number as a constant FAUST signal.
+ Required when mixing a Number with a UGen in an arithmetic expression,
+ because FAUST operators expect signal inputs on both sides."</span>
+100 asBox + pitchEnv.   <span class="cmt">"→ a signal: constant 100 + ADSR signal"</span></code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">Why asBox?</div>
+      In FAUST, arithmetic between a constant and a signal requires explicit wrapping of the constant as a signal. <code>asBox</code> does this conversion. Without it, Pharo will try to add a Number to a UGen object, which will fail.
+    </div>
+
+    <div class="page-nav">
+      <a href="basics.html">
+        <span class="nav-label">Previous</span>
+        <span class="nav-title">← Getting Started</span>
+      </a>
+      <a href="sequencing.html" class="next">
+        <span class="nav-label">Next</span>
+        <span class="nav-title">Sequencing & Sampling →</span>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

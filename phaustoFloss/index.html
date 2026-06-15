@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Docs</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
+    <p>FAUST × Pharo</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Start</div>
+    <a href="index.html" class="active">Overview</a>
+    <a href="setup.html">Installation</a>
+
+    <div class="nav-section">Basics</div>
+    <a href="basics.html">Getting Started</a>
+    <a href="basics.html#hello">Hello Phausto</a>
+    <a href="basics.html#stereo">Stereo</a>
+    <a href="basics.html#ugens">Unit Generators</a>
+    <a href="basics.html#controls">At the Controls</a>
+    <a href="basics.html#ui">Display the UI</a>
+
+    <div class="nav-section">Synthesis</div>
+    <a href="synthesis.html">Synthesis Techniques</a>
+    <a href="synthesis.html#waveforms">Basic Waveforms</a>
+    <a href="synthesis.html#subtractive">Subtractive</a>
+    <a href="synthesis.html#additive">Additive</a>
+    <a href="synthesis.html#modal">Modal</a>
+    <a href="synthesis.html#fm">FM Synthesis</a>
+    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
+
+    <div class="nav-section">Sequencing</div>
+    <a href="sequencing.html">Sequencing & Sampling</a>
+    <a href="sequencing.html#chuck">ChucK Operator</a>
+    <a href="sequencing.html#playnotes">Play Notes</a>
+    <a href="sequencing.html#sampler">TpSampler</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="content">
+
+    <div class="hero">
+      <h1>Ph<span>austo</span></h1>
+      <p>Use the <strong>FAUST</strong> compiler and its libraries inside <strong>Pharo</strong> — live, interactive, audio synthesis.</p>
+      <div class="hero-badges">
+        <span class="badge">Pharo</span>
+        <span class="badge">FAUST</span>
+        <span class="badge">Live Coding</span>
+        <span class="badge">DSP</span>
+        <span class="badge">GPL-2.0</span>
+      </div>
+    </div>
+
+    <p>
+      Phausto is a library and API that brings the <a href="https://faust.grame.fr">FAUST</a> (Functional Audio Stream) functional audio programming language into <a href="https://pharo.org">Pharo Smalltalk</a>. It lets you build audio synthesis chains — oscillators, filters, effects, samplers, physical models — directly from the Pharo environment, evaluated live.
+    </p>
+
+    <div class="install-banner">
+      <code>Metacello new baseline: 'Phausto'; repository: 'github://lucretiomsp/phausto:main'; load.</code>
+    </div>
+
+    <h2>Documentation</h2>
+    <div class="card-grid">
+      <a href="setup.html" class="doc-card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Installation</div>
+        <div class="card-desc">Load Phausto via Metacello, set up native libraries, and play your first sound.</div>
+      </a>
+      <a href="basics.html" class="doc-card">
+        <div class="card-icon">🔊</div>
+        <div class="card-title">Getting Started</div>
+        <div class="card-desc">Hello Phausto, DSP lifecycle, Unit Generators, UI controls, and the stereo bus.</div>
+      </a>
+      <a href="synthesis.html" class="doc-card">
+        <div class="card-icon">🌊</div>
+        <div class="card-title">Synthesis</div>
+        <div class="card-desc">Subtractive, additive, modal, and FM synthesis techniques with Phausto UGens.</div>
+      </a>
+      <a href="sequencing.html" class="doc-card">
+        <div class="card-icon">🎹</div>
+        <div class="card-title">Sequencing & Sampling</div>
+        <div class="card-desc">ChucK operator, melodic sequencing with playNote:, and TpSampler basics.</div>
+      </a>
+    </div>
+
+    <h2>Quick Example</h2>
+    <pre><code><span class="cmt">"A djembe physical model through a GreyHole reverb"</span>
+pulse := <span class="cls">Pulsen</span> new period: (<span class="cls">LFOTriPos</span> new freq: <span class="num">0.2</span>; amount: <span class="num">4</span>).
+djembe := <span class="cls">Djembe</span> new trigger: pulse.
+dsp := (djembe => <span class="cls">GreyHole</span> new) stereo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+dsp stop.</code></pre>
+
+    <h2>Architecture</h2>
+    <p>Phausto compiles FAUST DSP programs to native code at runtime. Each <strong>Unit Generator</strong> (UGen) corresponds to a FAUST module. UGens are composed with Pharo's natural message-passing syntax and the <code>=></code> ChucK operator, then wrapped in a <code>DSP</code> object that manages the audio lifecycle.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr><th>Concept</th><th>Phausto API</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Unit Generator</td><td><code>SineOsc new</code></td><td>Building block for synthesis</td></tr>
+        <tr><td>Signal chain</td><td><code>osc => filter</code></td><td>ChucK operator connects UGens</td></tr>
+        <tr><td>Stereo output</td><td><code>ugen stereo</code></td><td>Duplicates to stereo bus</td></tr>
+        <tr><td>DSP object</td><td><code>ugen asDsp</code></td><td>Wraps chain for playback</td></tr>
+        <tr><td>UI parameters</td><td><code>dsp displayUI</code></td><td>FAUST-generated knobs/sliders</td></tr>
+        <tr><td>Real-time set</td><td><code>dsp setValue: v parameter: 'x'</code></td><td>Change params while running</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Explore the Class Reference</h2>
+    <p>If <strong>CoypuIDE</strong> is installed, browse all Phausto UGens interactively:</p>
+    <pre><code><span class="cls">PhaustoClassReference</span> new openInSpace.</code></pre>
+    <p>Classes are organized by type: Oscillators, Effects, Envelopes, Filters, Physical Models, Noise, and more. Each class comment includes working examples.</p>
+
+  </div>
+</div>
+
+</body>
+</html>

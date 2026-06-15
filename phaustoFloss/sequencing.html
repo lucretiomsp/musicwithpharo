@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequencing & Sampling — Phausto Docs</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
+    <p>FAUST × Pharo</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Start</div>
+    <a href="index.html">Overview</a>
+    <a href="setup.html">Installation</a>
+
+    <div class="nav-section">Basics</div>
+    <a href="basics.html">Getting Started</a>
+    <a href="basics.html#hello">Hello Phausto</a>
+    <a href="basics.html#stereo">Stereo</a>
+    <a href="basics.html#ugens">Unit Generators</a>
+    <a href="basics.html#controls">At the Controls</a>
+    <a href="basics.html#ui">Display the UI</a>
+
+    <div class="nav-section">Synthesis</div>
+    <a href="synthesis.html">Synthesis Techniques</a>
+    <a href="synthesis.html#waveforms">Basic Waveforms</a>
+    <a href="synthesis.html#subtractive">Subtractive</a>
+    <a href="synthesis.html#additive">Additive</a>
+    <a href="synthesis.html#modal">Modal</a>
+    <a href="synthesis.html#fm">FM Synthesis</a>
+    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
+
+    <div class="nav-section">Sequencing</div>
+    <a href="sequencing.html" class="active">Sequencing & Sampling</a>
+    <a href="sequencing.html#chuck" class="sub">ChucK Operator</a>
+    <a href="sequencing.html#playnotes" class="sub">Play Notes</a>
+    <a href="sequencing.html#sampler" class="sub">TpSampler</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Sequencing &amp; Sampling</div>
+    <h1>Sequencing &amp; Sampling <span class="subtitle">The ChucK operator, melodic patterns with playNote:, and TpSampler.</span></h1>
+  </div>
+
+  <div class="content">
+
+    <div class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#chuck">The ChucK Operator =&gt;</a></li>
+        <li><a href="#playnotes">Playing Notes</a></li>
+        <li><a href="#sampler">TpSampler Basics</a></li>
+      </ul>
+    </div>
+
+    <!-- ===== CHUCK ===== -->
+    <h2 id="chuck">The ChucK Operator =&gt;</h2>
+    <p><span class="tag">Lesson 5b</span> The <code>=&gt;</code> operator connects Unit Generators <em>in series</em> — the output of the left-hand UGen becomes the input of the right-hand UGen. It is a playful homage to <a href="https://chuck.stanford.edu">ChucK</a>, the audio programming language.</p>
+
+    <pre><code><span class="cmt">"Connect an ElecGuitar physical model into a GreyHole reverb"</span>
+synth := <span class="cls">ElecGuitar</span> new => <span class="cls">GreyHole</span> new.
+
+dsp := synth asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open the UI — press ElecGuitarTrigger to pluck the string"</span>
+dsp displayUI.
+
+<span class="cmt">"Adjust reverb parameters (room size, damping, etc.) with the knobs"</span>
+dsp stop.</code></pre>
+
+    <h3>How => works</h3>
+    <p>The behaviour of <code>=></code> depends on the <strong>receiver</strong> UGen (the right-hand side). Each UGen class defines how it accepts an input signal:</p>
+
+    <table class="param-table">
+      <thead><tr><th>Pattern</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>osc => env</code></td><td>Oscillator multiplied by envelope (amplitude shaping)</td></tr>
+        <tr><td><code>osc => filter</code></td><td>Oscillator fed into filter input</td></tr>
+        <tr><td><code>synth => reverb</code></td><td>Synth signal fed into reverb input</td></tr>
+        <tr><td><code>pulse => impulsify</code></td><td>Pulse wave converted to impulse train</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout note">
+      <div class="callout-title">Operator precedence</div>
+      Pharo binary operators are left-to-right, so <code>a => b => c</code> equals <code>(a => b) => c</code>. Signal flows exactly left to right as written — natural and readable.
+    </div>
+
+    <h3>A richer example</h3>
+    <pre><code><span class="cmt">"Two pulse generators — pulse1 period modulated by an LFO"</span>
+pulse1 := <span class="cls">Pulsen</span> new period: (<span class="cls">LFOTriPos</span> new freq: <span class="num">0.2</span>; offset: <span class="num">0.05</span>; amount: <span class="num">4</span>).
+pulse2 := <span class="cls">Pulsen</span> new period: <span class="num">0.35</span>.
+
+<span class="cmt">"Two physical model instruments, each triggered by one pulse"</span>
+djembe  := <span class="cls">Djembe</span>  new trigger: pulse1.
+marimba := <span class="cls">Marimba</span> new
+  trigger: pulse2;
+  freq: (<span class="cls">LFORandomPos</span> new offset: <span class="num">20</span>; amount: <span class="num">600</span>; freq: (<span class="num">1</span> / <span class="num">0.35</span>)).
+
+<span class="cmt">"Mix them, chuck into reverb, create stereo DSP"</span>
+dsp := (djembe + marimba => <span class="cls">GreyHole</span> new) stereo asDsp.
+dsp init.
+dsp start.
+dsp stop.</code></pre>
+
+    <!-- ===== PLAY NOTES ===== -->
+    <h2 id="playnotes">Playing Notes</h2>
+    <p><span class="tag">Lesson 13</span> Use <code>playNote:prefix:dur:</code> to send MIDI note numbers to a DSP instrument in a Pharo block. The method converts MIDI numbers to frequencies and handles note-on / note-off automatically.</p>
+
+    <h3>Setup: labelling with symbols</h3>
+    <p>For <code>playNote:prefix:dur:</code> to work, the instrument's <code>freq</code> and <code>trigger</code> parameters must be named consistently. Pass a Symbol (starting with <code>#</code>) to set the FAUST parameter label:</p>
+
+    <pre><code><span class="cmt">"Use symbols to set parameter labels — required for playNote:prefix:dur:"</span>
+synth := <span class="cls">ElecGuitar</span> new
+  freq:    #ElecGuitarFreq;
+  trigger: #ElecGuitarTrigger.
+
+dsp := synth asDsp.
+dsp init.
+dsp start.</code></pre>
+
+    <h3>A melodic pattern</h3>
+    <pre><code><span class="cmt">"Play 128 random MIDI notes between 28 and 76, every 125 ms"</span>
+pattern := [
+  dsp playNote: (<span class="cls">Random</span> new nextIntegerBetween: <span class="num">28</span> and: <span class="num">76</span>)
+      prefix: <span class="str">'ElecGuitar'</span>
+      dur:    <span class="num">0.11</span>.
+  (<span class="cls">Delay</span> forMilliseconds: <span class="num">125</span>) wait
+].
+
+[<span class="num">128</span> timesRepeat: pattern] fork.
+
+dsp stop.</code></pre>
+
+    <div class="method-sig"><span class="badge">method</span> playNote: midiNote prefix: aString dur: seconds</div>
+    <pre><code><span class="cmt">"Play a MIDI note number on a DSP instrument.
+ midiNote — integer MIDI note (0–127; middle C = 60)
+ prefix   — the parameter label prefix (string, e.g. 'ElecGuitar')
+ dur      — note duration in seconds (float)
+
+ The method converts MIDI to Hz and triggers the note-on / note-off cycle."</span>
+dsp playNote: <span class="num">60</span> prefix: <span class="str">'ElecGuitar'</span> dur: <span class="num">0.25</span>.</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">Using fork</div>
+      Wrap sequencing loops in <code>[ ... ] fork</code> to run them on a background Pharo process, keeping the Playground responsive. Multiple forked blocks can run simultaneously for polyrhythmic patterns.
+    </div>
+
+    <!-- ===== TPSAMPLER ===== -->
+    <h2 id="sampler">TpSampler Basics</h2>
+    <p><span class="tag">Lesson 14</span> <code>TpSampler</code> is a multisampler from the TurboPhausto package. It loads a folder of <code>.wav</code> or <code>.aiff</code> files and plays them on demand — by UI, by trigger, or algorithmically.</p>
+
+    <div class="callout note">
+      <div class="callout-title">Sample folder setup</div>
+      Download the <strong>TurboSamples</strong> folder from the Phausto repository and place it in your system Documents folder. Drag a folder into the Playground and Phausto will generate the path string automatically.
+    </div>
+
+    <h3>Load and play from UI</h3>
+    <pre><code><span class="cmt">"Create a TpSampler pointing at a folder of samples"</span>
+sp := <span class="cls">TpSampler</span> new pathToFolder: <span class="str">'/Users/you/Documents/TurboSamples/conga'</span>.
+
+dsp := sp stereo asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open UI — use tpSamplerTrigger button and tpSamplerIndex to select samples"</span>
+dsp displayUI.</code></pre>
+
+    <h3>Algorithmic triggering</h3>
+    <pre><code><span class="cmt">"Play random samples at random intervals"</span>
+[<span class="num">128</span> timesRepeat: [
+  dsp trig: <span class="str">'tpSamplerTrigger'</span>.
+  dsp setValue: (<span class="cls">Random</span> new nextIntegerBetween: <span class="num">1</span> and: <span class="num">9</span>)
+      parameter: <span class="str">'tpSamplerIndex'</span>.
+  (<span class="cls">Random</span> new nextIntegerBetween: <span class="num">80</span> and: <span class="num">310</span>) milliSeconds wait
+]] fork.</code></pre>
+
+    <h3>Melodic playback with the same sample</h3>
+    <pre><code><span class="cmt">"Select a sample and play it at different pitches via MIDI note numbers"</span>
+dsp setValue: <span class="num">8</span> parameter: <span class="str">'tpSamplerIndex'</span>.
+
+[<span class="num">128</span> timesRepeat: [
+  dsp playNote: (<span class="cls">Random</span> new nextIntegerBetween: <span class="num">35</span> and: <span class="num">78</span>)
+      prefix: <span class="str">'tpSampler'</span>
+      dur:    <span class="num">0.1</span>.
+  <span class="num">110</span> milliSeconds wait
+]] fork.
+
+dsp stop.
+dsp destroy.</code></pre>
+
+    <table class="param-table">
+      <thead><tr><th>Message</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>pathToFolder: aString</td><td>Set folder of .wav/.aiff samples</td></tr>
+        <tr><td>dsp trig: 'tpSamplerTrigger'</td><td>Fire the trigger (play current sample)</td></tr>
+        <tr><td>dsp setValue: n parameter: 'tpSamplerIndex'</td><td>Select sample by index (1-based)</td></tr>
+        <tr><td>dsp playNote: midi prefix: 'tpSampler' dur: s</td><td>Play sample pitched to MIDI note</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">Folder tip</div>
+      Put only <code>.wav</code> or <code>.aiff</code> files inside the folder — no subfolders, no other file types. <code>tpSamplerIndex</code> selects files by sorted filename order.
+    </div>
+
+    <div class="page-nav">
+      <a href="synthesis.html">
+        <span class="nav-label">Previous</span>
+        <span class="nav-title">← Synthesis Techniques</span>
+      </a>
+      <span></span>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

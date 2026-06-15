@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installation — Phausto Docs</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
+    <p>FAUST × Pharo</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Start</div>
+    <a href="index.html">Overview</a>
+    <a href="setup.html" class="active">Installation</a>
+
+    <div class="nav-section">Basics</div>
+    <a href="basics.html">Getting Started</a>
+    <a href="basics.html#hello">Hello Phausto</a>
+    <a href="basics.html#stereo">Stereo</a>
+    <a href="basics.html#ugens">Unit Generators</a>
+    <a href="basics.html#controls">At the Controls</a>
+    <a href="basics.html#ui">Display the UI</a>
+
+    <div class="nav-section">Synthesis</div>
+    <a href="synthesis.html">Synthesis Techniques</a>
+    <a href="synthesis.html#waveforms">Basic Waveforms</a>
+    <a href="synthesis.html#subtractive">Subtractive</a>
+    <a href="synthesis.html#additive">Additive</a>
+    <a href="synthesis.html#modal">Modal</a>
+    <a href="synthesis.html#fm">FM Synthesis</a>
+    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
+
+    <div class="nav-section">Sequencing</div>
+    <a href="sequencing.html">Sequencing & Sampling</a>
+    <a href="sequencing.html#chuck">ChucK Operator</a>
+    <a href="sequencing.html#playnotes">Play Notes</a>
+    <a href="sequencing.html#sampler">TpSampler</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Installation</div>
+    <h1>Installation <span class="subtitle">Load Phausto into your Pharo image and set up native audio libraries.</span></h1>
+  </div>
+
+  <div class="content">
+
+    <div class="toc">
+      <div class="toc-title">On this page</div>
+      <ul>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#metacello">Load via Metacello</a></li>
+        <li><a href="#libraries">Native Libraries</a></li>
+        <li><a href="#verify">Verify the Install</a></li>
+        <li><a href="#faust-code">Direct FAUST Code</a></li>
+      </ul>
+    </div>
+
+    <h2 id="requirements">Requirements</h2>
+    <table class="param-table">
+      <thead><tr><th>Dependency</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Pharo 11+</td><td>Tested on Pharo 11 and 12</td></tr>
+        <tr><td>Native audio libraries</td><td>Platform-specific bundles provided in the repository</td></tr>
+        <tr><td>CoypuIDE (optional)</td><td>Enables <code>PhaustoClassReference new openInSpace</code> browser</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout note">
+      <div class="callout-title">Note</div>
+      Phausto bundles a pre-compiled FAUST runtime — you do <strong>not</strong> need a separate FAUST installation. The native libraries handle DSP compilation to machine code at runtime.
+    </div>
+
+    <h2 id="metacello">Load via Metacello</h2>
+    <p>Evaluate the following in a Pharo Playground:</p>
+
+    <pre><code><span class="cls">Metacello</span> new
+  baseline: <span class="str">'Phausto'</span>;
+  repository: <span class="str">'github://lucretiomsp/phausto:main'</span>;
+  load.</code></pre>
+
+    <p>This loads the full Phausto package including all UGens, TurboPhausto (TpSampler), and PhaustoDesigningSounds.</p>
+
+    <h2 id="libraries">Native Libraries</h2>
+    <p>Phausto requires native audio libraries bundled separately per platform. Download the appropriate bundle from the <a href="https://github.com/lucretiomsp/phausto">repository root</a> and follow the wiki for placement instructions.</p>
+
+    <table class="param-table">
+      <thead><tr><th>Platform</th><th>File</th></tr></thead>
+      <tbody>
+        <tr><td>macOS (Apple Silicon)</td><td><code>phaustoLibrariesM1.dmg</code></td></tr>
+        <tr><td>macOS (Intel)</td><td><code>phaustoLibraries_mac_Intel.dmg</code></td></tr>
+        <tr><td>Windows (Intel)</td><td><code>librariesBundle_windows_intel.zip</code></td></tr>
+        <tr><td>Linux (Intel)</td><td><code>librariesBundle_Linux.zip</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-title">Tip</div>
+      On macOS you may need to right-click → Open the first time to bypass Gatekeeper. The libraries are not signed with an Apple Developer certificate.
+    </div>
+
+    <h2 id="verify">Verify the Install</h2>
+    <p>Once loaded, run the simplest possible test in a Playground — one line at a time:</p>
+
+    <div class="method-sig"><span class="badge">step by step</span> Hello Phausto</div>
+    <pre><code><span class="cmt">"Create a sine wave oscillator at 440 Hz"</span>
+sine := <span class="cls">SineOsc</span> new.
+dsp := sine asDsp.
+dsp init.
+dsp start.    <span class="cmt">"you should hear a tone"</span>
+dsp stop.</code></pre>
+
+    <p>If you hear a sine tone, Phausto is correctly installed.</p>
+
+    <h2 id="faust-code">Direct FAUST Code</h2>
+    <p>You can also create a DSP directly from a raw FAUST string, without using the Phausto UGen API:</p>
+
+    <pre><code><span class="cmt">"Write FAUST code as a Pharo String"</span>
+content := <span class="str">'import("stdfaust.lib");
+tempo = hslider("tempo", 10000, 300, 20000, 100);
+freq  = hslider("freq",  300,   200, 900,   100);
+process = ba.pulsen(1, tempo) : pm.djembe(freq, 0.3, 0.4, 1) <: dm.freeverb_demo;'</span>.
+
+<span class="cmt">"Create, init, start"</span>
+x1 := <span class="cls">DSP</span> create: content.
+x1 init.
+x1 start.
+
+<span class="cmt">"Open parameter sliders in windows"</span>
+s1 := x1 sliderFor: <span class="str">'tempo'</span>.   s1 openInWindow.
+s2 := x1 sliderFor: <span class="str">'freq'</span>.    s2 openInWindow.
+s3 := x1 sliderFor: <span class="str">'Freeverb/0x00/RoomSize'</span>. s3 openInWindow.
+
+x1 stop.</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">When to use raw FAUST</div>
+      Direct FAUST strings give you access to the full FAUST standard library (<code>stdfaust.lib</code>, <code>dm.*</code>, <code>pm.*</code>, etc.) for advanced DSP not yet wrapped by Phausto UGens.
+    </div>
+
+    <div class="page-nav">
+      <span></span>
+      <a href="basics.html" class="next">
+        <span class="nav-label">Next</span>
+        <span class="nav-title">Getting Started →</span>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
