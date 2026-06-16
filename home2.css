@@ -1,5 +1,5 @@
 /* =========================================================
-   musicwithpharo — landing page stylesheet
+   musicwithpharo — main stylesheet
    Palette: deep navy / steel blue / pale azure / cold white
    Type: Space Grotesk display + JetBrains Mono code
    ========================================================= */
@@ -12,7 +12,6 @@
   --blue:        #2e5fa3;
   --blue-light:  #5b8fd4;
   --blue-pale:   #ddeaf7;
-  --amber:       #c4962a;          /* kept for accent highlights */
   --cold-white:  #f6f8fc;
   --white:       #fdfeff;
   --code-bg:     #111c2d;
@@ -20,11 +19,19 @@
   --text:        #1e2d45;
   --muted:       #5f7a9e;
 
-  --topbar-h:    56px;
+  --topbar-h:    58px;
   --content-max: 820px;
   --radius:      6px;
   --mono: 'JetBrains Mono', 'Fira Code', monospace;
   --sans: 'Space Grotesk', system-ui, sans-serif;
+
+  /* spacing scale */
+  --sp-xs:  0.5rem;
+  --sp-sm:  1rem;
+  --sp-md:  1.75rem;
+  --sp-lg:  2.75rem;
+  --sp-xl:  4rem;
+  --gutter: clamp(1.25rem, 5vw, 3rem);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +39,7 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -40,10 +47,12 @@ body {
   background: var(--cold-white);
   color: var(--text);
   line-height: 1.75;
-  min-height: 100%;
+  min-height: 100dvh;
 }
 
-/* ---- TOP BAR ---- */
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 .topbar {
   position: sticky;
   top: 0;
@@ -52,66 +61,79 @@ body {
   height: var(--topbar-h);
   display: flex;
   align-items: center;
-  padding: 0 1.6rem;
+  padding: 0 var(--gutter);
+  gap: 1rem;
   border-bottom: 1px solid rgba(255,255,255,.06);
-  /* signature: subtle left-edge blue glow */
-  box-shadow: inset 4px 0 0 var(--blue), 0 2px 12px rgba(13,21,32,.6);
+  box-shadow: inset 4px 0 0 var(--blue), 0 2px 16px rgba(13,21,32,.55);
 }
+
+.topbar-brand {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: auto;
+}
+.topbar-brand:hover { opacity: 0.85; text-decoration: none; }
 
 .topbar ul {
   list-style: none;
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
-li.toplist {
-  display: inline;
-}
+li.toplist { display: inline; }
 
 a.toplink {
   display: inline-block;
   font-family: var(--sans);
-  font-size: 0.72rem;
+  font-size: 0.71rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--blue-pale);
+  color: rgba(221,234,247,.75);
   text-decoration: none;
-  padding: 0.35rem 0.85rem;
+  padding: 0.35rem 0.8rem;
   border-radius: var(--radius);
   transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
-
 a.toplink:hover {
   background: var(--blue);
   color: var(--white);
 }
 
-a {
-  color: var(--blue);
-  text-decoration: none;
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* =========================================================
+   HOME PAGE — POST LISTING (home2 layout)
+   ========================================================= */
+.home,
+main,
+.page-content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--sp-lg) var(--gutter) var(--sp-xl);
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-/* ---- HERO ---- */
-h1 {
+/* site hero h1 (home2 layout only) */
+body:not(.docu-page) h1 {
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--white);
   text-align: center;
-  background: var(--navy-mid);
-  padding: 3rem 1.5rem 2.8rem;
+  background: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
+  padding: clamp(2rem, 5vw, 3.5rem) var(--gutter) clamp(1.8rem, 5vw, 3rem);
   border-bottom: 3px solid var(--blue);
-  /* subtle horizontal blue shimmer */
-  background-image: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
 }
-
-h1::after {
+body:not(.docu-page) h1::after {
   content: '';
   display: block;
   width: 48px;
@@ -121,16 +143,6 @@ h1::after {
   border-radius: 2px;
 }
 
-/* ---- MAIN CONTENT AREA ---- */
-.home,
-main,
-.page-content {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
-}
-
-/* ---- HEADINGS inside content ---- */
 h2.page-heading,
 h2.post-list-heading {
   font-size: 0.7rem;
@@ -140,69 +152,49 @@ h2.post-list-heading {
   color: var(--muted);
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.5rem;
-  margin: 2.5rem 0 1.2rem;
+  margin: var(--sp-lg) 0 var(--sp-md);
 }
 
-/* ---- POST LIST ---- */
 ul.post-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 ul.post-list li {
-  padding: 1.1rem 0;
+  padding: var(--sp-md) 0;
   border-bottom: 1px solid var(--border);
-  display: grid;
-  grid-template-rows: auto auto;
 }
-
-ul.post-list li:last-child {
-  border-bottom: none;
-}
+ul.post-list li:last-child { border-bottom: none; }
 
 .post-meta {
   font-family: var(--mono);
   font-size: 0.72rem;
   color: var(--muted);
   letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
 }
 
-ul.post-list h3 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-top: 0.2rem;
-}
+ul.post-list h3 { font-size: 1.05rem; font-weight: 600; }
 
-a.post-link {
-  color: var(--text);
-  text-decoration: none;
-  transition: color 0.12s;
-}
+a.post-link { color: var(--text); transition: color 0.12s; }
+a.post-link:hover { color: var(--blue); text-decoration: none; }
 
-a.post-link:hover {
-  color: var(--blue);
-}
-
-/* ---- INTRO TEXT (from index.md) ---- */
-.home p,
-main > p {
-  font-size: 1.05rem;
-  color: var(--text);
-  max-width: 62ch;
+.home p, main > p {
+  font-size: 1.02rem;
+  max-width: 64ch;
   line-height: 1.8;
+  margin-bottom: var(--sp-sm);
 }
 
-/* ---- PAGINATION ---- */
 ul.pagination {
   list-style: none;
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin-top: 2.5rem;
+  margin-top: var(--sp-lg);
+  flex-wrap: wrap;
 }
-
 ul.pagination li a,
 ul.pagination .current-page,
 ul.pagination .pager-edge {
@@ -212,276 +204,161 @@ ul.pagination .pager-edge {
   font-family: var(--mono);
   font-size: 0.8rem;
 }
+ul.pagination li a { background: var(--blue-pale); color: var(--navy); transition: background 0.15s; }
+ul.pagination li a:hover { background: var(--blue); color: var(--white); text-decoration: none; }
+ul.pagination .current-page { background: var(--blue); color: var(--white); }
 
-ul.pagination li a {
-  background: var(--blue-pale);
+canvas { display: block; z-index: 0; }
+
+/* =========================================================
+   DOCU PAGE LAYOUT  (docuMain layout)
+   ========================================================= */
+body.docu-page {
+  background: var(--cold-white);
+}
+
+.docu-wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter) var(--sp-xl);
+}
+
+.docu-hero {
+  padding: var(--sp-lg) 0 var(--sp-md);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-lg);
+}
+
+.docu-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 0.5rem;
+}
+
+.docu-hero h1 {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--navy);
-  text-decoration: none;
-  transition: background 0.15s;
+  background: none;
+  text-align: left;
+  padding: 0;
+  border: none;
+  line-height: 1.2;
+}
+.docu-hero h1::after { display: none; }
+
+/* body prose */
+.docu-body { max-width: 68ch; }
+
+.docu-body h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+  margin: var(--sp-lg) 0 var(--sp-sm);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
 }
 
-ul.pagination li a:hover {
-  background: var(--blue);
-  color: var(--white);
+.docu-body p {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: var(--sp-sm);
 }
 
-ul.pagination .current-page {
-  background: var(--blue);
-  color: var(--white);
+.docu-body ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: var(--sp-sm) 0 var(--sp-md);
+  padding: 0;
+}
+.docu-body ul li {
+  padding-left: 1rem;
+  border-left: 2px solid var(--blue-pale);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.docu-body ul li strong { color: var(--navy); }
+
+.docu-body a { color: var(--blue); }
+.docu-body a:hover { text-decoration: underline; }
+
+/* =========================================================
+   INSTALL CARDS
+   ========================================================= */
+.install-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: var(--sp-md) 0 var(--sp-lg);
 }
 
-/* ---- CANVAS (p5.js sketch) ---- */
-canvas {
-  display: block;
-  z-index: 0;
+.install-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.install-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 2px 12px rgba(46,95,163,.1);
 }
 
-/* ---- RESPONSIVE ---- */
-@media (max-width: 600px) {
-  .topbar { padding: 0 1rem; }
-  h1 { padding: 2rem 1rem 1.8rem; }
-  .home, main, .page-content { padding: 1.5rem 1rem 3rem; }
-}/* =========================================================
-   musicwithpharo — landing page stylesheet
-   Palette: deep navy / steel blue / pale azure / cold white
-   Type: Space Grotesk display + JetBrains Mono code
+.install-card .card-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 0.4rem;
+}
+.install-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 0.5rem;
+}
+.install-card p {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: none;
+}
+
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* tablet */
+@media (max-width: 768px) {
+  .topbar ul { gap: 0.1rem; }
+  a.toplink { padding: 0.3rem 0.55rem; font-size: 0.68rem; }
 
-:root {
-  --navy:        #0d1520;
-  --navy-mid:    #172035;
-  --blue:        #2e5fa3;
-  --blue-light:  #5b8fd4;
-  --blue-pale:   #ddeaf7;
-  --amber:       #c4962a;          /* kept for accent highlights */
-  --cold-white:  #f6f8fc;
-  --white:       #fdfeff;
-  --code-bg:     #111c2d;
-  --border:      #c8d9ee;
-  --text:        #1e2d45;
-  --muted:       #5f7a9e;
-
-  --topbar-h:    56px;
-  --content-max: 820px;
-  --radius:      6px;
-  --mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --sans: 'Space Grotesk', system-ui, sans-serif;
+  .install-grid { grid-template-columns: 1fr; }
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* mobile */
+@media (max-width: 520px) {
+  :root { --gutter: 1.1rem; }
 
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-  height: 100%;
-}
+  .topbar-brand { font-size: 0.82rem; }
+  a.toplink { letter-spacing: 0.04em; }
 
-body {
-  font-family: var(--sans);
-  background: var(--cold-white);
-  color: var(--text);
-  line-height: 1.75;
-  min-height: 100%;
-}
+  .docu-wrap { padding-bottom: 2.5rem; }
+  .docu-hero { padding: var(--sp-md) 0 var(--sp-sm); }
 
-/* ---- TOP BAR ---- */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--navy);
-  height: var(--topbar-h);
-  display: flex;
-  align-items: center;
-  padding: 0 1.6rem;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  /* signature: subtle left-edge blue glow */
-  box-shadow: inset 4px 0 0 var(--blue), 0 2px 12px rgba(13,21,32,.6);
-}
+  .docu-body { max-width: 100%; }
+  .docu-body ul { gap: 0.6rem; }
 
-.topbar ul {
-  list-style: none;
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-}
+  .install-card { padding: 1.1rem 1.2rem; }
 
-li.toplist {
-  display: inline;
-}
-
-a.toplink {
-  display: inline-block;
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--blue-pale);
-  text-decoration: none;
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius);
-  transition: background 0.15s, color 0.15s;
-}
-
-a.toplink:hover {
-  background: var(--blue);
-  color: var(--white);
-}
-
-a {
-  color: var(--blue);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* ---- HERO ---- */
-h1 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--white);
-  text-align: center;
-  background: var(--navy-mid);
-  padding: 3rem 1.5rem 2.8rem;
-  border-bottom: 3px solid var(--blue);
-  /* subtle horizontal blue shimmer */
-  background-image: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
-}
-
-h1::after {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 3px;
-  background: var(--blue-light);
-  margin: 1rem auto 0;
-  border-radius: 2px;
-}
-
-/* ---- MAIN CONTENT AREA ---- */
-.home,
-main,
-.page-content {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
-}
-
-/* ---- HEADINGS inside content ---- */
-h2.page-heading,
-h2.post-list-heading {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
-  margin: 2.5rem 0 1.2rem;
-}
-
-/* ---- POST LIST ---- */
-ul.post-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-ul.post-list li {
-  padding: 1.1rem 0;
-  border-bottom: 1px solid var(--border);
-  display: grid;
-  grid-template-rows: auto auto;
-}
-
-ul.post-list li:last-child {
-  border-bottom: none;
-}
-
-.post-meta {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-ul.post-list h3 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-top: 0.2rem;
-}
-
-a.post-link {
-  color: var(--text);
-  text-decoration: none;
-  transition: color 0.12s;
-}
-
-a.post-link:hover {
-  color: var(--blue);
-}
-
-/* ---- INTRO TEXT (from index.md) ---- */
-.home p,
-main > p {
-  font-size: 1.05rem;
-  color: var(--text);
-  max-width: 62ch;
-  line-height: 1.8;
-}
-
-/* ---- PAGINATION ---- */
-ul.pagination {
-  list-style: none;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 2.5rem;
-}
-
-ul.pagination li a,
-ul.pagination .current-page,
-ul.pagination .pager-edge {
-  display: inline-block;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: 0.8rem;
-}
-
-ul.pagination li a {
-  background: var(--blue-pale);
-  color: var(--navy);
-  text-decoration: none;
-  transition: background 0.15s;
-}
-
-ul.pagination li a:hover {
-  background: var(--blue);
-  color: var(--white);
-}
-
-ul.pagination .current-page {
-  background: var(--blue);
-  color: var(--white);
-}
-
-/* ---- CANVAS (p5.js sketch) ---- */
-canvas {
-  display: block;
-  z-index: 0;
-}
-
-/* ---- RESPONSIVE ---- */
-@media (max-width: 600px) {
-  .topbar { padding: 0 1rem; }
-  h1 { padding: 2rem 1rem 1.8rem; }
-  .home, main, .page-content { padding: 1.5rem 1rem 3rem; }
+  ul.post-list li { padding: var(--sp-sm) 0; }
 }
