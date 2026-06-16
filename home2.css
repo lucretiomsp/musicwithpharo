@@ -333,6 +333,13 @@ body.docu-page {
   max-width: none;
 }
 
+.launcher-screenshot {
+  max-width: 100%;
+  border: 1px solid var(--blue-light);
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
 /* =========================================================
    RESPONSIVE
    ========================================================= */
