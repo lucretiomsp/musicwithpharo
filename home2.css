@@ -1,58 +1,487 @@
-* {
-  box-sizing: border-box;
-  font-family: 'Courier New', Courier, monospace;
- 
+/* =========================================================
+   musicwithpharo — landing page stylesheet
+   Palette: deep navy / steel blue / pale azure / cold white
+   Type: Space Grotesk display + JetBrains Mono code
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --navy:        #0d1520;
+  --navy-mid:    #172035;
+  --blue:        #2e5fa3;
+  --blue-light:  #5b8fd4;
+  --blue-pale:   #ddeaf7;
+  --amber:       #c4962a;          /* kept for accent highlights */
+  --cold-white:  #f6f8fc;
+  --white:       #fdfeff;
+  --code-bg:     #111c2d;
+  --border:      #c8d9ee;
+  --text:        #1e2d45;
+  --muted:       #5f7a9e;
+
+  --topbar-h:    56px;
+  --content-max: 820px;
+  --radius:      6px;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
 }
 
-header {
-  background-color: yellow;
-}
-
-h1 {
-  background:linear-gradient(blue, lightblue);
-  color: white;
-  text-align: center;
-  
-}
-
-.toplist {
-  display: inline; /* Make the list items inline */
-  margin-right: 10px; /* Add space between items */
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
+  font-size: 16px;
+  scroll-behavior: smooth;
   height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--cold-white);
+  color: var(--text);
+  line-height: 1.75;
+  min-height: 100%;
+}
+
+/* ---- TOP BAR ---- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--navy);
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 1.6rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  /* signature: subtle left-edge blue glow */
+  box-shadow: inset 4px 0 0 var(--blue), 0 2px 12px rgba(13,21,32,.6);
+}
+
+.topbar ul {
+  list-style: none;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+li.toplist {
+  display: inline;
+}
+
+a.toplink {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-pale);
+  text-decoration: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius);
+  transition: background 0.15s, color 0.15s;
+}
+
+a.toplink:hover {
+  background: var(--blue);
+  color: var(--white);
 }
 
 a {
+  color: var(--blue);
   text-decoration: none;
-  color: black;
 }
 
-.toplink {
-background-color: black;
-color: white;  
+a:hover {
+  text-decoration: underline;
 }
 
+/* ---- HERO ---- */
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  text-align: center;
+  background: var(--navy-mid);
+  padding: 3rem 1.5rem 2.8rem;
+  border-bottom: 3px solid var(--blue);
+  /* subtle horizontal blue shimmer */
+  background-image: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--blue-light);
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+/* ---- MAIN CONTENT AREA ---- */
+.home,
+main,
+.page-content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ---- HEADINGS inside content ---- */
+h2.page-heading,
+h2.post-list-heading {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin: 2.5rem 0 1.2rem;
+}
+
+/* ---- POST LIST ---- */
+ul.post-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+ul.post-list li {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-rows: auto auto;
+}
+
+ul.post-list li:last-child {
+  border-bottom: none;
+}
+
+.post-meta {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+ul.post-list h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+a.post-link {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+a.post-link:hover {
+  color: var(--blue);
+}
+
+/* ---- INTRO TEXT (from index.md) ---- */
+.home p,
+main > p {
+  font-size: 1.05rem;
+  color: var(--text);
+  max-width: 62ch;
+  line-height: 1.8;
+}
+
+/* ---- PAGINATION ---- */
+ul.pagination {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+ul.pagination li a,
+ul.pagination .current-page,
+ul.pagination .pager-edge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+ul.pagination li a {
+  background: var(--blue-pale);
+  color: var(--navy);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+ul.pagination li a:hover {
+  background: var(--blue);
+  color: var(--white);
+}
+
+ul.pagination .current-page {
+  background: var(--blue);
+  color: var(--white);
+}
+
+/* ---- CANVAS (p5.js sketch) ---- */
+canvas {
+  display: block;
+  z-index: 0;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 600px) {
+  .topbar { padding: 0 1rem; }
+  h1 { padding: 2rem 1rem 1.8rem; }
+  .home, main, .page-content { padding: 1.5rem 1rem 3rem; }
+}/* =========================================================
+   musicwithpharo — landing page stylesheet
+   Palette: deep navy / steel blue / pale azure / cold white
+   Type: Space Grotesk display + JetBrains Mono code
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --navy:        #0d1520;
+  --navy-mid:    #172035;
+  --blue:        #2e5fa3;
+  --blue-light:  #5b8fd4;
+  --blue-pale:   #ddeaf7;
+  --amber:       #c4962a;          /* kept for accent highlights */
+  --cold-white:  #f6f8fc;
+  --white:       #fdfeff;
+  --code-bg:     #111c2d;
+  --border:      #c8d9ee;
+  --text:        #1e2d45;
+  --muted:       #5f7a9e;
+
+  --topbar-h:    56px;
+  --content-max: 820px;
+  --radius:      6px;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  height: 100%;
+}
 
 body {
-  /* background-color: blue */
-   background: linear-gradient(lightblue, white);
-   height: 100%;
-   z-index: 10;
+  font-family: var(--sans);
+  background: var(--cold-white);
+  color: var(--text);
+  line-height: 1.75;
+  min-height: 100%;
 }
 
-
-.home {
-  width: 100%;
-  height: 100%;
-  padding: 15px;
-  background:  linear-gradient(lighblue, white);
+/* ---- TOP BAR ---- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--navy);
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 1.6rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  /* signature: subtle left-edge blue glow */
+  box-shadow: inset 4px 0 0 var(--blue), 0 2px 12px rgba(13,21,32,.6);
 }
 
+.topbar ul {
+  list-style: none;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
 
-   canvas {
-   
-      z-index: 0; /* Places canvas behind other elements */
-    }
+li.toplist {
+  display: inline;
+}
 
+a.toplink {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-pale);
+  text-decoration: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius);
+  transition: background 0.15s, color 0.15s;
+}
+
+a.toplink:hover {
+  background: var(--blue);
+  color: var(--white);
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---- HERO ---- */
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  text-align: center;
+  background: var(--navy-mid);
+  padding: 3rem 1.5rem 2.8rem;
+  border-bottom: 3px solid var(--blue);
+  /* subtle horizontal blue shimmer */
+  background-image: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--blue-light);
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+/* ---- MAIN CONTENT AREA ---- */
+.home,
+main,
+.page-content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ---- HEADINGS inside content ---- */
+h2.page-heading,
+h2.post-list-heading {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin: 2.5rem 0 1.2rem;
+}
+
+/* ---- POST LIST ---- */
+ul.post-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+ul.post-list li {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-rows: auto auto;
+}
+
+ul.post-list li:last-child {
+  border-bottom: none;
+}
+
+.post-meta {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+ul.post-list h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+a.post-link {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+a.post-link:hover {
+  color: var(--blue);
+}
+
+/* ---- INTRO TEXT (from index.md) ---- */
+.home p,
+main > p {
+  font-size: 1.05rem;
+  color: var(--text);
+  max-width: 62ch;
+  line-height: 1.8;
+}
+
+/* ---- PAGINATION ---- */
+ul.pagination {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+ul.pagination li a,
+ul.pagination .current-page,
+ul.pagination .pager-edge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+ul.pagination li a {
+  background: var(--blue-pale);
+  color: var(--navy);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+ul.pagination li a:hover {
+  background: var(--blue);
+  color: var(--white);
+}
+
+ul.pagination .current-page {
+  background: var(--blue);
+  color: var(--white);
+}
+
+/* ---- CANVAS (p5.js sketch) ---- */
+canvas {
+  display: block;
+  z-index: 0;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 600px) {
+  .topbar { padding: 0 1rem; }
+  h1 { padding: 2rem 1rem 1.8rem; }
+  .home, main, .page-content { padding: 1.5rem 1rem 3rem; }
+}
