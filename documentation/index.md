@@ -23,6 +23,20 @@ Two ways to get started:
     <h3>Music Image</h3>
     <p>A ready-to-use Pharo image with all packages pre-installed. Available in the <strong>Pharo Launcher</strong> under <em>Templates</em>. Recommended for beginners.</p>
   </div>
+
+  <section class="install-section">
+  <h2>Install via Pharo Launcher</h2>
+  <p>Download <a href="https://pharo.org/download">Pharo Launcher</a>, then:</p>
+  <ol>
+    <li>Click <strong>New</strong> → select category <strong>Pharo-Music distributions</strong></li>
+    <li>Choose <strong>Pharo Music (demo)</strong> from the template list</li>
+    <li>Click <strong>Create image</strong></li>
+    <li>Double-click the new image to launch it</li>
+  </ol>
+  <img src="/musicwithpharo/assets/img/musicImgLaunchTemp.png" alt="Pharo Launcher – selecting Pharo Music demo template" class="launcher-screenshot">
+</section>
+
+
   <div class="install-card">
     <div class="card-label">Option 2</div>
     <h3>Metacello</h3>
