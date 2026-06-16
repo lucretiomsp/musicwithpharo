@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} — {% endif %}Music with Pharo</title>
+  <link rel="stylesheet" href="{{ '/home2.css' | relative_url }}">
+</head>
+<body>
+
+  <nav class="topbar">
+    <a class="topbar-brand" href="{{ '/' | relative_url }}">Music with Pharo</a>
+    <ul>
+      <li class="toplist"><a class="toplink" href="{{ '/documentation/documentation.html' | relative_url }}">Docs</a></li>
+      <li class="toplist"><a class="toplink" href="{{ '/coypuFloss/' | relative_url }}">Coypu</a></li>
+      <li class="toplist"><a class="toplink" href="{{ '/documentation/phausto.html' | relative_url }}">Phausto</a></li>
+      <li class="toplist"><a class="toplink" href="{{ '/documentation/pharosound.html' | relative_url }}">Pharo-Sound</a></li>
+    </ul>
+  </nav>
+
+  <div class="docu-wrap">
+    <header class="docu-hero">
+      <p class="docu-eyebrow">Documentation</p>
+      <h1>{{ page.title }}</h1>
+    </header>
+    <main class="docu-body">
+      {{ content }}
+    </main>
+  </div>
+
+</body>
+</html>
