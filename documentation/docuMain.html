@@ -3,20 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ '/home2.css' | relative_url }}">
-  <!-- ADD THIS -->
+<link rel="stylesheet" href="{{ '/home2.css' | relative_url }}">
+
+  <!-- p5js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+ 
   <style>
     body { background: var(--navy); }
     .home, .topbar { position: relative; z-index: 1; }
   </style>
+
 </head>
 <h1> Music and Sounds with Pharo </h1>
-<h2>{{ page.title }}</h2>
+
+  <!-- navigation top bar -->
+<div class="topbar">
+    <ul>
+   
+        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/coypu.html">COYPU</a></li>
+        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/phausto.html">PHAUSTO</a></li>
+        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/pharosound.html">PHAROSOUND</a></li>
+    </ul>
+</div>
+  
+  <!-- ################################ -->
 <body>
-  <div class="home">
-{{ content }}
-  </div>
-  <!-- ADD THIS -->
-  <script src="{{ '/lissajous-bg.js' | relative_url }}"></script>
+
+ <script src="lissajous-bg.js"></script>
+<!-- index.md contents aka landing page -->
+  {{ content }}
+
+ {%- if page.title -%}
+    <h2 class="page-heading">{{ page.title }}</h2>
+  {%- endif -%}
+
+  <!-- ############################## -->
+  {% if site.paginate %}
+    {% assign posts = paginator.posts %}
+  {% else %}
+    {% assign posts = site.posts %}
+  {% endif %}
+
+
+  {%- if posts.size > 0 -%}
+    {%- if page.list_title -%}
+      <h2 class="post-list-heading">{{ page.list_title }}</h2>
+    {%- endif -%}
+    <ul class="post-list">
+      {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+      {%- for post in posts -%}
+      <li>
+        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <h3>
+          <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title | escape }}
+          </a>
+        </h3>
+        {%- if site.show_excerpts -%}
+          {{ post.excerpt }}
+        {%- endif -%}
+      </li>
+      {%- endfor -%}
+    </ul>
+
+    {% if site.paginate %}
+    <!-- >  <div class="pager"> -->
+        <ul class="pagination">
+        {%- if paginator.previous_page %}
+          <li><a href="{{ paginator.previous_page_path | relative_url }}" class="previous-page">{{ paginator.previous_page }}</a></li>
+        {%- else %}
+          <li><div class="pager-edge">•</div></li>
+        {%- endif %}
+          <li><div class="current-page">{{ paginator.page }}</div></li>
+        {%- if paginator.next_page %}
+          <li><a href="{{ paginator.next_page_path | relative_url }}" class="next-page">{{ paginator.next_page }}</a></li>
+        {%- else %}
+          <li><div class="pager-edge">•</div></li>
+        {%- endif %}
+        </ul>
+
+        
+    {%- endif %}
+
+  {%- endif -%}
+
+<!--  </div> -->
+    
+
+
 </body>
-</html>
+  </html>
