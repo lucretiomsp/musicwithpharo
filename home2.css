@@ -179,6 +179,7 @@ ul.post-list h3 { font-size: 1.05rem; font-weight: 600; }
 
 a.post-link { color: var(--text); transition: color 0.12s; }
 a.post-link:hover { color: var(--blue); text-decoration: none; }
+a.post-link, h2.page-heading, h2.post-list-heading {color: #f6f8fc;}
 
 .home p, main > p {
   font-size: 1.02rem;
