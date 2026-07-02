@@ -3,47 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ '/home2.css' | relative_url }}">
-
-  <!-- p5js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
- 
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="stylesheet" href="{{ '/home2.css' | relative_url }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     body { background: var(--navy); }
     .home, .topbar { position: relative; z-index: 1; }
   </style>
-
 </head>
-<h1> Music and Sounds with Pharo </h1>
-
-  <!-- navigation top bar -->
-<div class="topbar">
-    <ul>
-   
-        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/coypu.html">COYPU</a></li>
-        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/phausto.html">PHAUSTO</a></li>
-        <li class = "toplist"> <a class ="toplink" href="https://lucretiomsp.github.io/musicwithpharo/documentation/pharosound.html">PHAROSOUND</a></li>
-    </ul>
-</div>
-  
-  <!-- ################################ -->
 <body>
 
- <script src="lissajous-bg.js"></script>
-<!-- index.md contents aka landing page -->
+  <script src="{{ '/lissajous-bg.js' | relative_url }}"></script>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a class="topbar-brand" href="{{ '/' | relative_url }}">🎵 Music with Pharo</a>
+
+    <!-- desktop nav -->
+    <ul class="topbar-nav">
+      <li class="toplist"><a class="toplink" href="{{ site.baseurl }}/documentation/coypu.html">Coypu</a></li>
+      <li class="toplist"><a class="toplink" href="{{ site.baseurl }}/documentation/phausto.html">Phausto</a></li>
+      <li class="toplist"><a class="toplink" href="{{ site.baseurl }}/documentation/pharosound.html">Pharo-Sound</a></li>
+    </ul>
+
+    <!-- hamburger -->
+    <button class="topbar-toggle" id="topbarToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- mobile dropdown -->
+  <nav class="topbar-dropdown" id="topbarDropdown">
+    <a class="toplink" href="{{ site.baseurl }}/documentation/coypu.html">Coypu</a>
+    <a class="toplink" href="{{ site.baseurl }}/documentation/phausto.html">Phausto</a>
+    <a class="toplink" href="{{ site.baseurl }}/documentation/pharosound.html">Pharo-Sound</a>
+  </nav>
+
+  <h1>{{ site.title | default: "Music and Sounds with Pharo" }}</h1>
+
+  <!-- page content (index.md) -->
   {{ content }}
 
- {%- if page.title -%}
+  {%- if page.title -%}
     <h2 class="page-heading">{{ page.title }}</h2>
   {%- endif -%}
 
-  <!-- ############################## -->
   {% if site.paginate %}
     {% assign posts = paginator.posts %}
   {% else %}
     {% assign posts = site.posts %}
   {% endif %}
-
 
   {%- if posts.size > 0 -%}
     {%- if page.list_title -%}
@@ -67,29 +76,35 @@
     </ul>
 
     {% if site.paginate %}
-    <!-- >  <div class="pager"> -->
-        <ul class="pagination">
-        {%- if paginator.previous_page %}
-          <li><a href="{{ paginator.previous_page_path | relative_url }}" class="previous-page">{{ paginator.previous_page }}</a></li>
-        {%- else %}
-          <li><div class="pager-edge">•</div></li>
-        {%- endif %}
-          <li><div class="current-page">{{ paginator.page }}</div></li>
-        {%- if paginator.next_page %}
-          <li><a href="{{ paginator.next_page_path | relative_url }}" class="next-page">{{ paginator.next_page }}</a></li>
-        {%- else %}
-          <li><div class="pager-edge">•</div></li>
-        {%- endif %}
-        </ul>
-
-        
+    <ul class="pagination">
+      {%- if paginator.previous_page %}
+        <li><a href="{{ paginator.previous_page_path | relative_url }}" class="previous-page">{{ paginator.previous_page }}</a></li>
+      {%- else %}
+        <li><div class="pager-edge">•</div></li>
+      {%- endif %}
+      <li><div class="current-page">{{ paginator.page }}</div></li>
+      {%- if paginator.next_page %}
+        <li><a href="{{ paginator.next_page_path | relative_url }}" class="next-page">{{ paginator.next_page }}</a></li>
+      {%- else %}
+        <li><div class="pager-edge">•</div></li>
+      {%- endif %}
+    </ul>
     {%- endif %}
-
   {%- endif -%}
 
-<!--  </div> -->
-    
-
+  <script>
+    const toggle = document.getElementById('topbarToggle');
+    const dropdown = document.getElementById('topbarDropdown');
+    toggle.addEventListener('click', () => {
+      toggle.classList.toggle('open');
+      dropdown.classList.toggle('open');
+    });
+    // close when a link is tapped
+    dropdown.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      toggle.classList.remove('open');
+      dropdown.classList.remove('open');
+    }));
+  </script>
 
 </body>
-  </html>
+</html>
