@@ -25,7 +25,6 @@
   --mono: 'JetBrains Mono', 'Fira Code', monospace;
   --sans: 'Space Grotesk', system-ui, sans-serif;
 
-  /* spacing scale */
   --sp-xs:  0.5rem;
   --sp-sm:  1rem;
   --sp-md:  1.75rem;
@@ -79,12 +78,20 @@ body {
 }
 .topbar-brand:hover { opacity: 0.85; text-decoration: none; }
 
-.topbar ul {
+/* desktop nav */
+.topbar-nav {
+  display: flex;
+  list-style: none;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+/* legacy support for bare <ul> inside topbar */
+.topbar > ul {
   list-style: none;
   display: flex;
   gap: 0.2rem;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 li.toplist { display: inline; }
@@ -103,16 +110,65 @@ a.toplink {
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-a.toplink:hover {
+a.toplink:hover,
+a.toplink:focus {
   background: var(--blue);
   color: var(--white);
 }
+
+/* hamburger button — hidden on desktop */
+.topbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.topbar-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--blue-pale);
+  border-radius: 2px;
+  transition: transform .2s, opacity .2s;
+}
+.topbar-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.topbar-toggle.open span:nth-child(2) { opacity: 0; }
+.topbar-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* mobile nav dropdown */
+.topbar-dropdown {
+  display: none;
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0; right: 0;
+  background: var(--navy-mid);
+  border-bottom: 2px solid var(--blue);
+  z-index: 99;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.topbar-dropdown.open { display: flex; }
+.topbar-dropdown a.toplink {
+  padding: 0.75rem var(--gutter);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  border-radius: 0;
+  color: rgba(221,234,247,.85);
+}
+.topbar-dropdown a.toplink:hover { background: var(--blue); color: var(--white); }
 
 a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* =========================================================
-   HOME PAGE — POST LISTING (home2 layout)
+   HOME PAGE — POST LISTING
    ========================================================= */
 .home,
 main,
@@ -122,15 +178,14 @@ main,
   padding: var(--sp-lg) var(--gutter) var(--sp-xl);
 }
 
-/* site hero h1 (home2 layout only) */
 body:not(.docu-page) h1 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--white);
   text-align: center;
   background: linear-gradient(135deg, var(--navy) 60%, #1a3560 100%);
-  padding: clamp(2rem, 5vw, 3.5rem) var(--gutter) clamp(1.8rem, 5vw, 3rem);
+  padding: clamp(1.5rem, 5vw, 3.5rem) var(--gutter) clamp(1.2rem, 5vw, 3rem);
   border-bottom: 3px solid var(--blue);
 }
 body:not(.docu-page) h1::after {
@@ -179,7 +234,7 @@ ul.post-list h3 { font-size: 1.05rem; font-weight: 600; }
 
 a.post-link { color: var(--text); transition: color 0.12s; }
 a.post-link:hover { color: var(--blue); text-decoration: none; }
-a.post-link, h2.page-heading, h2.post-list-heading {color: #f6f8fc;}
+a.post-link, h2.page-heading, h2.post-list-heading { color: #f6f8fc; }
 
 .home p, main > p {
   font-size: 1.02rem;
@@ -212,11 +267,9 @@ ul.pagination .current-page { background: var(--blue); color: var(--white); }
 canvas { display: block; z-index: 0; }
 
 /* =========================================================
-   DOCU PAGE LAYOUT  (docuMain layout)
+   DOCU PAGE LAYOUT
    ========================================================= */
-body.docu-page {
-  background: var(--cold-white);
-}
+body.docu-page { background: var(--cold-white); }
 
 .docu-wrap {
   max-width: var(--content-max);
@@ -240,7 +293,7 @@ body.docu-page {
 }
 
 .docu-hero h1 {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--navy);
@@ -252,7 +305,6 @@ body.docu-page {
 }
 .docu-hero h1::after { display: none; }
 
-/* body prose */
 .docu-body { max-width: 68ch; }
 
 .docu-body h2 {
@@ -286,9 +338,22 @@ body.docu-page {
   line-height: 1.7;
 }
 .docu-body ul li strong { color: var(--navy); }
-
 .docu-body a { color: var(--blue); }
 .docu-body a:hover { text-decoration: underline; }
+
+/* code blocks in docu pages */
+.docu-body pre, pre {
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0.8rem 0 1.2rem;
+  font-family: var(--mono);
+  font-size: 0.83rem;
+  color: #c8d8f0;
+  line-height: 1.6;
+}
 
 /* =========================================================
    INSTALL CARDS
@@ -311,7 +376,6 @@ body.docu-page {
   border-color: var(--blue);
   box-shadow: 0 2px 12px rgba(46,95,163,.1);
 }
-
 .install-card .card-label {
   font-family: var(--mono);
   font-size: 0.65rem;
@@ -331,7 +395,6 @@ body.docu-page {
   color: var(--muted);
   line-height: 1.65;
   margin: 0;
-  max-width: none;
 }
 
 .launcher-screenshot {
@@ -347,10 +410,14 @@ body.docu-page {
 
 /* tablet */
 @media (max-width: 768px) {
-  .topbar ul { gap: 0.1rem; }
-  a.toplink { padding: 0.3rem 0.55rem; font-size: 0.68rem; }
+  /* hide desktop nav, show hamburger */
+  .topbar > ul,
+  .topbar-nav { display: none; }
+  .topbar-toggle { display: flex; }
 
   .install-grid { grid-template-columns: 1fr; }
+
+  .docu-body { max-width: 100%; }
 }
 
 /* mobile */
@@ -358,15 +425,19 @@ body.docu-page {
   :root { --gutter: 1.1rem; }
 
   .topbar-brand { font-size: 0.82rem; }
-  a.toplink { letter-spacing: 0.04em; }
+
+  body:not(.docu-page) h1 {
+    font-size: 1.4rem;
+    padding: 1.4rem var(--gutter) 1.2rem;
+  }
+
+  .home, main, .page-content {
+    padding-top: var(--sp-md);
+  }
 
   .docu-wrap { padding-bottom: 2.5rem; }
   .docu-hero { padding: var(--sp-md) 0 var(--sp-sm); }
-
-  .docu-body { max-width: 100%; }
   .docu-body ul { gap: 0.6rem; }
-
   .install-card { padding: 1.1rem 1.2rem; }
-
   ul.post-list li { padding: var(--sp-sm) 0; }
 }
