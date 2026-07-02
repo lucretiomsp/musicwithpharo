@@ -1,129 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phausto — Docs</title>
-  <link rel="stylesheet" href="phausto-shared.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coypu — Live Coding Music in Pharo</title>
+<link rel="stylesheet" href="coypu-shared.css">
+<style>
+  /* index-specific overrides */
+  .hero {
+    background: var(--ink);
+    color: var(--white);
+    padding: 4rem 3rem 3rem;
+    border-bottom: 2px solid var(--sage);
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: .7rem;
+  }
+  .hero h1 span { color: var(--sage-light); }
+  .hero p {
+    color: #b8cbbf;
+    font-size: 1.05rem;
+    max-width: 540px;
+    margin-bottom: 1.6rem;
+  }
+  .hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: .6rem 1.3rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity .15s, background .15s;
+  }
+  .btn-primary { background: var(--sage); color: var(--white); }
+  .btn-primary:hover { background: var(--sage-light); }
+  .btn-ghost { border: 1px solid rgba(255,255,255,.25); color: var(--cream); }
+  .btn-ghost:hover { background: rgba(255,255,255,.07); }
+
+  .index-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+    padding: 2.4rem 3rem;
+  }
+  .doc-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.4rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color .15s, box-shadow .15s;
+    display: block;
+  }
+  .doc-card:hover { border-color: var(--sage); box-shadow: 0 2px 12px rgba(78,124,95,.1); }
+  .doc-card .card-icon { font-size: 1.5rem; margin-bottom: .6rem; }
+  .doc-card .card-title { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: .3rem; }
+  .doc-card .card-desc { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+
+  .section-heading {
+    padding: 1.6rem 3rem .4rem;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .install-banner {
+    margin: 0 3rem 0;
+    background: var(--code-bg);
+    border-radius: var(--radius);
+    padding: 1rem 1.3rem;
+    border-left: 3px solid var(--sage);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .install-banner span { color: var(--muted); font-size: .8rem; }
+  .install-banner pre { margin: 0; padding: 0; background: none; border: none; flex: 1; }
+  .install-banner code { font-size: .82rem; }
+</style>
 </head>
 <body>
 
-<nav class="sidebar">
+<aside class="sidebar">
   <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
-    <p>FAUST × Pharo</p>
+    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
+    <p>Live Coding Music in Pharo</p>
   </div>
-  <div class="sidebar-nav">
-    <div class="nav-section">Start</div>
-    <a href="index.html" class="active">Overview</a>
-    <a href="setup.html">Installation</a>
-
-    <div class="nav-section">Basics</div>
-    <a href="basics.html">Getting Started</a>
-    <a href="basics.html#hello">Hello Phausto</a>
-    <a href="basics.html#stereo">Stereo</a>
-    <a href="basics.html#ugens">Unit Generators</a>
-    <a href="basics.html#controls">At the Controls</a>
-    <a href="basics.html#ui">Display the UI</a>
-
-    <div class="nav-section">Synthesis</div>
-    <a href="synthesis.html">Synthesis Techniques</a>
-    <a href="synthesis.html#waveforms">Basic Waveforms</a>
-    <a href="synthesis.html#subtractive">Subtractive</a>
-    <a href="synthesis.html#additive">Additive</a>
-    <a href="synthesis.html#modal">Modal</a>
-    <a href="synthesis.html#fm">FM Synthesis</a>
-    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
-
-    <div class="nav-section">Sequencing</div>
-    <a href="sequencing.html">Sequencing & Sampling</a>
-    <a href="sequencing.html#chuck">ChucK Operator</a>
-    <a href="sequencing.html#playnotes">Play Notes</a>
-    <a href="sequencing.html#sampler">TpSampler</a>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Getting Started</div>
+      <a href="setup.html">Setup &amp; Installation</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Rhythm Reference</div>
+      <a href="rhythms-basics.html">Rhythm Basics</a>
+      <a href="rhythm-library.html">Rhythm Library</a>
+      <a href="rhythms-advanced.html">Advanced Patterns</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Performing</div>
+      <a href="performing.html">Performance Control</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
   </div>
-</nav>
+</aside>
 
 <div class="main">
-  <div class="content">
 
-    <div class="hero">
-      <h1>Ph<span>austo</span></h1>
-      <p>Use the <strong>FAUST</strong> compiler and its libraries inside <strong>Pharo</strong> — live, interactive, audio synthesis.</p>
-      <div class="hero-badges">
-        <span class="badge">Pharo</span>
-        <span class="badge">FAUST</span>
-        <span class="badge">Live Coding</span>
-        <span class="badge">DSP</span>
-        <span class="badge">GPL-2.0</span>
-      </div>
-    </div>
-
+  <div class="hero">
+    <h1>🦫 <span>Coypu</span><br>Live Coding Music in Pharo</h1>
     <p>
-      Phausto is a library and API that brings the <a href="https://faust.grame.fr">FAUST</a> (Functional Audio Stream) functional audio programming language into <a href="https://pharo.org">Pharo Smalltalk</a>. It lets you build audio synthesis chains — oscillators, filters, effects, samplers, physical models — directly from the Pharo environment, evaluated live.
+      A compact, iconic syntax for programming music on the fly — send OSC to SuperDirt, Kyma, MIDI hardware,
+      or the built-in EcoPhausto engine. All from a Pharo Playground.
     </p>
-
-    <div class="install-banner">
-      <code>Metacello new baseline: 'Phausto'; repository: 'github://lucretiomsp/phausto:main'; load.</code>
+    <div class="hero-actions">
+      <a href="setup.html" class="btn btn-primary">Get Started →</a>
+      <a href="https://github.com/lucretiomsp/Coypu" target="_blank" class="btn btn-ghost">GitHub ↗</a>
     </div>
-
-    <h2>Documentation</h2>
-    <div class="card-grid">
-      <a href="setup.html" class="doc-card">
-        <div class="card-icon">📦</div>
-        <div class="card-title">Installation</div>
-        <div class="card-desc">Load Phausto via Metacello, set up native libraries, and play your first sound.</div>
-      </a>
-      <a href="basics.html" class="doc-card">
-        <div class="card-icon">🔊</div>
-        <div class="card-title">Getting Started</div>
-        <div class="card-desc">Hello Phausto, DSP lifecycle, Unit Generators, UI controls, and the stereo bus.</div>
-      </a>
-      <a href="synthesis.html" class="doc-card">
-        <div class="card-icon">🌊</div>
-        <div class="card-title">Synthesis</div>
-        <div class="card-desc">Subtractive, additive, modal, and FM synthesis techniques with Phausto UGens.</div>
-      </a>
-      <a href="sequencing.html" class="doc-card">
-        <div class="card-icon">🎹</div>
-        <div class="card-title">Sequencing & Sampling</div>
-        <div class="card-desc">ChucK operator, melodic sequencing with playNote:, and TpSampler basics.</div>
-      </a>
-    </div>
-
-    <h2>Quick Example</h2>
-    <pre><code><span class="cmt">"A djembe physical model through a GreyHole reverb"</span>
-pulse := <span class="cls">Pulsen</span> new period: (<span class="cls">LFOTriPos</span> new freq: <span class="num">0.2</span>; amount: <span class="num">4</span>).
-djembe := <span class="cls">Djembe</span> new trigger: pulse.
-dsp := (djembe => <span class="cls">GreyHole</span> new) stereo asDsp.
-dsp init.
-dsp start.
-dsp displayUI.
-dsp stop.</code></pre>
-
-    <h2>Architecture</h2>
-    <p>Phausto compiles FAUST DSP programs to native code at runtime. Each <strong>Unit Generator</strong> (UGen) corresponds to a FAUST module. UGens are composed with Pharo's natural message-passing syntax and the <code>=></code> ChucK operator, then wrapped in a <code>DSP</code> object that manages the audio lifecycle.</p>
-
-    <table class="comp-table">
-      <thead>
-        <tr><th>Concept</th><th>Phausto API</th><th>Notes</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Unit Generator</td><td><code>SineOsc new</code></td><td>Building block for synthesis</td></tr>
-        <tr><td>Signal chain</td><td><code>osc => filter</code></td><td>ChucK operator connects UGens</td></tr>
-        <tr><td>Stereo output</td><td><code>ugen stereo</code></td><td>Duplicates to stereo bus</td></tr>
-        <tr><td>DSP object</td><td><code>ugen asDsp</code></td><td>Wraps chain for playback</td></tr>
-        <tr><td>UI parameters</td><td><code>dsp displayUI</code></td><td>FAUST-generated knobs/sliders</td></tr>
-        <tr><td>Real-time set</td><td><code>dsp setValue: v parameter: 'x'</code></td><td>Change params while running</td></tr>
-      </tbody>
-    </table>
-
-    <h2>Explore the Class Reference</h2>
-    <p>If <strong>CoypuIDE</strong> is installed, browse all Phausto UGens interactively:</p>
-    <pre><code><span class="cls">PhaustoClassReference</span> new openInSpace.</code></pre>
-    <p>Classes are organized by type: Oscillators, Effects, Envelopes, Filters, Physical Models, Noise, and more. Each class comment includes working examples.</p>
-
   </div>
+
+  <div class="install-banner">
+    <span>Install</span>
+    <pre><code>Metacello new baseline: 'Coypu'; repository: 'github://lucretiomsp/coypu:master'; load</code></pre>
+  </div>
+
+  <div class="section-heading">Documentation</div>
+
+  <div class="index-grid">
+    <a href="setup.html" class="doc-card">
+      <div class="card-icon">🚀</div>
+      <div class="card-title">Setup &amp; Installation</div>
+      <div class="card-desc">Install Coypu via Metacello, choose your audio backend, and make your first sound in minutes.</div>
+    </a>
+    <a href="rhythms-basics.html" class="doc-card">
+      <div class="card-icon">🥁</div>
+      <div class="card-title">Rhythm Basics</div>
+      <div class="card-desc">Create sequencers from binary arrays, named rhythms, hex patterns, and random triggers.</div>
+    </a>
+    <a href="rhythms-advanced.html" class="doc-card">
+      <div class="card-icon">🔁</div>
+      <div class="card-title">Advanced Patterns</div>
+      <div class="card-desc">Euclidean rhythms, SuperDirt note strings, scale-based random walks, and arpeggiation.</div>
+    </a>
+    <a href="performing.html" class="doc-card">
+      <div class="card-icon">🎛️</div>
+      <div class="card-title">Performance Control</div>
+      <div class="card-desc">Mute, solo, loop, save/restore, BPM, and global rhythm — live control on stage.</div>
+    </a>
+  </div>
+
 </div>
 
+
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>
