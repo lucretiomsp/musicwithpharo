@@ -6,7 +6,6 @@
 <title>Performance Control — Coypu Docs</title>
 <link rel="stylesheet" href="coypu-shared.css">
 </head>
-  <script src="sidebar-toggle.js"></script>
 <body>
 
 <aside class="sidebar">
@@ -60,14 +59,14 @@
 ep := EcoPhausto new.
 ep playFor: N bars.</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Message</th><th>Effect</th></tr></thead>
         <tbody>
           <tr><td>EcoPhausto start</td><td>Initialises the audio engine. Must be called once per session before anything else.</td></tr>
           <tr><td>EcoPhausto new</td><td>Creates a new Performance object. Assign it to a variable so you can control it.</td></tr>
           <tr><td>ep playFor: N bars</td><td>Starts the clock running for N bars. Sequencers added at any point during the run will join immediately.</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code>EcoPhausto start.
 ep := EcoPhausto new.
@@ -89,12 +88,12 @@ ep playFor: <span class="num">128</span> bars.   <span class="cmt">"Runs for 128
 
       <div class="method-sig">ep bpm: value.</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>value</td><td>Number</td><td>Beats per minute. No practical limit, but 60–200 is typical.</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code>ep bpm: <span class="num">120</span>.
 ep bpm: <span class="num">90</span>.    <span class="cmt">"Slow down mid-performance"</span>
@@ -110,12 +109,12 @@ ep bpm: <span class="num">140</span>.   <span class="cmt">"Ramp up the energy"</
       <div class="method-sig">ep mute: #( #instA #instB ... ).
 ep unmute: #( #instA #instB ... ).</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>#( symbols )</td><td>Array of Symbols</td><td>The instrument names to mute or unmute</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code><span class="cmt">"Mute kick, snare and bleep together"</span>
 ep mute: #(<span class="sym">#kick</span> <span class="sym">#snare</span> <span class="sym">#bleep</span>).
@@ -162,12 +161,12 @@ ep unsolo: #(<span class="sym">#psg</span> <span class="sym">#cowbell</span>).</
       <div class="method-sig">ep loop: N.
 ep unloop.</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>N</td><td>Integer</td><td>Number of steps to loop</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code><span class="cmt">"Loop the next 5 steps forever"</span>
 ep loop: <span class="num">5</span>.
@@ -292,5 +291,7 @@ ep stop.</code></pre>
   </div>
 </div>
 
+
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>

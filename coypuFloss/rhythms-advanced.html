@@ -6,7 +6,6 @@
 <title>Advanced Patterns — Coypu Docs</title>
 <link rel="stylesheet" href="coypu-shared.css">
 </head>
-  <script src="sidebar-toggle.js"></script>
 <body>
 
 <aside class="sidebar">
@@ -56,13 +55,13 @@
 
       <div class="method-sig">#( pulses steps ) euclidean to: #instrumentName.</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>pulses</td><td>Integer</td><td>Number of triggers to distribute</td></tr>
           <tr><td>steps</td><td>Integer</td><td>Total number of steps in the pattern</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code><span class="cmt">"Classic tresillo — 3 pulses in 8 steps"</span>
 #(<span class="num">3</span> <span class="num">8</span>) euclidean to: #conga.
@@ -106,7 +105,7 @@
 
 <span class="cmt">"Tokens: rest(8 beats) → note 38 → note 56 twice → rest(4 beats) → 41 → 66"</span></code></pre>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Token</th><th>Meaning</th></tr></thead>
         <tbody>
           <tr><td>38</td><td>MIDI note 38 (one step)</td></tr>
@@ -115,7 +114,7 @@
           <tr><td>56*2</td><td>Note 56 repeated 2 times</td></tr>
           <tr><td>,</td><td>Separator between tokens</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
       <h3 id="asDirtIndex">Dirt index — <code>asDirtIndex</code></h3>
       <p>
@@ -171,7 +170,7 @@
 
       <div class="method-sig">N randomWalksOn: Scale &lt;scale&gt; octaves: octaves root: rootMidi.</div>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td>N</td><td>Integer</td><td>Number of steps to generate</td></tr>
@@ -179,7 +178,7 @@
           <tr><td>octaves</td><td>Integer</td><td>Octave range to walk within</td></tr>
           <tr><td>rootMidi</td><td>Integer</td><td>Root note as MIDI number (e.g. 48 = C3)</td></tr>
         </tbody>
-      </table>
+      </table></div>
 
 <pre><code><span class="cmt">"64-step random walk on Sakura scale, 2 octaves from C3"</span>
 <span class="num">64</span> randomTrigs
@@ -281,5 +280,7 @@ ep playFor: <span class="num">128</span> bars.
   </div>
 </div>
 
+
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>

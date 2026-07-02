@@ -6,7 +6,6 @@
 <title>Setup — Coypu Docs</title>
 <link rel="stylesheet" href="coypu-shared.css">
 </head>
-  <script src="sidebar-toggle.js"></script>
 <body>
 
 <!-- ========== SIDEBAR ========== -->
@@ -80,7 +79,7 @@
       <h3 id="audio-engine">Audio engine — choosing your backend</h3>
       <p>Coypu can send sound through several backends. Pick one:</p>
 
-      <table class="param-table">
+      <div class="param-table-wrap"><table class="param-table">
         <thead>
           <tr><th>Backend</th><th>What it does</th><th>Requires</th></tr>
         </thead>
@@ -106,7 +105,7 @@
             <td>pharo-sound (PortMidi)</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div class="callout tip">
         <span class="callout-icon">💡</span>
@@ -115,19 +114,8 @@
 
       <!-- INSTALLATION -->
       <h2 id="installation">Installing Coypu</h2>
-      <section class="install-section">
-  <h3>Install via Pharo Launcher</h3>
-  <p>Download <a href="https://pharo.org/download">Pharo Launcher</a>, then:</p>
-  <ol>
-    <li>Click <strong>New</strong> → select category <strong>Pharo-Music distributions</strong></li>
-    <li>Choose <strong>Pharo Music (demo)</strong> from the template list</li>
-    <li>Click <strong>Create image</strong></li>
-    <li>Double-click the new image to launch it</li>
-  </ol>
-  <img src="/musicwithpharo/assets/img/musicImgLaunchTemp.png" alt="Pharo Launcher – selecting Pharo Music demo template" class="launcher-screenshot">
-</section>
 
-      <h3 id="metacello">Using Metacello (for experts)</h3>
+      <h3 id="metacello">Using Metacello (recommended)</h3>
       <p>
         Open a <strong>Playground</strong> (<kbd>CMD+P</kbd> on macOS / <kbd>CTRL+P</kbd> on Linux &amp; Windows),
         paste the snippet below, select all and press <kbd>CMD+D</kbd> / <kbd>CTRL+D</kbd> to evaluate:
@@ -238,5 +226,7 @@ ep stop.</code></pre>
   </div>
 </div>
 
+
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>

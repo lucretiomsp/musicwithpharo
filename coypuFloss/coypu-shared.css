@@ -440,6 +440,51 @@ hr.section-divider {
   margin: 2rem 0;
 }
 
+/* ---- HAMBURGER BUTTON ---- */
+.nav-toggle {
+  display: none;
+  position: fixed;
+  top: .8rem;
+  left: .8rem;
+  z-index: 200;
+  background: var(--ink);
+  border: none;
+  border-radius: var(--radius);
+  width: 2.4rem;
+  height: 2.4rem;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--sage-light);
+  border-radius: 2px;
+  transition: transform .2s, opacity .2s;
+}
+
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ---- OVERLAY ---- */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 90;
+}
+
+.sidebar-overlay.visible { display: block; }
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 960px) {
   .toc { display: none; }
@@ -447,9 +492,55 @@ hr.section-divider {
 }
 
 @media (max-width: 720px) {
-  .sidebar { transform: translateX(-100%); transition: transform .25s; }
+  /* sidebar slides in */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
   .sidebar.open { transform: translateX(0); }
+
+  /* show hamburger */
+  .nav-toggle { display: flex; }
+
+  /* push content full width, add top bar height */
   .main { margin-left: 0; }
-  .page-header { padding: 1.6rem 1.4rem 1.2rem; }
-  .content { padding: 1.6rem 1.4rem; }
+
+  .page-header {
+    padding: 1rem 1.1rem 1rem 1.1rem;
+    padding-top: 4rem; /* clear hamburger */
+  }
+
+  .page-header h1 { font-size: 1.5rem; }
+
+  .content { padding: 1.4rem 1.1rem; }
+
+  /* tables scroll horizontally */
+  .param-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: .8rem 0 1.4rem;
+  }
+  .param-table { margin: 0; min-width: 480px; }
+
+  /* code blocks scroll */
+  pre { font-size: .78rem; padding: .8rem 1rem; }
+
+  /* step visualisers scroll */
+  .step-vis {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: .3rem;
+  }
+
+  /* page nav stack */
+  .page-nav { flex-direction: column; }
+  .page-nav a { max-width: 100%; }
+  .page-nav .next { text-align: left; margin-left: 0; }
+
+  /* callouts tighten */
+  .callout { font-size: .85rem; padding: .7rem .9rem; }
+
+  /* method sig wraps */
+  .method-sig { font-size: .78rem; }
 }
