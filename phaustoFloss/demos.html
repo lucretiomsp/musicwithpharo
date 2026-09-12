@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Demo Gallery</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="demos.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › Demo Gallery</div>
+    <h1>Demo Gallery</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Thirty-four ready-made patches from the FAUST demo library, each one instantiable in a single
+      line. The fastest way to hear what an algorithm sounds like before committing to it.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#using">Using a demo</a>
+          <ol>
+            <li><a href="#using-channels">Mono, stereo and generators</a></li>
+            <li><a href="#using-params">Finding the controls</a></li>
+          </ol>
+        </li>
+        <li><a href="#generators">Generators and analysis</a></li>
+        <li><a href="#mono">Mono effects</a></li>
+        <li><a href="#stereo">Stereo effects and reverbs</a></li>
+        <li><a href="#learning">Reading a demo as a lesson</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="using">
+      <h2>1. Using a demo</h2>
+
+      <p>
+        A demo is an ordinary UGen. Instantiate it, turn it into a DSP, open its interface:
+      </p>
+
+<pre><code><span class="cmt">"A complete virtual-analogue oscillator with a full control panel"</span>
+demo := <span class="cls">Virtual_Analog_Oscillator_Demo</span> new.
+dsp  := demo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+
+dsp stop.
+dsp destroy.</code></pre>
+
+      <p>
+        Demos come from FAUST's <code>demos.lib</code>, which packages each algorithm together with a
+        complete, sensibly ranged set of controls. That is their value: no wiring, no guessing at
+        parameter ranges.
+      </p>
+
+      <section id="using-channels">
+        <h3>1.1 Mono, stereo and generators</h3>
+
+        <p>The superclass tells you what a demo expects:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Superclass</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>PhDemos</td><td>A generator or analyser — needs no input</td></tr>
+            <tr><td>PhDemosMono</td><td>An effect taking one channel of input</td></tr>
+            <tr><td>PhDemosStereo</td><td>An effect taking two channels of input</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="cmt">"Effects need something to process"</span>
+voice := <span class="cls">SawOsc</span> new =&gt; <span class="cls">ADSREnv</span> new.
+
+<span class="cmt">"Mono effect"</span>
+dsp := (voice =&gt; <span class="cls">Moog_Vcf_Demo</span> new) stereo asDsp.
+
+<span class="cmt">"Stereo effect — widen before, not after"</span>
+dsp := (voice stereo =&gt; <span class="cls">Freeverb_Demo</span> new) asDsp.</code></pre>
+      </section>
+
+      <section id="using-params">
+        <h3>1.2 Finding the controls</h3>
+
+        <p>
+          Demos use nested FAUST groups, so their parameter names are paths rather than simple
+          labels — something like <code>'Freeverb/0x00/RoomSize'</code>. Do not try to construct
+          these:
+        </p>
+
+<pre><code>dsp traceAllParams.   <span class="cmt">"copy the names exactly as printed"</span></code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Use the interface first</span>
+          For demos, <code>displayUI</code> is almost always the better route — the generated panel
+          is laid out the way the algorithm's author intended, with the controls grouped
+          meaningfully. Reach for <code>setValue:parameter:</code> only once you know what you want
+          to automate.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="generators">
+      <h2>2. Generators and analysis</h2>
+
+      <p>These need no input — instantiate and play.</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Demonstrates</th></tr></thead>
+        <tbody>
+          <tr><td>Virtual_Analog_Oscillator_Demo</td><td>A full virtual-analogue oscillator section with several waveforms</td></tr>
+          <tr><td>Sawtooth_Demo</td><td>Sawtooth generation methods compared</td></tr>
+          <tr><td>Twin_Osc_Demo</td><td>Two detuned oscillators</td></tr>
+          <tr><td>Oscrs_Demo</td><td>Resonant oscillator bank</td></tr>
+          <tr><td>Colored_Noise_Demo</td><td>Noise with adjustable spectral tilt</td></tr>
+          <tr><td>Velvet_Noise_Demo</td><td>Velvet noise — sparse impulses, used in reverb design</td></tr>
+          <tr><td>Envelopes_Demo</td><td>The envelope generators side by side</td></tr>
+          <tr><td>Latch_Demo</td><td>Sample-and-hold behaviour</td></tr>
+          <tr><td>Fft_Spectral_Level_demo</td><td>FFT spectral level analysis and display</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Velvet noise is worth a listen</span>
+        It sounds like white noise but consists of widely spaced unit impulses. Because it is sparse,
+        convolving with it is cheap — which is why it turns up inside reverb algorithms rather than
+        as a sound in its own right.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="mono">
+      <h2>3. Mono effects</h2>
+
+      <p>These take one channel of input.</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Demonstrates</th></tr></thead>
+        <tbody>
+          <tr><td>Moog_Vcf_Demo</td><td>The Moog voltage-controlled filter</td></tr>
+          <tr><td>Wah4_Demo</td><td>Four-pole wah</td></tr>
+          <tr><td>CryBaby_Demo</td><td>The Cry Baby wah pedal model</td></tr>
+          <tr><td>Parametric_Eq_Demo</td><td>Parametric equaliser</td></tr>
+          <tr><td>Spectral_Tilt_Demo</td><td>Tilting the whole spectrum around a pivot</td></tr>
+          <tr><td>FilterBank_Demo</td><td>A bank of band filters</td></tr>
+          <tr><td>Vocoder_Demo</td><td>Channel vocoder</td></tr>
+          <tr><td>Cubicnl_Demo</td><td>Cubic nonlinear distortion</td></tr>
+          <tr><td>Exciter_Demo</td><td>Harmonic exciter — adds high-frequency content</td></tr>
+          <tr><td>Reverse_Echo_Demo</td><td>Reversed echo</td></tr>
+          <tr><td>PosPass_Demo</td><td>Positional pass filtering</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Vocoder_Demo needs two things</span>
+        A vocoder modulates one signal by the spectral envelope of another — a carrier and a
+        modulator. Feeding it a single source will not produce the effect you are expecting; check
+        <code>traceAllParams</code> for which input is which.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="stereo">
+      <h2>4. Stereo effects and reverbs</h2>
+
+      <p>These take two channels. Send <code>stereo</code> to the source first.</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Demonstrates</th></tr></thead>
+        <tbody>
+          <tr><td>Freeverb_Demo</td><td>Freeverb — the classic Schroeder–Moorer reverb</td></tr>
+          <tr><td>ZitaRev1</td><td>Zita-Rev1, a high-quality FDN reverberator</td></tr>
+          <tr><td>ZitaLight</td><td>A lighter-weight Zita configuration</td></tr>
+          <tr><td>JpRev_Demo</td><td>JPverb — long, lush ambient reverb</td></tr>
+          <tr><td>Dattorro_Rev_Demo</td><td>The Dattorro plate reverb</td></tr>
+          <tr><td>GreyHole_Demo</td><td>Greyhole — diffuse, pitch-shifting, unpredictable</td></tr>
+          <tr><td>ReverbTank_Demo</td><td>Spring-tank style reverb</td></tr>
+          <tr><td>KbRomRev1</td><td>A room reverberator</td></tr>
+          <tr><td>PhVitalRev_Demo</td><td>Reverb modelled on the Vital synthesiser's</td></tr>
+          <tr><td>Flanger_Demo</td><td>Stereo flanger</td></tr>
+          <tr><td>Phaser2_Demo</td><td>Stereo phaser</td></tr>
+          <tr><td>TapeStop_Demo</td><td>Tape-stop effect — pitch and speed falling to a halt</td></tr>
+          <tr><td>Compressor_Demo</td><td>Stereo compressor with metering</td></tr>
+          <tr><td>Gate_Demo</td><td>Stereo noise gate</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Several of these have direct UGen equivalents — <code>ZitaRevStereo</code>,
+        <code>DattorroRev</code>, <code>GreyHole</code>, <code>JpVerb</code> — described in
+        <a href="effects.html">Effects §6</a>. The demo versions carry more controls; the plain UGens
+        are leaner and easier to automate.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="learning">
+      <h2>5. Reading a demo as a lesson</h2>
+
+      <p>
+        Demos are worth more than a quick audition. Because every one is a complete, working,
+        professionally parameterised patch, they are a reference for how an algorithm <em>should</em>
+        be set up.
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Audition</strong> — instantiate, <code>displayUI</code>, and move every control to learn what the algorithm responds to.</div>
+        <div class="step"><strong>Read the ranges</strong> — <code>dsp traceAllParams</code> shows the minimum, maximum and default the author chose. These are good defaults for your own patch.</div>
+        <div class="step"><strong>Read the code</strong> — <code>dsp generatedCode</code> returns the FAUST source. This is the actual algorithm, and it is often short.</div>
+        <div class="step"><strong>Rebuild it</strong> — assemble the equivalent from plain UGens, and compare. The demo is your reference implementation.</div>
+      </div>
+
+<pre><code><span class="cmt">"What is this demo actually doing?"</span>
+demo := <span class="cls">Dattorro_Rev_Demo</span> new.
+dsp := demo asDsp.
+dsp init.
+dsp traceAllParams.
+dsp generatedCode.   <span class="cmt">"the FAUST source behind it"</span></code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">A note on cost</span>
+        Demos are built for demonstration, not for efficiency — they often expose far more controls
+        and compute more than a finished patch needs. Once you know what you want, the plain UGen is
+        usually the better choice for a piece you will perform.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="effects.html">Effects, Reverbs &amp; Dynamics</a></td><td>The leaner UGen equivalents of these demos.</td></tr>
+          <tr><td><a href="filters.html">Filters</a></td><td>The filters several of these demonstrate.</td></tr>
+          <tr><td><a href="faust-box.html">Raw FAUST &amp; the Box API</a></td><td>Reaching the rest of the FAUST demo library directly.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The full demo class list.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>The demo is silent</h4>
+      <p>
+        It is an effect and has no input. Check its superclass — <code>PhDemosMono</code> and
+        <code>PhDemosStereo</code> both need a source chucked into them. §1.1.
+      </p>
+
+      <h4>A stereo demo only outputs on one side</h4>
+      <p>The source was mono. Send <code>stereo</code> before the demo, not after — §1.1.</p>
+
+      <h4>I cannot work out the parameter names</h4>
+      <p>
+        They are nested group paths with hex segments. Copy them verbatim from
+        <code>traceAllParams</code>, or just use <code>displayUI</code> — §1.2.
+      </p>
+
+      <h4>The demo uses a lot of CPU</h4>
+      <p>
+        Expected — demos favour completeness over efficiency. Switch to the plain UGen equivalent
+        once you know what you need. §5.
+      </p>
+
+      <h4>The vocoder does nothing useful</h4>
+      <p>It needs both a carrier and a modulator — §3.</p>
+
+      <h4>I want a FAUST demo that is not in this list</h4>
+      <p>
+        <code>demos.lib</code> has more than Phausto wraps. Reach it with a raw FAUST string — see
+        <a href="faust-box.html">Raw FAUST &amp; the Box API</a>.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

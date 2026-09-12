@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — FAQ</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="faq.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Project › FAQ</div>
+    <h1>FAQ</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Short answers to the questions that come up most, each pointing at the page that answers them
+      properly.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#general">About the project</a></li>
+        <li><a href="#install">Installing</a></li>
+        <li><a href="#silence">Why is there no sound?</a></li>
+        <li><a href="#api">Finding your way around the API</a></li>
+        <li><a href="#building">Building patches</a></li>
+        <li><a href="#performing">Performing and sequencing</a></li>
+        <li><a href="#beyond">Beyond Pharo</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="general">
+      <h2>1. About the project</h2>
+
+      <h3>What is Phausto, in one sentence?</h3>
+      <p>
+        An embedded FAUST compiler inside a live Pharo image, with a Smalltalk object layer over it,
+        so you can build and hear DSP interactively and export the result.
+      </p>
+
+      <h3>Do I need to install FAUST?</h3>
+      <p>
+        No. A compiled FAUST runtime ships in the platform library bundle. See
+        <a href="setup.html">Installation §3</a>.
+      </p>
+
+      <h3>Do I need to know FAUST?</h3>
+      <p>
+        No. The <a href="basics.html">Unit Generator</a> layer is a complete API in its own right.
+        Knowing FAUST helps when you want something Phausto does not wrap — see
+        <a href="faust-box.html">Raw FAUST &amp; the Box API</a>.
+      </p>
+
+      <h3>Which Pharo versions work?</h3>
+      <p>Pharo 11, 12 and 13.</p>
+
+      <h3>How is it related to Coypu?</h3>
+      <p>
+        Coypu decides when and what to play; Phausto decides how it sounds. They are separate
+        packages designed to be used together — see <a href="turbophausto.html">TurboPhausto §6</a>.
+      </p>
+
+      <h3>Is it ready for real work?</h3>
+      <p>
+        It is used for performance and research, and the DSP underneath is mature FAUST. The Pharo
+        API is still moving, so pin a commit for anything that must keep running — see
+        <a href="changelog.html">Changelog §1.1</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="install">
+      <h2>2. Installing</h2>
+
+      <h3>What is the fastest way to try it?</h3>
+      <p>
+        The Pharo Music image from Pharo Launcher — everything is already in place. See
+        <a href="setup.html">Installation §1</a>.
+      </p>
+
+      <h3>The package loaded but nothing works</h3>
+      <p>
+        The native libraries are missing. <code>librariesBundle</code> goes in the same folder as your
+        <code>.image</code> file — <a href="setup.html">Installation §3.2</a>.
+      </p>
+
+      <h3>macOS will not open the library</h3>
+      <p>
+        Right-click it in Finder and choose <strong>Open</strong> once — the binaries are unsigned.
+        <a href="setup.html">Installation §3.3</a>.
+      </p>
+
+      <h3>Is Windows or Linux supported?</h3>
+      <p>Yes, with the corresponding library bundle. See the table in <a href="setup.html">Installation §3.1</a>.</p>
+
+      <h3><code>main</code> or <code>master</code>?</h3>
+      <p>The Phausto branch is <code>main</code>.</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="silence">
+      <h2>3. Why is there no sound?</h2>
+
+      <p>By far the most common question. Work down this list in order.</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Check</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Did you evaluate line by line?</td><td>Running the whole snippet at once starts and stops within microseconds</td></tr>
+          <tr><td>Did you call <code>init</code> and then <code>start</code>?</td><td>Both are required, in that order</td></tr>
+          <tr><td>Does the UGen need triggering?</td><td>Envelopes, drums and plucked models are silent until gated — <code>dsp displayUI</code> and press the button</td></tr>
+          <tr><td>Is <code>uLevel</code> above zero?</td><td>Every UGen has one</td></tr>
+          <tr><td>Is it an effect with no input?</td><td>Effects need something chucked into them</td></tr>
+          <tr><td>Are the native libraries in place?</td><td><a href="setup.html">Installation §3</a></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>The long form is in <a href="first-sounds.html">First Sounds §8</a>.</p>
+
+      <h3>Sound keeps playing after I stopped it</h3>
+      <p>
+        An earlier DSP is still running. <code>DSP initializedDSPs do: [ :d | d stop ]</code> silences
+        everything — <a href="dsp-api.html">DSP API §2.3</a>.
+      </p>
+
+      <h3>The audio crackles</h3>
+      <p>Raise the buffer size — <a href="internals.html">Internals §4</a>.</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="api">
+      <h2>4. Finding your way around the API</h2>
+
+      <h3>The class I want has almost no methods. Where is its API?</h3>
+      <p>
+        In traits. <code>SineOsc</code> defines only <code>initialize</code>; <code>freq:</code>
+        comes from <code>PhFrequencySetter</code>. See <a href="traits.html">Setter Traits</a>.
+      </p>
+
+      <h3>How do I find out what a UGen can do?</h3>
+      <p>Three lines:</p>
+<pre><code>dsp := <span class="cls">SomeUGen</span> new asDsp.
+dsp init.
+dsp traceAllParams.</code></pre>
+
+      <h3>How do I find a UGen for a job?</h3>
+      <p>
+        The <a href="ugen-library.html">UGen Library</a> lists all 533 with a filter box. In the
+        image, <code>PhaustoClassReference new openInSpace</code> browses them by family if CoypuIDE
+        is installed.
+      </p>
+
+      <h3><code>doesNotUnderstand</code> on a setter I am sure exists</h3>
+      <p>
+        Either that trait is not composed into this class, or the name differs — try
+        <code>freq:</code>, <code>frequency:</code>, <code>fr:</code>, <code>cutoff:</code>. See
+        <a href="traits.html">Setter Traits §9</a>.
+      </p>
+
+      <h3>Why do some classes start with <code>Ph</code> and others not?</h3>
+      <p>
+        Historical inconsistency. When a name is not understood, try adding the prefix —
+        <code>PhImpulsify</code>, <code>PhModeFilter</code>, <code>PhFlangerMono</code>. See
+        <a href="changelog.html">Changelog §3</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="building">
+      <h2>5. Building patches</h2>
+
+      <h3>Why can I not change a value while it plays?</h3>
+      <p>
+        You passed a number, so it was compiled in as a constant. Pass a symbol or a UI primitive
+        instead — <a href="parameters.html">Parameters §1</a>. This is the single most common
+        misunderstanding in Phausto.
+      </p>
+
+      <h3>What is the difference between <code>,</code> and <code>+</code>?</h3>
+      <p>
+        <code>,</code> puts signals side by side as separate channels; <code>+</code> mixes them into
+        one. See <a href="connecting.html">Connecting §2</a>.
+      </p>
+
+      <h3>Why does <code>100 + someUGen</code> fail?</h3>
+      <p>
+        FAUST arithmetic needs signals on both sides. Write <code>100 asBox + someUGen</code> —
+        <a href="connecting.html">Connecting §3.1</a>.
+      </p>
+
+      <h3>Why is <code>a + b * c</code> not what I expected?</h3>
+      <p>
+        Pharo binary operators are all equal precedence, left to right. Parenthesise —
+        <a href="connecting.html">Connecting §1.2</a>.
+      </p>
+
+      <h3>Should <code>stereo</code> go before or after an effect?</h3>
+      <p>
+        Before, if you want the effect to process two channels. After, it merely duplicates the
+        result — <a href="connecting.html">Connecting §7</a>.
+      </p>
+
+      <h3>How do I see what my patch actually compiled to?</h3>
+      <p>
+        <code>dsp generatedCode</code>. It is the best debugging tool in the system —
+        <a href="faust-box.html">Raw FAUST §5</a>.
+      </p>
+
+      <h3>Do I need to call <code>destroy</code>?</h3>
+      <p>
+        Yes. <code>stop</code> silences, <code>destroy</code> frees. Undestroyed DSPs accumulate and
+        slow the image — <a href="internals.html">Internals §7</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="performing">
+      <h2>6. Performing and sequencing</h2>
+
+      <h3>How do I play a melody?</h3>
+      <p>
+        Label the instrument's frequency and gate with symbols, then use
+        <code>playNote:prefix:dur:</code> in a forked loop — <a href="midi.html">MIDI §2</a>.
+      </p>
+
+      <h3>Why did my loop freeze the image?</h3>
+      <p>It was not forked. Wrap it in <code>[ ... ] fork</code> — <a href="sequencing.html">Sequencing §3.2</a>.</p>
+
+      <h3>My two rhythms drift apart</h3>
+      <p>
+        One is on the audio thread and one on Pharo's scheduler. Pick one clock per rhythmic layer —
+        <a href="sequencing.html">Sequencing §1</a>.
+      </p>
+
+      <h3>Can I use a MIDI keyboard?</h3>
+      <p>
+        Yes — build with <code>asDspMIDI</code> and declare <code>midiCtrl:</code> on your widgets.
+        For MIDI in and out to hardware, add Pharo-Sound. See <a href="midi.html">MIDI §3</a>.
+      </p>
+
+      <h3>Is there something more immediate for playing live?</h3>
+      <p>
+        <a href="turbophausto.html">TurboPhausto</a> — a pre-compiled rack driven entirely by
+        parameter changes, so nothing is rebuilt mid-performance.
+      </p>
+
+      <h3>Can Phausto be polyphonic?</h3>
+      <p>
+        A patch is one voice. Polyphony comes from playing several instruments in the rack, or from
+        the polyphonic wrapper at export — <a href="exporting.html">Exporting §3.2</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="beyond">
+      <h2>7. Beyond Pharo</h2>
+
+      <h3>Can I make a VST out of my patch?</h3>
+      <p>
+        Yes — Phausto generates a complete JUCE project with an automatable parameter tree. You build
+        it with JUCE's toolchain. See <a href="exporting.html">Exporting §4</a>.
+      </p>
+
+      <h3>Can I run a patch on hardware?</h3>
+      <p>
+        Yes, on a Bela board, with analogue inputs bound through <code>belaPin:</code> —
+        <a href="exporting.html">Exporting §5</a>.
+      </p>
+
+      <h3>My exported plugin has no parameters</h3>
+      <p>
+        The patch used literal numbers, so there was nothing to expose. Use widgets —
+        <a href="exporting.html">Exporting §6</a>.
+      </p>
+
+      <h3>My exported plugin is silent</h3>
+      <p>
+        If the rhythm lived in a forked Pharo loop, it did not travel. Move time into the signal graph
+        — <a href="exporting.html">Exporting §6</a>.
+      </p>
+
+      <h3>Can I use a FAUST library function Phausto has no class for?</h3>
+      <p>
+        Yes — write FAUST source and wrap it with <code>DSP create:</code>. The result is an ordinary
+        DSP — <a href="faust-box.html">Raw FAUST §2</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="first-sounds.html">First Sounds</a></td><td>The lifecycle, and the answer to most silence problems.</td></tr>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Why a value can or cannot be changed at runtime.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>Every class, filterable.</td></tr>
+          <tr><td><a href="community.html">Community</a></td><td>Where to ask what is not answered here.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

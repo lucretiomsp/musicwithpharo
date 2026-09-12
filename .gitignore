@@ -26,6 +26,10 @@
 *.sql
 *.sqlite
 
+# Tooling #
+###########
+.juggler/
+
 # OS generated files #
 ######################
 .DS_Store

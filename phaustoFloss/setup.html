@@ -3,162 +3,275 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Installation — Phausto Docs</title>
+  <title>Phausto — Installation</title>
   <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
-<body>
+<body data-page="setup.html">
 
-<nav class="sidebar">
-  <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
-    <p>FAUST × Pharo</p>
-  </div>
-  <div class="sidebar-nav">
-    <div class="nav-section">Start</div>
-    <a href="index.html">Overview</a>
-    <a href="setup.html" class="active">Installation</a>
-
-    <div class="nav-section">Basics</div>
-    <a href="basics.html">Getting Started</a>
-    <a href="basics.html#hello">Hello Phausto</a>
-    <a href="basics.html#stereo">Stereo</a>
-    <a href="basics.html#ugens">Unit Generators</a>
-    <a href="basics.html#controls">At the Controls</a>
-    <a href="basics.html#ui">Display the UI</a>
-
-    <div class="nav-section">Synthesis</div>
-    <a href="synthesis.html">Synthesis Techniques</a>
-    <a href="synthesis.html#waveforms">Basic Waveforms</a>
-    <a href="synthesis.html#subtractive">Subtractive</a>
-    <a href="synthesis.html#additive">Additive</a>
-    <a href="synthesis.html#modal">Modal</a>
-    <a href="synthesis.html#fm">FM Synthesis</a>
-    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
-
-    <div class="nav-section">Sequencing</div>
-    <a href="sequencing.html">Sequencing & Sampling</a>
-    <a href="sequencing.html#chuck">ChucK Operator</a>
-    <a href="sequencing.html#playnotes">Play Notes</a>
-    <a href="sequencing.html#sampler">TpSampler</a>
-  </div>
-</nav>
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Phausto</a> › Installation</div>
-    <h1>Installation <span class="subtitle">Load Phausto into your Pharo image and set up native audio libraries.</span></h1>
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Getting Started › Installation</div>
+    <h1>Installation</h1>
   </div>
 
   <div class="content">
 
-    <div class="toc">
-      <div class="toc-title">On this page</div>
-      <ul>
-        <li><a href="#launcher">Install via Pharo Launche</a></li>
-        <li><a href="#metacello">Load via Metacello</a></li>
-        <li><a href="#libraries">Native Libraries</a></li>
-        <li><a href="#verify">Verify the Install</a></li>
-        <li><a href="#faust-code">Direct FAUST Code</a></li>
-      </ul>
-    </div>
+    <p class="lede">
+      Two ways to get Phausto running: start from the ready-made Pharo Music image, or load the
+      package into an image you already have and place the native FAUST libraries yourself.
+    </p>
 
-    <h2 id="fromLauncher">Install via Pharo Launcher</h2>
-    <section class="install-section">
-      
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#launcher">Install via Pharo Launcher</a></li>
+        <li><a href="#metacello">Load via Metacello</a>
+          <ol>
+            <li><a href="#metacello-what">What gets loaded</a></li>
+          </ol>
+        </li>
+        <li><a href="#libraries">Native libraries</a>
+          <ol>
+            <li><a href="#libraries-platform">Choosing the right bundle</a></li>
+            <li><a href="#libraries-placement">Where the bundle goes</a></li>
+            <li><a href="#libraries-gatekeeper">Getting past Gatekeeper on macOS</a></li>
+          </ol>
+        </li>
+        <li><a href="#verify">Verify the install</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
 
-  <p>Download <a href="https://pharo.org/download">Pharo Launcher</a>, then:</p>
-  <ol>
-    <li>Click <strong>New</strong> → select category <strong>Pharo-Music distributions</strong></li>
-    <li>Choose <strong>Pharo Music (demo)</strong> from the template list</li>
-    <li>Click <strong>Create image</strong></li>
-    <li>Double-click the new image to launch it</li>
-  </ol>
-  <img src="/musicwithpharo/assets/img/musicImgLaunchTemp.png" alt="Pharo Launcher – selecting Pharo Music demo template" class="launcher-screenshot">
-</section>
-    
+    <!-- ======================================================= -->
+    <section id="launcher">
+      <h2>1. Install via Pharo Launcher</h2>
 
-    <div class="callout note">
-      <div class="callout-title">Note</div>
-      Phausto bundles a pre-compiled FAUST runtime — you do <strong>not</strong> need a separate FAUST installation. The native libraries handle DSP compilation to machine code at runtime.
-    </div>
+      <p>
+        This is the shortest route and the one to choose if you are new to Pharo. The
+        <strong>Pharo Music</strong> distribution is an image with Phausto, Coypu and the native
+        libraries already in place — nothing to download separately, nothing to copy.
+      </p>
 
-    <h2 id="metacello">Load via Metacello</h2>
-    <p>Evaluate the following in a Pharo Playground:</p>
+      <p>Download <a href="https://pharo.org/download">Pharo Launcher</a>, then:</p>
 
-    <pre><code><span class="cls">Metacello</span> new
+      <div class="steps">
+        <div class="step"><strong>1</strong> — Click <strong>New</strong>, then select the category <strong>Pharo-Music distributions</strong>.</div>
+        <div class="step"><strong>2</strong> — Choose <strong>Pharo Music (demo)</strong> from the template list.</div>
+        <div class="step"><strong>3</strong> — Click <strong>Create image</strong>.</div>
+        <div class="step"><strong>4</strong> — Double-click the new image to launch it.</div>
+      </div>
+
+      <img src="/musicwithpharo/assets/img/musicImgLaunchTemp.png"
+           alt="Pharo Launcher – selecting the Pharo Music demo template"
+           class="launcher-screenshot">
+
+      <p>
+        Open a Playground and jump straight to <a href="first-sounds.html">First Sounds</a> —
+        §3 and §4 below do not apply to you.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="metacello">
+      <h2>2. Load via Metacello</h2>
+
+      <p>To add Phausto to an existing image, evaluate the following in a Playground:</p>
+
+<pre><code><span class="cls">Metacello</span> new
   baseline: <span class="str">'Phausto'</span>;
   repository: <span class="str">'github://lucretiomsp/phausto:main'</span>;
   load.</code></pre>
 
-    <p>This loads the full Phausto package including all UGens, TurboPhausto (TpSampler), and PhaustoDesigningSounds.</p>
+      <div class="callout note">
+        <span class="callout-title">Note</span>
+        Phausto bundles a pre-compiled FAUST runtime — you do <strong>not</strong> need a separate
+        FAUST installation. The native libraries compile your DSP to machine code at runtime, inside
+        the running image.
+      </div>
 
-    <h2 id="libraries">Native Libraries</h2>
-    <p>Phausto requires native audio libraries bundled separately per platform. Download the appropriate bundle from the <a href="https://github.com/lucretiomsp/phausto">repository root</a> and follow the wiki for placement instructions.</p>
+      <section id="metacello-what">
+        <h3>2.1 What gets loaded</h3>
+        <p>
+          The baseline pulls in the whole package: the Unit Generator library, the
+          <a href="ui-primitives.html">UI primitives</a>, the
+          <a href="turbophausto.html">TurboPhausto</a> engine including <code>TpSampler</code>, the
+          <a href="exporting.html">CMajor, JUCE and Bela exporters</a>, and the
+          <code>Phausto-DesigningSounds</code> examples. It is a single package — there is no
+          "core only" subset to choose from.
+        </p>
+      </section>
+    </section>
 
-    <table class="param-table">
-      <thead><tr><th>Platform</th><th>File</th></tr></thead>
-      <tbody>
-        <tr><td>macOS (Apple Silicon)</td><td><code>phaustoLibrariesM1.dmg</code></td></tr>
-        <tr><td>macOS (Intel)</td><td><code>phaustoLibraries_mac_Intel.dmg</code></td></tr>
-        <tr><td>Windows (Intel)</td><td><code>librariesBundle_windows_intel.zip</code></td></tr>
-        <tr><td>Linux (Intel)</td><td><code>librariesBundle_Linux.zip</code></td></tr>
-      </tbody>
-    </table>
+    <!-- ======================================================= -->
+    <section id="libraries">
+      <h2>3. Native libraries</h2>
 
-    <div class="callout tip">
-      <div class="callout-title">Tip</div>
-      On macOS you may need to right-click → Open the first time to bypass Gatekeeper. The libraries are not signed with an Apple Developer certificate.
-    </div>
+      <p>
+        Phausto talks to the FAUST dynamic engine over
+        <a href="internals.html">uFFI</a>, so it needs a compiled library for your platform. These
+        are distributed as separate bundles in the repository root rather than through Metacello,
+        because they are platform-specific binaries.
+      </p>
 
-    <h2 id="verify">Verify the Install</h2>
-    <p>Once loaded, run the simplest possible test in a Playground — one line at a time:</p>
+      <section id="libraries-platform">
+        <h3>3.1 Choosing the right bundle</h3>
 
-    <div class="method-sig"><span class="badge">step by step</span> Hello Phausto</div>
-    <pre><code><span class="cmt">"Create a sine wave oscillator at 440 Hz"</span>
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Platform</th><th>File</th></tr></thead>
+          <tbody>
+            <tr><td>macOS (Apple Silicon)</td><td><code>phaustoLibrariesM1.dmg</code></td></tr>
+            <tr><td>macOS (Intel)</td><td><code>phaustoLibraries_mac_Intel.dmg</code></td></tr>
+            <tr><td>Windows (Intel)</td><td><code>librariesBundle_windows_intel.zip</code></td></tr>
+            <tr><td>Linux (Intel)</td><td><code>librariesBundle_Linux.zip</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Download the one that matches your machine from the
+          <a href="https://github.com/lucretiomsp/phausto">repository root</a>. Apple Silicon users
+          should take the M1 bundle even when running Pharo under Rosetta is possible — the
+          architectures must match the VM you actually launch.
+        </p>
+      </section>
+
+      <section id="libraries-placement">
+        <h3>3.2 Where the bundle goes</h3>
+        <p>
+          Open the archive and place the <code>librariesBundle</code> folder <em>next to your
+          image file</em>, that is, inside the image's own directory:
+        </p>
+
+<pre><code>Documents/Pharo/images/&lt;yourPhaustoImage&gt;/
+  ├── &lt;yourPhaustoImage&gt;.image
+  ├── &lt;yourPhaustoImage&gt;.changes
+  └── librariesBundle/        <span class="cmt">← the folder from the archive</span></code></pre>
+
+        <p>
+          Phausto resolves the library path relative to the running image, so an image moved to a
+          new folder needs its <code>librariesBundle</code> moved with it.
+        </p>
+      </section>
+
+      <section id="libraries-gatekeeper">
+        <h3>3.3 Getting past Gatekeeper on macOS</h3>
+        <div class="callout warning">
+          <span class="callout-title">Unsigned binaries</span>
+          The libraries are not signed with an Apple Developer certificate. The first time macOS
+          refuses to load one, right-click it in Finder and choose <strong>Open</strong>, which
+          records a permanent exception. Doing this once per bundle is enough.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="verify">
+      <h2>4. Verify the install</h2>
+
+      <p>Run the smallest possible test in a Playground, one line at a time:</p>
+
+      <div class="method-sig"><span class="badge">step by step</span> Hello Phausto</div>
+<pre><code><span class="cmt">"Create a sine wave oscillator — 440 Hz by default"</span>
 sine := <span class="cls">SineOsc</span> new.
-dsp := sine asDsp.
+dsp  := sine asDsp.
 dsp init.
 dsp start.    <span class="cmt">"you should hear a tone"</span>
 dsp stop.</code></pre>
 
-    <p>If you hear a sine tone, Phausto is correctly installed.</p>
+      <p>
+        If you hear a steady tone, the package and the native libraries are both working. If
+        <code>dsp init</code> raises an error instead, the libraries are the thing to check —
+        see §7 below.
+      </p>
 
-    <h2 id="faust-code">Direct FAUST Code</h2>
-    <p>You can also create a DSP directly from a raw FAUST string, without using the Phausto UGen API:</p>
+      <p>
+        You can also confirm the engine itself is reachable without making any sound, by asking it
+        for its buffer size:
+      </p>
 
-    <pre><code><span class="cmt">"Write FAUST code as a Pharo String"</span>
-content := <span class="str">'import("stdfaust.lib");
-tempo = hslider("tempo", 10000, 300, 20000, 100);
-freq  = hslider("freq",  300,   200, 900,   100);
-process = ba.pulsen(1, tempo) : pm.djembe(freq, 0.3, 0.4, 1) <: dm.freeverb_demo;'</span>.
+<pre><code><span class="cls">PhaustoDynamicEngine</span> bufferSize.</code></pre>
+    </section>
 
-<span class="cmt">"Create, init, start"</span>
-x1 := <span class="cls">DSP</span> create: content.
-x1 init.
-x1 start.
+    <!-- ======================================================= -->
+    <section id="requirements">
+      <h2>5. Requirements</h2>
 
-<span class="cmt">"Open parameter sliders in windows"</span>
-s1 := x1 sliderFor: <span class="str">'tempo'</span>.   s1 openInWindow.
-s2 := x1 sliderFor: <span class="str">'freq'</span>.    s2 openInWindow.
-s3 := x1 sliderFor: <span class="str">'Freeverb/0x00/RoomSize'</span>. s3 openInWindow.
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Requirement</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Pharo</td><td>11, 12 or 13</td></tr>
+          <tr><td>Platform</td><td>macOS (Apple Silicon or Intel), Windows x64, Linux x64</td></tr>
+          <tr><td>FAUST</td><td>Not required — a compiled runtime ships in the bundle</td></tr>
+          <tr><td>Audio</td><td>The system default output device; no configuration step</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
 
-x1 stop.</code></pre>
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="first-sounds.html">First Sounds</a></td><td>The DSP lifecycle and your first working patch.</td></tr>
+          <tr><td><a href="masterlu.html">Learn in the Image</a></td><td>MasterLu, the interactive tutorial that teaches Phausto from inside Pharo.</td></tr>
+          <tr><td><a href="basics.html">Unit Generators</a></td><td>What a UGen is and what every UGen has in common.</td></tr>
+          <tr><td><a href="internals.html">Architecture &amp; Internals</a></td><td>What the native libraries actually do and how the FFI bridge works.</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-    <div class="callout note">
-      <div class="callout-title">When to use raw FAUST</div>
-      Direct FAUST strings give you access to the full FAUST standard library (<code>stdfaust.lib</code>, <code>dm.*</code>, <code>pm.*</code>, etc.) for advanced DSP not yet wrapped by Phausto UGens.
-    </div>
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
 
-    <div class="page-nav">
-      <span></span>
-      <a href="basics.html" class="next">
-        <span class="nav-label">Next</span>
-        <span class="nav-title">Getting Started →</span>
-      </a>
-    </div>
+      <h4>The package loaded, but <code>dsp init</code> raises an error</h4>
+      <p>
+        The native libraries are missing or in the wrong place. Confirm that
+        <code>librariesBundle</code> sits in the same folder as your <code>.image</code> file, not
+        beside the Pharo VM and not in <code>pharo-local</code> — see §3.2.
+      </p>
+
+      <h4>macOS says the library "cannot be opened because the developer cannot be verified"</h4>
+      <p>Right-click the file in Finder and choose <strong>Open</strong> once. See §3.3.</p>
+
+      <h4>The DSP starts without error, but there is no sound</h4>
+      <p>
+        Check that <code>dsp start</code> was actually evaluated and not just <code>dsp init</code>,
+        and that the UGen has a non-zero <code>uLevel</code>. Some UGens — envelopes and physical
+        models in particular — stay silent until triggered; open <code>dsp displayUI</code> and press
+        the trigger button. See <a href="first-sounds.html">First Sounds</a>.
+      </p>
+
+      <h4>Everything worked yesterday, and today the image cannot find the libraries</h4>
+      <p>
+        The image was probably moved or copied without its <code>librariesBundle</code> folder. The
+        path is resolved relative to the image, so the folder has to travel with it — see §3.2.
+      </p>
+
+      <h4>I want the newest changes and Metacello keeps giving me a cached version</h4>
+      <p>
+        Metacello caches repositories under <code>pharo-local/iceberg</code>. Delete the cached
+        <code>lucretiomsp/phausto</code> checkout, or use Iceberg to pull the
+        <code>main</code> branch directly.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
 
   </div>
 </div>
 
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>

@@ -3,246 +3,341 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Getting Started — Phausto Docs</title>
+  <title>Phausto — Unit Generators</title>
   <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
-<body>
+<body data-page="basics.html">
 
-<nav class="sidebar">
-  <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🎛 <span>Phausto</span></a>
-    <p>FAUST × Pharo</p>
-  </div>
-  <div class="sidebar-nav">
-    <div class="nav-section">Start</div>
-    <a href="index.html">Overview</a>
-    <a href="setup.html">Installation</a>
-
-    <div class="nav-section">Basics</div>
-    <a href="basics.html" class="active">Getting Started</a>
-    <a href="basics.html#hello" class="sub">Hello Phausto</a>
-    <a href="basics.html#stereo" class="sub">Stereo</a>
-    <a href="basics.html#ugens" class="sub">Unit Generators</a>
-    <a href="basics.html#controls" class="sub">At the Controls</a>
-    <a href="basics.html#ui" class="sub">Display the UI</a>
-
-    <div class="nav-section">Synthesis</div>
-    <a href="synthesis.html">Synthesis Techniques</a>
-    <a href="synthesis.html#waveforms">Basic Waveforms</a>
-    <a href="synthesis.html#subtractive">Subtractive</a>
-    <a href="synthesis.html#additive">Additive</a>
-    <a href="synthesis.html#modal">Modal</a>
-    <a href="synthesis.html#fm">FM Synthesis</a>
-    <a href="synthesis.html#pitch-env">Pitch Envelope</a>
-
-    <div class="nav-section">Sequencing</div>
-    <a href="sequencing.html">Sequencing & Sampling</a>
-    <a href="sequencing.html#chuck">ChucK Operator</a>
-    <a href="sequencing.html#playnotes">Play Notes</a>
-    <a href="sequencing.html#sampler">TpSampler</a>
-  </div>
-</nav>
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Phausto</a> › Getting Started</div>
-    <h1>Getting Started <span class="subtitle">The DSP lifecycle, Unit Generators, and real-time controls.</span></h1>
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Unit Generators</div>
+    <h1>Unit Generators</h1>
   </div>
 
   <div class="content">
 
-    <div class="toc">
-      <div class="toc-title">On this page</div>
-      <ul>
-        <li><a href="#hello">Hello Phausto</a></li>
-        <li><a href="#stereo">Hello Stereo</a></li>
-        <li><a href="#ugens">Unit Generators 101</a></li>
-        <li><a href="#controls">At the Controls</a></li>
-        <li><a href="#ui">Display the UI</a></li>
-      </ul>
-    </div>
+    <p class="lede">
+      Unit Generators are the atoms of synthesis in Phausto. There are over five hundred of them and
+      they all behave the same way — this page is about what they have in common.
+    </p>
 
-    <!-- ===== HELLO PHAUSTO ===== -->
-    <h2 id="hello">Hello Phausto</h2>
-    <p><span class="tag">Lesson 1</span> The minimal Phausto program. A sine wave oscillator at 440 Hz (A4), wrapped in a DSP object and started.</p>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">What a Unit Generator is</a>
+          <ol>
+            <li><a href="#what-history">Where the idea comes from</a></li>
+          </ol>
+        </li>
+        <li><a href="#common">What every UGen has</a>
+          <ol>
+            <li><a href="#common-ulevel">uLevel, the universal control</a></li>
+            <li><a href="#common-label">Labels and parameter names</a></li>
+            <li><a href="#common-io">Inputs and outputs</a></li>
+          </ol>
+        </li>
+        <li><a href="#families">The families of UGen</a></li>
+        <li><a href="#setters">Where the setters come from</a></li>
+        <li><a href="#values">UGens, numbers and boxes</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
 
-    <p>In Phausto, every sound is built from <strong>Unit Generators</strong> (UGens). To hear a UGen, you must wrap it in a <code>DSP</code> object, initialise it, and start it. Evaluate these lines one at a time in a Playground:</p>
+    <!-- ======================================================= -->
+    <section id="what">
+      <h2>1. What a Unit Generator is</h2>
 
-    <div class="method-sig"><span class="badge">step by step</span> Hello Phausto</div>
-    <pre><code><span class="cmt">"Create a new SineWave Oscillator — default frequency is 440 Hz (A4)"</span>
-sine := <span class="cls">SineOsc</span> new.
+      <p>
+        A Unit Generator — UGen — is an object that describes a signal. Oscillators, noise sources,
+        envelopes, filters, effects, physical models and even arithmetic operators are all UGens.
+        They are all subclasses of <code>UnitGenerator</code>, and there are 506 of them in the
+        current package.
+      </p>
 
-<span class="cmt">"Wrap it in a DSP object"</span>
-dsp := sine asDsp.
+      <p>
+        A UGen is a <em>description</em>, not a sound. Sending it messages builds a bigger
+        description; sending it <code>asDsp</code> hands that description to the FAUST engine, which
+        compiles it to native code. Nothing is heard until then. This is why you can freely build,
+        inspect and recombine UGens without any audio running.
+      </p>
 
-<span class="cmt">"Initialise the DSP (compiles the FAUST code to native audio)"</span>
-dsp init.
-
-<span class="cmt">"Start playback — you should now hear the tone"</span>
-dsp start.
-
-<span class="cmt">"Stop the sound"</span>
-dsp stop.</code></pre>
-
-    <h3>The DSP Lifecycle</h3>
-    <p>Every Phausto patch follows the same four-step lifecycle:</p>
-
-    <div class="steps">
-      <div class="step"><strong>Create</strong> — build a UGen chain (or a single UGen), then call <code>asDsp</code> to get a DSP object.</div>
-      <div class="step"><strong>Init</strong> — <code>dsp init</code> compiles the FAUST DSP to native code and allocates audio buffers.</div>
-      <div class="step"><strong>Start</strong> — <code>dsp start</code> begins audio output. The DSP runs on a separate audio thread.</div>
-      <div class="step"><strong>Stop / Destroy</strong> — <code>dsp stop</code> halts audio. Call <code>dsp destroy</code> to free native resources when done.</div>
-    </div>
-
-    <table class="param-table">
-      <thead><tr><th>Message</th><th>Effect</th></tr></thead>
-      <tbody>
-        <tr><td>asDsp</td><td>Wrap UGen chain in a DSP object (mono)</td></tr>
-        <tr><td>stereo asDsp</td><td>Wrap with stereo output</td></tr>
-        <tr><td>dsp init</td><td>Compile and allocate</td></tr>
-        <tr><td>dsp start</td><td>Begin audio playback</td></tr>
-        <tr><td>dsp stop</td><td>Halt audio output</td></tr>
-        <tr><td>dsp destroy</td><td>Free native resources</td></tr>
-      </tbody>
-    </table>
-
-    <!-- ===== STEREO ===== -->
-    <h2 id="stereo">Hello Stereo</h2>
-    <p><span class="tag">Lesson 2</span> Most instruments need a stereo output. Add <code>stereo</code> before <code>asDsp</code> to duplicate the signal to both channels.</p>
-
-    <pre><code><span class="cmt">"Create a Sawtooth oscillator"</span>
-saw := <span class="cls">SawOsc</span> new.
-
-<span class="cmt">"Create a STEREO DSP — notice 'stereo' before 'asDsp'"</span>
-dsp := saw <span class="kw">stereo</span> asDsp.
-
-dsp init.
-dsp start.
-dsp stop.</code></pre>
-
-    <div class="callout tip">
-      <div class="callout-title">Tip</div>
-      Always use <code>stereo</code> for instruments you plan to run through effects chains. Effects like <code>GreyHole</code> and <code>Freeverb</code> expect stereo input.
-    </div>
-
-    <!-- ===== UGENS ===== -->
-    <h2 id="ugens">Unit Generators 101</h2>
-    <p><span class="tag">Lesson 3</span> Unit Generators are the atoms of synthesis in Phausto — oscillators, noise generators, envelopes, filters, effects, physical models. All UGens share a common interface.</p>
-
-    <pre><code><span class="cmt">"White noise is the simplest signal source"</span>
+<pre><code><span class="cmt">"White noise is the simplest signal source there is"</span>
 noise := <span class="cls">Noise</span> new.
 dsp := noise stereo asDsp.
 dsp init.
 dsp start.
-
-<span class="cmt">"All UGens have a 'uLevel' parameter — linear volume control"</span>
-<span class="cmt">"Open its UI to see the knob"</span>
-dsp displayUI.
-
+dsp displayUI.   <span class="cmt">"one knob: uLevel"</span>
 dsp stop.</code></pre>
 
-    <h3>UGen categories</h3>
-    <table class="param-table">
-      <thead><tr><th>Category</th><th>Examples</th></tr></thead>
-      <tbody>
-        <tr><td>Oscillators</td><td><code>SineOsc</code>, <code>SawOsc</code>, <code>TriOsc</code>, <code>SquareOsc</code>, <code>PulseOsc</code></td></tr>
-        <tr><td>Noise</td><td><code>Noise</code></td></tr>
-        <tr><td>Envelopes</td><td><code>ADSREnv</code></td></tr>
-        <tr><td>Filters</td><td><code>MoogVcf</code>, <code>PhSvfLp</code>, <code>PhModeFilter</code></td></tr>
-        <tr><td>Effects</td><td><code>GreyHole</code>, <code>Freeverb</code></td></tr>
-        <tr><td>Physical Models</td><td><code>Djembe</code>, <code>Marimba</code>, <code>ElecGuitar</code></td></tr>
-        <tr><td>LFOs</td><td><code>LFOTriPos</code>, <code>LFORandomPos</code></td></tr>
-        <tr><td>Pulse generators</td><td><code>Pulse</code>, <code>Pulsen</code></td></tr>
-        <tr><td>FM operators</td><td><code>Dx7Op</code></td></tr>
-      </tbody>
-    </table>
+      <section id="what-history">
+        <h3>1.1 Where the idea comes from</h3>
+        <p>
+          The Unit Generator was introduced by Max Mathews at Bell Labs in the 1950s, in the MUSIC
+          family of languages. Nearly every audio environment since — Csound, SuperCollider, Max,
+          Pd, ChucK, FAUST — has kept the concept and mostly kept the name. If you have used any of
+          them, Phausto's UGens will feel familiar; what is different is that here they are ordinary
+          Smalltalk objects, inspectable and debuggable in a live image.
+        </p>
+      </section>
+    </section>
 
-    <div class="callout note">
-      <div class="callout-title">Common parameter</div>
-      Every UGen has a <code>uLevel:</code> setter for linear amplitude. Human loudness perception is logarithmic, so small <code>uLevel</code> changes sound more dramatic at lower values.
-    </div>
+    <!-- ======================================================= -->
+    <section id="common">
+      <h2>2. What every UGen has</h2>
 
-    <!-- ===== AT THE CONTROLS ===== -->
-    <h2 id="controls">At the Controls</h2>
-    <p><span class="tag">Lesson 4</span> Change UGen parameters in real time with <code>setValue:parameter:</code>, or inspect what parameters are available with <code>traceAllParams</code>.</p>
+      <section id="common-ulevel">
+        <h3>2.1 uLevel, the universal control</h3>
 
-    <pre><code><span class="cmt">"PulseOsc is a square oscillator with a variable duty cycle"</span>
-pulse := <span class="cls">PulseOsc</span> new.
-dsp := pulse asDsp.
-dsp init.
-dsp start.
+        <p>
+          Every UGen carries a <code>uLevel</code> — a linear gain applied to its output. It is the
+          one parameter you can count on being present, whatever the UGen is:
+        </p>
 
-<span class="cmt">"Change the duty cycle while running"</span>
-dsp setValue: <span class="num">0.2</span> parameter: <span class="str">'PulseOscDuty'</span>.
+<pre><code>sine := <span class="cls">SineOsc</span> new uLevel: <span class="num">0.3</span>.</code></pre>
 
-<span class="cmt">"Change the frequency"</span>
-dsp setValue: <span class="num">120</span> parameter: <span class="str">'PulseOscFreq'</span>.
+        <div class="callout note">
+          <span class="callout-title">Linear, not perceptual</span>
+          <code>uLevel</code> is a straight multiplication. Human loudness perception is closer to
+          logarithmic, so a change from 0.1 to 0.2 sounds far larger than one from 0.8 to 0.9. When
+          you want decibels, convert with <code>PhDb2Linear</code> or the <code>db2linear</code>
+          message — see <a href="math.html">Math &amp; Conversion Tools</a>.
+        </div>
 
-<span class="cmt">"See all available parameters for this DSP"</span>
-dsp traceAllParams.
+        <p>
+          Because <code>uLevel:</code> accepts a number, a UGen or a UI primitive, it doubles as an
+          amplitude modulation input:
+        </p>
 
-dsp stop.</code></pre>
+<pre><code><span class="cmt">"Tremolo: amplitude driven by a slow oscillator"</span>
+sine := <span class="cls">SineOsc</span> new uLevel: (<span class="cls">LFOTri</span> new freq: <span class="num">5</span>).</code></pre>
+      </section>
 
-    <div class="method-sig"><span class="badge">method</span> setValue: aNumber parameter: aString</div>
-    <pre><code><span class="cmt">"Set a named DSP parameter in real time.
-aNumber — the new value.
-aString — exact FAUST parameter label (check traceAllParams or class comments)."</span>
-dsp setValue: <span class="num">440</span> parameter: <span class="str">'SineOscFreq'</span>.</code></pre>
+      <section id="common-label">
+        <h3>2.2 Labels and parameter names</h3>
 
-    <div class="method-sig"><span class="badge">method</span> traceAllParams</div>
-    <pre><code><span class="cmt">"Print all parameter labels and current values to the Transcript."</span>
-dsp traceAllParams.</code></pre>
+        <p>
+          Each UGen has a <strong>label</strong>, which defaults to its class name. The label is what
+          prefixes every parameter name the UGen contributes to the finished DSP — which is why a
+          <code>PulseOsc</code> gives you <code>PulseOscFreq</code> and <code>PulseOscDuty</code>.
+        </p>
 
-    <div class="callout tip">
-      <div class="callout-title">Tip</div>
-      Parameter labels are derived from FAUST slider/button labels. You can also find them in each UGen's class comment, or by calling <code>dsp traceAllParams</code> after <code>init</code>.
-    </div>
+        <p>Change the label and you change the parameter names:</p>
 
-    <!-- ===== DISPLAY UI ===== -->
-    <h2 id="ui">Display the UI</h2>
-    <p><span class="tag">Lesson 5</span> FAUST generates a UI automatically from the slider and button definitions in each module. Call <code>displayUI</code> to open it as a Pharo window.</p>
+<pre><code><span class="cmt">"Two oscillators that would otherwise collide"</span>
+a := <span class="cls">SineOsc</span> new label: <span class="str">'Left'</span>.
+b := <span class="cls">SineOsc</span> new label: <span class="str">'Right'</span>.
 
-    <pre><code><span class="cmt">"Djembe — a physical model of the West African goblet drum"</span>
-perc := <span class="cls">Djembe</span> new.
-dsp := perc asDsp.
-dsp init.
-dsp start.
+<span class="cmt">"now addressable as LeftFreq and RightFreq"</span></code></pre>
 
-<span class="cmt">"Open the auto-generated UI — press DjembeTrigger to trigger the drum"</span>
-dsp displayUI.
+        <div class="callout tip">
+          <span class="callout-title">Why you would do this</span>
+          Two instances of the same class in one DSP would otherwise expose the same parameter
+          names. Relabelling also lets <code>playNote:prefix:dur:</code> find the frequency and gate
+          of an arbitrary instrument — see <a href="midi.html">MIDI &amp; Playing Notes</a>.
+        </div>
+      </section>
 
-<span class="cmt">"Try substituting Djembe with Marimba for a different timbral character"</span>
-dsp stop.</code></pre>
+      <section id="common-io">
+        <h3>2.3 Inputs and outputs</h3>
 
-    <h3>UI parameter types</h3>
-    <table class="param-table">
-      <thead><tr><th>FAUST element</th><th>Phausto class</th><th>Use</th></tr></thead>
-      <tbody>
-        <tr><td>hslider</td><td><code>PhHSlider</code></td><td>Horizontal slider (range + step)</td></tr>
-        <tr><td>nentry</td><td><code>PhNumEntry</code></td><td>Numerical entry (integer or float)</td></tr>
-        <tr><td>button</td><td>auto-generated</td><td>Trigger (pulse on click)</td></tr>
-        <tr><td>knob</td><td>auto-generated</td><td>Rotary control</td></tr>
-      </tbody>
-    </table>
+        <p>
+          Every UGen knows its channel count, through <code>numberOfInputs</code> and
+          <code>numberOfOutputs</code>. This is what makes connection errors catchable: a UGen with
+          two outputs cannot be fed into one expecting one input without an explicit conversion.
+          <code>stereo</code> and <code>mono</code> are the two conversions you will use constantly.
+        </p>
 
-    <div class="callout note">
-      <div class="callout-title">Note</div>
-      Only UI parameters (declared as FAUST sliders/knobs/buttons) can be changed in real time. Internal computed values cannot be modified while the DSP is running.
-    </div>
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>uLevel:</td><td>Linear output gain — accepts a number, UGen or UI primitive</td></tr>
+            <tr><td>label:</td><td>Rename the UGen, and with it all its parameter names</td></tr>
+            <tr><td>stereo</td><td>Duplicate the signal to two channels</td></tr>
+            <tr><td>mono</td><td>Collapse to a single channel</td></tr>
+            <tr><td>numberOfInputs</td><td>How many channels this UGen consumes</td></tr>
+            <tr><td>numberOfOutputs</td><td>How many channels it produces</td></tr>
+            <tr><td>asBox</td><td>The underlying FAUST box — see <a href="faust-box.html">Raw FAUST &amp; the Box API</a></td></tr>
+            <tr><td>asDsp</td><td>Compile into a playable <code>DSP</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
 
-    <div class="page-nav">
-      <a href="setup.html">
-        <span class="nav-label">Previous</span>
-        <span class="nav-title">← Installation</span>
-      </a>
-      <a href="synthesis.html" class="next">
-        <span class="nav-label">Next</span>
-        <span class="nav-title">Synthesis Techniques →</span>
-      </a>
-    </div>
+    <!-- ======================================================= -->
+    <section id="families">
+      <h2>3. The families of UGen</h2>
+
+      <p>
+        UGens are organised into families by package tag. The counts below are the current contents
+        of the package — use them to gauge where the depth is.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Family</th><th>Size</th><th>Examples</th><th>Guide</th></tr></thead>
+        <tbody>
+          <tr><td>Filters</td><td>60</td><td><code>MoogLadder</code>, <code>PhSvfLp</code>, <code>Lowpass</code></td><td><a href="filters.html">Filters</a></td></tr>
+          <tr><td>Effects</td><td>47</td><td><code>GreyHole</code>, <code>AutoWah</code>, <code>PhEcho</code></td><td><a href="effects.html">Effects</a></td></tr>
+          <tr><td>Math</td><td>46</td><td><code>PhLog2</code>, <code>PhSignum</code>, <code>PhSampleRate</code></td><td><a href="math.html">Math</a></td></tr>
+          <tr><td>Oscillators</td><td>42</td><td><code>SineOsc</code>, <code>SawOsc</code>, <code>CZpulse</code></td><td><a href="synthesis.html">Synthesis</a></td></tr>
+          <tr><td>Physical models</td><td>87</td><td><code>Djembe</code>, <code>ElecGuitar</code>, <code>ClarinetModel</code></td><td><a href="physical-models.html">Physical Modelling</a></td></tr>
+          <tr><td>Compressors</td><td>30</td><td><code>PhCompressorStereo</code>, <code>PhLimiter1176Mono</code></td><td><a href="effects.html">Dynamics</a></td></tr>
+          <tr><td>Toolkit</td><td>23</td><td><code>PhSequencer</code>, <code>PhSelectN</code>, <code>PhLooper</code></td><td><a href="sequencing.html">Sequencing</a></td></tr>
+          <tr><td>Counters &amp; time</td><td>18</td><td><code>Pulse</code>, <code>PhTempo</code>, <code>PhBeat</code></td><td><a href="sequencing.html">Sequencing</a></td></tr>
+          <tr><td>Conversion tools</td><td>17</td><td><code>PhMidiKey2Hz</code>, <code>PhDb2Linear</code></td><td><a href="math.html">Conversions</a></td></tr>
+          <tr><td>TurboPhausto</td><td>17</td><td><code>TpSampler</code>, <code>Acid</code>, <code>TpKick99</code></td><td><a href="turbophausto.html">TurboPhausto</a></td></tr>
+          <tr><td>Basics</td><td>16</td><td><code>PhLatch</code>, <code>PhBitCrusher</code>, <code>PhLine</code></td><td><a href="ugen-library.html">UGen Library</a></td></tr>
+          <tr><td>Antialiased</td><td>14</td><td><code>AASine</code>, <code>ArcTan2</code>, <code>Cosine1</code></td><td><a href="ugen-library.html">UGen Library</a></td></tr>
+          <tr><td>Envelopes</td><td>13</td><td><code>ADSREnv</code>, <code>AREnv</code>, <code>AHDSREnvBias</code></td><td><a href="envelopes.html">Envelopes</a></td></tr>
+          <tr><td>Synths</td><td>12</td><td><code>Kick</code>, <code>Clap</code>, <code>Fm4Op</code></td><td><a href="synthesis.html">Synthesis</a></td></tr>
+          <tr><td>Signals</td><td>11</td><td><code>PhSmooth</code>, <code>PhBus</code>, <code>PhRev</code></td><td><a href="ugen-library.html">UGen Library</a></td></tr>
+          <tr><td>Operations</td><td>10</td><td><code>PhAdder</code>, <code>PhMultiplicator</code></td><td><a href="connecting.html">Connecting</a></td></tr>
+          <tr><td>UI primitives</td><td>9</td><td><code>PhHSlider</code>, <code>PhButton</code>, <code>PhNumEntry</code></td><td><a href="ui-primitives.html">UI Primitives</a></td></tr>
+          <tr><td>Dx7</td><td>5</td><td><code>Dx7Op</code>, <code>Dx7Algo</code>, <code>Dx7Env</code></td><td><a href="synthesis.html">FM Synthesis</a></td></tr>
+          <tr><td>Noises</td><td>4</td><td><code>Noise</code>, <code>PinkNoise</code>, <code>SparseNoise</code></td><td><a href="ugen-library.html">UGen Library</a></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The full catalogue, class by class, is in the
+        <a href="ugen-library.html">UGen Library</a> reference.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="setters">
+      <h2>4. Where the setters come from</h2>
+
+      <p>
+        Browse <code>SineOsc</code> in the System Browser and you will find exactly one method:
+        <code>initialize</code>. Yet <code>SineOsc new freq: 200; uLevel: 0.5</code> works. This
+        surprises people, and it is worth understanding early.
+      </p>
+
+      <p>
+        The fluid setter API is supplied by <strong>traits</strong>. <code>freq:</code> comes from
+        <code>PhFrequencySetter</code>, <code>period:</code> from <code>PhPeriodSetter</code>,
+        <code>trigger:</code> and <code>gate:</code> from <code>PhTriggerSetter</code>, and a broad
+        catch-all of thirty-five parameter setters from <code>PhParamsSetter</code>. Twenty-two such
+        traits are composed into UGens across the hierarchy.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">The practical consequence</span>
+        Reading one class will not tell you its API. Instead, instantiate it, call
+        <code>asDsp</code>, <code>init</code> and <code>traceAllParams</code>, and read the answer
+        off the Transcript. The complete list of traits and their selectors is in
+        <a href="traits.html">Setter Traits</a>.
+      </div>
+
+      <p>
+        Every setter accepts the same three kinds of argument, which is what makes modulation so
+        easy to write:
+      </p>
+
+<pre><code><span class="cmt">"a number — fixed at compile time, not changeable at runtime"</span>
+osc := <span class="cls">SineOsc</span> new freq: <span class="num">440</span>.
+
+<span class="cmt">"a UGen — modulation"</span>
+osc := <span class="cls">SineOsc</span> new freq: (<span class="cls">LFOTri</span> new freq: <span class="num">3</span>) * <span class="num">20</span> + <span class="num">440</span>.
+
+<span class="cmt">"a symbol — creates a named, runtime-controllable parameter"</span>
+osc := <span class="cls">SineOsc</span> new freq: #myFreq.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="values">
+      <h2>5. UGens, numbers and boxes</h2>
+
+      <p>
+        Underneath, every UGen becomes a FAUST <em>box</em>. Phausto extends <code>Number</code>,
+        <code>String</code>, <code>Symbol</code> and <code>Array</code> so that ordinary Pharo values
+        can enter a signal graph wherever a UGen is expected:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Expression</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>200 asBox</td><td>A constant signal, usable in arithmetic with UGens</td></tr>
+          <tr><td>60 midiNNToFreq</td><td>MIDI note number converted to hertz</td></tr>
+          <tr><td>#gate asPhButton</td><td>A named button UI primitive</td></tr>
+          <tr><td>#cutoff asPhHSlider</td><td>A named horizontal slider</td></tr>
+          <tr><td>anArray asSumOfUGen</td><td>All elements summed into one signal</td></tr>
+          <tr><td>anArray asChainOfUGen</td><td>All elements chained in series</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>Which is what lets a pitch envelope be written as plain arithmetic:</p>
+
+<pre><code><span class="cmt">"An ADSR scaled to 200 Hz of sweep, offset from a 100 Hz base"</span>
+pitchEnv := <span class="num">200</span> asBox * <span class="cls">ADSREnv</span> new.
+osc := <span class="cls">TriOsc</span> new freq: (<span class="num">100</span> asBox + pitchEnv).</code></pre>
+
+      <p>
+        The operators themselves are covered in
+        <a href="connecting.html">Connecting Unit Generators</a>; the box layer beneath them in
+        <a href="faust-box.html">Raw FAUST &amp; the Box API</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>Chaining, stacking, arithmetic, recursion and splitting.</td></tr>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Naming, triggering and automating what you have built.</td></tr>
+          <tr><td><a href="traits.html">Setter Traits</a></td><td>All 22 traits and every selector they provide.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The complete catalogue, family by family.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>The System Browser shows almost no methods on the UGen I want to use</h4>
+      <p>That is expected — the setters arrive by trait. See §4, and <a href="traits.html">Setter Traits</a>.</p>
+
+      <h4>Two copies of the same UGen fight over the same knob</h4>
+      <p>
+        They share a label, so they share parameter names. Give at least one of them its own
+        <code>label:</code> — §2.2.
+      </p>
+
+      <h4><code>doesNotUnderstand</code> on a setter I am sure exists</h4>
+      <p>
+        The trait providing it is not composed into that particular class. Check the selector against
+        <a href="traits.html">Setter Traits</a>; several near-synonyms exist —
+        <code>freq:</code>, <code>frequency:</code>, <code>fr:</code>, <code>cutoff:</code> — and
+        which one applies depends on the family.
+      </p>
+
+      <h4>Setting <code>uLevel:</code> to 2 distorts instead of getting louder</h4>
+      <p>
+        <code>uLevel</code> is a raw multiplier with no limiting. Values above 1 will clip. Add a
+        limiter from <a href="effects.html">Dynamics</a>, or scale down elsewhere in the chain.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
 
   </div>
 </div>
 
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
 </body>
 </html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Setter Traits</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="traits.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › Setter Traits</div>
+    <h1>Setter Traits</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Phausto's fluid API does not live on the UGen classes. It lives in twenty-two traits composed
+      across the hierarchy — which is why browsing a class tells you almost nothing about how to use
+      it.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#why">Why the classes look empty</a>
+          <ol>
+            <li><a href="#why-argument">Every setter takes three kinds of argument</a></li>
+            <li><a href="#why-find">How to find the right selector</a></li>
+          </ol>
+        </li>
+        <li><a href="#pitch">Pitch and time</a></li>
+        <li><a href="#envelope">Envelope traits</a></li>
+        <li><a href="#filter">Filter and gain traits</a></li>
+        <li><a href="#modulation">Modulation traits</a></li>
+        <li><a href="#physical">Physical modelling traits</a></li>
+        <li><a href="#routing">Input, size and interpolation</a></li>
+        <li><a href="#general">The general parameter trait</a></li>
+        <li><a href="#synonyms">Synonyms and near-misses</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="why">
+      <h2>1. Why the classes look empty</h2>
+
+      <p>
+        Open <code>SineOsc</code> in the System Browser and you will find one method:
+        <code>initialize</code>. Yet this works:
+      </p>
+
+<pre><code>osc := <span class="cls">SineOsc</span> new freq: <span class="num">200</span>; uLevel: <span class="num">0.5</span>.</code></pre>
+
+      <p>
+        <code>freq:</code> arrives from the <code>PhFrequencySetter</code> trait, composed into the
+        oscillator hierarchy. The same pattern holds throughout: <code>period:</code> comes from
+        <code>PhPeriodSetter</code>, <code>trigger:</code> from <code>PhTriggerSetter</code>,
+        <code>cutoff:</code> from <code>PhFilterSetter</code>. A large catch-all,
+        <code>PhParamsSetter</code>, supplies thirty-five more.
+      </p>
+
+      <p>
+        The benefit is consistency — <code>freq:</code> means the same thing on an oscillator, a
+        filter and a physical model. The cost is discoverability, and this page exists to pay it
+        back.
+      </p>
+
+      <section id="why-argument">
+        <h3>1.1 Every setter takes three kinds of argument</h3>
+
+        <p>
+          Almost every selector below is declared as taking
+          <code>aNumberOrABoxOrASymbol</code>. That signature is a promise:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Argument</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>A number</td><td>Compiled in as a constant; cannot be changed at runtime</td></tr>
+            <tr><td>A UGen or box</td><td>Modulation — the value comes from the signal graph</td></tr>
+            <tr><td>A symbol</td><td>Creates a named, runtime-controllable parameter</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>See <a href="parameters.html">Parameters &amp; Control §1</a> for what follows from each.</p>
+      </section>
+
+      <section id="why-find">
+        <h3>1.2 How to find the right selector</h3>
+
+        <p>
+          The authoritative answer for any given UGen is always the same three lines:
+        </p>
+
+<pre><code>dsp := <span class="cls">SomeUGen</span> new asDsp.
+dsp init.
+dsp traceAllParams.</code></pre>
+
+        <p>
+          This lists the parameters that UGen actually exposes, under the names the DSP knows them
+          by. The tables below tell you what to <em>send</em>; <code>traceAllParams</code> tells you
+          what came out.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="pitch">
+      <h2>2. Pitch and time</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhFrequencySetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>freq:</td><td>Frequency in hertz</td></tr>
+          <tr><td>frequency:</td><td>Synonym of <code>freq:</code></td></tr>
+          <tr><td>pitch:</td><td>Pitch, where the module expresses it as such</td></tr>
+          <tr><td>reset:</td><td>Reset the oscillator phase</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhPeriodSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>period:</td><td>Repetition interval in seconds — the inverse of frequency</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhTempoSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>tempo:</td><td>Tempo, in beats per minute</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhSpeedSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>speed:</td><td>Playback or traversal rate</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhTriggerSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>trigger:</td><td>The trigger input</td></tr>
+          <tr><td>trig:</td><td>Synonym of <code>trigger:</code></td></tr>
+          <tr><td>gate:</td><td>The gate input — held open rather than momentary</td></tr>
+          <tr><td>max:</td><td>Upper bound on the trigger value</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Trigger or gate</span>
+        A trigger is an instant; a gate has duration. Percussion models care only that something
+        happened, so either works. Sustaining instruments and ADSR envelopes need the gate, because
+        the sustain stage lasts exactly as long as it is held.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="envelope">
+      <h2>3. Envelope traits</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhADSRSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>attack:</td><td>Time to reach peak level, in seconds</td></tr>
+          <tr><td>release:</td><td>Time to fall to zero after the gate closes</td></tr>
+          <tr><td>sustain:</td><td>The <em>level</em> held while gated — not a duration</td></tr>
+          <tr><td>ar:</td><td>Attack and release together, for two-stage envelopes</td></tr>
+          <tr><td>level1: … level4:</td><td>Per-stage target levels</td></tr>
+          <tr><td>release1: … release4:</td><td>Per-stage release times</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">Decay lives elsewhere</span>
+        <code>decay:</code> is not in <code>PhADSRSetter</code> — it comes from the general
+        <code>PhParamsSetter</code> trait in §8. The selector works as expected; it is simply
+        declared in a different place.
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhBiasSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>biasAttack:</td><td>Curvature of the attack segment</td></tr>
+          <tr><td>biasDecay:</td><td>Curvature of the decay segment</td></tr>
+          <tr><td>biasRelease:</td><td>Curvature of the release segment</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The bias setters apply to the <code>…EnvBias</code> envelopes, and are what let you shape a
+        segment between linear and strongly exponential. See
+        <a href="envelopes.html">Envelopes &amp; Modulation §2</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="filter">
+      <h2>4. Filter and gain traits</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhFilterSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>freq: / frequency: / fr:</td><td>Corner or centre frequency</td></tr>
+          <tr><td>cutoff: / cutoffFreq:</td><td>Cutoff frequency, where the module names it so</td></tr>
+          <tr><td>q:</td><td>Quality factor — resonance sharpness</td></tr>
+          <tr><td>res:</td><td>Resonance expressed as an amount rather than a Q</td></tr>
+          <tr><td>gain:</td><td>Output or band gain</td></tr>
+          <tr><td>aN:</td><td>Filter coefficient, on the primitive sections</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhGainSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>gain:</td><td>Output gain</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhCombFilterSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>del:</td><td>Delay length</td></tr>
+          <tr><td>intDel:</td><td>Integer delay length in samples</td></tr>
+          <tr><td>b0:</td><td>Feed-forward coefficient at the input tap</td></tr>
+          <tr><td>b:</td><td>General coefficient</td></tr>
+          <tr><td>bM:</td><td>Coefficient at the delayed tap</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhWetAmountSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>wetAmount:</td><td>Balance between the processed and untreated signal</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="modulation">
+      <h2>5. Modulation traits</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhModulationSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>modFreq:</td><td>Modulation frequency</td></tr>
+          <tr><td>modDepth:</td><td>Modulation depth</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhFMSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>modIndex:</td><td>FM modulation index — how much the carrier is deviated</td></tr>
+          <tr><td>modRatio:</td><td>Ratio between modulator and carrier frequency</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Index and ratio</span>
+        In FM, the <em>ratio</em> decides which partials appear and the <em>index</em> decides how
+        strong they are. Integer ratios sound harmonic; raising the index at a fixed ratio brightens
+        without changing pitch. See <a href="synthesis.html">Synthesis §5</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="physical">
+      <h2>6. Physical modelling traits</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhPhysModelSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>pressure:</td><td>Breath or bow pressure</td></tr>
+          <tr><td>breathGain:</td><td>Amount of breath noise</td></tr>
+          <tr><td>bowPressure:</td><td>How hard the bow presses</td></tr>
+          <tr><td>bowVelocity:</td><td>How fast the bow moves</td></tr>
+          <tr><td>bowPosition:</td><td>Where along the string the bow contacts</td></tr>
+          <tr><td>stiffness:</td><td>Material stiffness — governs inharmonicity</td></tr>
+          <tr><td>strikeSHarpness:</td><td>Sharpness of the strike; mallet hardness</td></tr>
+          <tr><td>tubeLength:</td><td>Physical tube length</td></tr>
+          <tr><td>bellOpening:</td><td>How open a brass bell is</td></tr>
+          <tr><td>length:</td><td>Generic physical length</td></tr>
+          <tr><td>excitation:</td><td>The excitation signal</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhPMSSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>pluckPosition:</td><td>Where along the string it is plucked</td></tr>
+          <tr><td>strikePosition:</td><td>Where the object is struck</td></tr>
+          <tr><td>stringLength:</td><td>Physical string length</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Note the capital <code>H</code> in <code>strikeSHarpness:</code> — it is a typo in the
+        package, but it is the selector that exists, so it is the one to send. See
+        <a href="physical-models.html">Physical Modelling §8</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="routing">
+      <h2>7. Input, size and interpolation</h2>
+
+      <div class="method-sig"><span class="badge">trait</span> PhInputSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>input:</td><td>The input signal</td></tr>
+          <tr><td>input1: / input2:</td><td>First and second inputs on two-input modules</td></tr>
+          <tr><td>inputL: / inputR:</td><td>Left and right channel inputs</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhMaxMinSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>min:</td><td>Lower bound</td></tr>
+          <tr><td>max:</td><td>Upper bound</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhSizeSetter · PhNSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>size:</td><td>Buffer or structure size</td></tr>
+          <tr><td>n:</td><td>Order, count or number of stages</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhInterpSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>v0: / v1:</td><td>The two values to interpolate between</td></tr>
+          <tr><td>dv:</td><td>Interpolation delta</td></tr>
+          <tr><td>interpControl:</td><td>The interpolation control signal</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">trait</span> PhTSLSetter</div>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Selector</th><th>Sets</th></tr></thead>
+        <tbody>
+          <tr><td>trig:</td><td>Trigger input</td></tr>
+          <tr><td>step:</td><td>Step size</td></tr>
+          <tr><td>length:</td><td>Length in steps</td></tr>
+          <tr><td>duration:</td><td>Duration in seconds</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="general">
+      <h2>8. The general parameter trait</h2>
+
+      <p>
+        <code>PhParamsSetter</code> is the largest trait, carrying thirty-five selectors that did not
+        warrant a trait of their own. If a selector is not in any table above, look here first.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Group</th><th>Selectors</th></tr></thead>
+        <tbody>
+          <tr><td>Envelope</td><td><code>decay:</code>, <code>legato:</code>, <code>maxDuration:</code></td></tr>
+          <tr><td>Level and drive</td><td><code>level:</code>, <code>amount:</code>, <code>drive:</code>, <code>attenuation:</code>, <code>depth:</code></td></tr>
+          <tr><td>Delay and feedback</td><td><code>fb:</code>, <code>feedBack:</code>, <code>maxDel:</code>, <code>earlyDiff:</code>, <code>wetAmount:</code></td></tr>
+          <tr><td>Gating</td><td><code>gate:</code>, <code>run:</code>, <code>invert:</code></td></tr>
+          <tr><td>Oscillator shape</td><td><code>duty:</code>, <code>waveform:</code>, <code>mode:</code>, <code>offset:</code></td></tr>
+          <tr><td>Pitch</td><td><code>midiNN:</code>, <code>maxFreq:</code>, <code>accent:</code></td></tr>
+          <tr><td>Structure</td><td><code>length:</code>, <code>numberOfBands:</code>, <code>part:</code>, <code>init:</code>, <code>impulseIndex:</code></td></tr>
+          <tr><td>Signal routing</td><td><code>signal:</code>, <code>source:</code>, <code>fx:</code>, <code>excitation:</code></td></tr>
+          <tr><td>Filtering</td><td><code>resonance:</code>, <code>smoothness:</code></td></tr>
+          <tr><td>Capture</td><td><code>captureButton:</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="synonyms">
+      <h2>9. Synonyms and near-misses</h2>
+
+      <p>
+        Because the traits wrap FAUST modules that named things independently, several concepts have
+        more than one selector. Any of these may be the right one depending on the class:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Concept</th><th>Possible selectors</th></tr></thead>
+        <tbody>
+          <tr><td>Frequency</td><td><code>freq:</code>, <code>frequency:</code>, <code>fr:</code>, <code>cutoff:</code>, <code>cutoffFreq:</code>, <code>pitch:</code></td></tr>
+          <tr><td>Resonance</td><td><code>q:</code>, <code>res:</code>, <code>resonance:</code></td></tr>
+          <tr><td>Trigger</td><td><code>trigger:</code>, <code>trig:</code>, <code>gate:</code></td></tr>
+          <tr><td>Feedback</td><td><code>fb:</code>, <code>feedBack:</code></td></tr>
+          <tr><td>Amount</td><td><code>amount:</code>, <code>depth:</code>, <code>level:</code>, <code>wetAmount:</code></td></tr>
+          <tr><td>Length</td><td><code>length:</code>, <code>stringLength:</code>, <code>tubeLength:</code>, <code>size:</code>, <code>n:</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">When in doubt</span>
+        Try the most specific name first, then the generic one. A
+        <code>doesNotUnderstand</code> costs nothing and tells you immediately.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>10. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>What each kind of argument does once the DSP is running.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The classes these traits are composed into.</td></tr>
+          <tr><td><a href="ui-primitives.html">UI Primitives</a></td><td>Building the widgets you pass to these setters.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>Reading back what the setters produced.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>11. Troubleshooting</h2>
+
+      <h4>A selector listed here raises doesNotUnderstand</h4>
+      <p>
+        That trait is not composed into that particular class. The tables say what each trait
+        provides, not that every UGen has every trait. Try a synonym from §9.
+      </p>
+
+      <h4>The setter is accepted but nothing appears in traceAllParams</h4>
+      <p>
+        You passed a number, so the value was compiled in as a constant. Pass a symbol to expose it —
+        §1.1.
+      </p>
+
+      <h4><code>decay:</code> is missing from the ADSR trait</h4>
+      <p>It is in <code>PhParamsSetter</code> instead. The selector works — see §3 and §8.</p>
+
+      <h4><code>strikeSharpness:</code> is not understood</h4>
+      <p>The selector is <code>strikeSHarpness:</code>, with a capital H. See §6.</p>
+
+      <h4>I set <code>sustain:</code> to 2 expecting two seconds</h4>
+      <p>
+        Sustain is a level, not a time — a value of 2 is twice full scale. The duration of the
+        sustain stage is however long the gate is held. §3.
+      </p>
+
+      <h4>How do I know which traits a class has?</h4>
+      <p>
+        Inspect the class in Pharo, or take the practical route: <code>traceAllParams</code> on an
+        initialised DSP shows every parameter the class really exposes — §1.2.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

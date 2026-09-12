@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — UGen Library</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+  <style>
+    .fam-count { font-size: .62rem; font-weight: 600; letter-spacing: .06em; background: var(--sage-pale);
+                 color: var(--sage); padding: .12em .5em; border-radius: 3px; vertical-align: middle; margin-left: .5rem; }
+    .ugen-filter { position: sticky; top: 0; z-index: 5; background: var(--white);
+                   padding: .8rem 0 .9rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .ugen-filter input { width: 100%; font-family: var(--sans); font-size: .95rem; padding: .6rem .9rem;
+                         border: 1px solid var(--border); border-radius: var(--radius);
+                         background: var(--white); color: var(--text); }
+    .ugen-filter input:focus { outline: 2px solid var(--sage-pale); outline-offset: -2px; }
+    .filter-count { font-size: .75rem; color: var(--muted); margin-top: .4rem; display: block; }
+    .ugen-table td:nth-child(2) { font-family: var(--mono); font-size: .76rem; color: var(--muted); white-space: nowrap; }
+    .ugen-table td:nth-child(3) { font-size: .84rem; white-space: normal; }
+    .ugen-table td:first-child { white-space: nowrap; }
+    .no-desc { color: var(--muted); }
+    .filtered-out { display: none; }
+  </style>
+</head>
+<body data-page="ugen-library.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › UGen Library</div>
+    <h1>UGen Library</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Every Unit Generator in Phausto, grouped by family, with the class it inherits from and what it
+      does. 533 classes are catalogued here — use the filter to search them.
+    </p>
+
+    <div class="ugen-filter">
+      <input type="text" id="ugenFilter" placeholder="Filter by name, superclass or description…" aria-label="Filter unit generators">
+      <span class="filter-count" id="ugenCount"></span>
+    </div>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#oscillators">Oscillators</a></li>
+        <li><a href="#noises">Noise</a></li>
+        <li><a href="#envelopes">Envelopes</a></li>
+        <li><a href="#filters">Filters</a></li>
+        <li><a href="#effects">Effects</a></li>
+        <li><a href="#compressors">Dynamics</a></li>
+        <li><a href="#physmodels">Physical Models</a></li>
+        <li><a href="#synths">Synths</a></li>
+        <li><a href="#dx7">Dx7 Operators</a></li>
+        <li><a href="#basics">Basics</a></li>
+        <li><a href="#time">Counters &amp; Time Tools</a></li>
+        <li><a href="#conversion">Conversion Tools</a></li>
+        <li><a href="#signals">Signals</a></li>
+        <li><a href="#operations">Operations</a></li>
+        <li><a href="#math">Math</a></li>
+        <li><a href="#antialiased">Antialiased</a></li>
+        <li><a href="#toolkit">Toolkit</a></li>
+        <li><a href="#ui">UI Primitives</a></li>
+        <li><a href="#turbo">TurboPhausto</a></li>
+        <li><a href="#demo">Demos</a></li>
+        <li><a href="#core">Core &amp; Infrastructure</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <div class="callout note">
+      <span class="callout-title">Descriptions come from the source</span>
+      Each description is the opening sentence of the class comment in the Phausto package. Where a
+      class carries no comment the cell is left blank rather than guessed at — instantiate it and call
+      <code>traceAllParams</code> to see what it exposes.
+    </div>
+
+    <section id="oscillators">
+      <h2>1. Oscillators <span class="fam-count">42</span></h2>
+      <p>Periodic signal sources: the classic four shapes, wavetable oscillators, the Casio CZ phase-distortion set, and the LFO family used for modulation.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="casioczoscillators unitgenerator super class for oscillators that mimic the casio cz oscillators."><td>CasioCZOscillators</td><td>UnitGenerator</td><td>Super class for Oscillators that mimic the Casio CZ oscillators.</td></tr>
+          <tr data-ugen="coswaveform wavetablebasedoscillators cosine waveform ready to use with a rdtable."><td>CosWaveform</td><td>WaveTableBasedOscillators</td><td>Cosine waveform ready to use with a rdtable.</td></tr>
+          <tr data-ugen="czhalfsine casioczoscillators oscillator that mimics the casio cz half sine oscillator"><td>CZhalfSine</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ half sine oscillator</td></tr>
+          <tr data-ugen="czhalfsinep casioczoscillators oscillator that mimics the casio cz half sine oscillator, with it's phase aligned to fund:sin."><td>CZhalfSineP</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ half sine oscillator, with it's phase aligned to fund:sin.</td></tr>
+          <tr data-ugen="czpulse casioczoscillators oscillator that mimics the casio cz pulse oscillator."><td>CZpulse</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ pulse oscillator.</td></tr>
+          <tr data-ugen="czpulsep casioczoscillators oscillator that mimics the casio cz pulse oscillator, with it's phase aligned to fund:sin."><td>CZpulseP</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ pulse oscillator, with it's phase aligned to fund:sin.</td></tr>
+          <tr data-ugen="czressaw casioczoscillators oscillator that mimics the casio cz resonant sawtooth oscillator."><td>CZresSaw</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ resonant sawtooth oscillator.</td></tr>
+          <tr data-ugen="czrestrap casioczoscillators oscillator that mimics the casio cz resonant trapeze oscillator."><td>CZresTrap</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ resonant trapeze oscillator.</td></tr>
+          <tr data-ugen="czrestriangle casioczoscillators oscillator that mimics the casio cz resonant triangle oscillator."><td>CZresTriangle</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ resonant triangle oscillator.</td></tr>
+          <tr data-ugen="czsaw casioczoscillators oscillator that mimics the casio cz saw oscillator."><td>CZsaw</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ saw oscillator.</td></tr>
+          <tr data-ugen="czsawp casioczoscillators oscillator that mimics the casio cz saw oscillator, with it's phase aligned to fund:sin"><td>CZsawP</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ saw oscillator, with it's phase aligned to fund:sin</td></tr>
+          <tr data-ugen="czsinepulse casioczoscillators oscillator that mimics the casio cz sine/pulse oscillator."><td>CZsinePulse</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ sine/pulse oscillator.</td></tr>
+          <tr data-ugen="czsinepulsep casioczoscillators oscillator that mimics the casio cz sine/pulse oscillator, with it's phase aligned to fund:sin."><td>CZsinePulseP</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ sine/pulse oscillator, with it's phase aligned to fund:sin.</td></tr>
+          <tr data-ugen="czsquare casioczoscillators oscillator that mimics the casio cz square oscillator"><td>CZsquare</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ square oscillator</td></tr>
+          <tr data-ugen="czsquarep casioczoscillators oscillator that mimics the casio cz square oscillator, with it's phase aligned to fund:sin."><td>CZsquareP</td><td>CasioCZOscillators</td><td>Oscillator that mimics the Casio CZ square oscillator, with it's phase aligned to fund:sin.</td></tr>
+          <tr data-ugen="hsosccos oscillator wave-table-based sine wave oscillator with hard syncing phase"><td>HsOscCos</td><td>Oscillator</td><td>Wave-Table-Based Sine wave oscillator with hard syncing phase</td></tr>
+          <tr data-ugen="hsoscsin oscillator wave-table-based sine wave oscillator with hard syncing phase"><td>HsOscSin</td><td>Oscillator</td><td>Wave-Table-Based Sine wave oscillator with hard syncing phase</td></tr>
+          <tr data-ugen="hsphasor phasor hardsyncing phasor to be used with a rdtable."><td>HsPhasor</td><td>Phasor</td><td>Hardsyncing phasor to be used with a rdtable.</td></tr>
+          <tr data-ugen="hspphasor hsphasor hardsyncing phasor to be used with a rdtable."><td>HspPhasor</td><td>HsPhasor</td><td>Hardsyncing phasor to be used with a rdtable.</td></tr>
+          <tr data-ugen="lfo oscillator do not use this superclass directly; it exists only for grouping and establishing a basic inheritance chain."><td>LFO</td><td>Oscillator</td><td>Do not use this superclass directly; it exists only for grouping and establishing a basic inheritance chain.</td></tr>
+          <tr data-ugen="lfoformodulation lfo lfoformodulation are oscillators with no aliasing suppression intended to be used for modulating parameters, with positive range."><td>LFOForModulation</td><td>LFO</td><td>LFOForModulation are oscillators with no aliasing suppression intended to be used for modulating parameters, with positive range.</td></tr>
+          <tr data-ugen="lfosaw lfo simple sawtooth waveform oscillator between -1 and 1."><td>LFOSaw</td><td>LFO</td><td>Simple sawtooth waveform oscillator between -1 and 1.</td></tr>
+          <tr data-ugen="lfosawpos lfoformodulation simple sawtooth waveform oscillator between 0 and 1."><td>LFOSawPos</td><td>LFOForModulation</td><td>Simple sawtooth waveform oscillator between 0 and 1.</td></tr>
+          <tr data-ugen="lfosquare lfo zero-mean unit-amplitude lfo square wave withrange -1 1."><td>LFOSquare</td><td>LFO</td><td>Zero-mean unit-amplitude LFO square wave withrange -1 1.</td></tr>
+          <tr data-ugen="lfosquarepos lfoformodulation positive lfo square wave in [0,1]."><td>LFOSquarePos</td><td>LFOForModulation</td><td>Positive LFO square wave in [0,1].</td></tr>
+          <tr data-ugen="lfotri lfo lowfrequency triangle wave from the faust standard library"><td>LFOTri</td><td>LFO</td><td>LowFrequency triangle wave from the Faust Standard Library</td></tr>
+          <tr data-ugen="lfotripos lfoformodulation positive unit-amplitude lf triangle wave from the faust standard library"><td>LFOTriPos</td><td>LFOForModulation</td><td>Positive unit-amplitude LF triangle wave from the Faust Standard Library</td></tr>
+          <tr data-ugen="osccos oscillator wave-table-based sine wave oscillator."><td>OscCos</td><td>Oscillator</td><td>Wave-Table-Based Sine wave oscillator.</td></tr>
+          <tr data-ugen="osccosm oscillator sine wave-table-based oscillator based on the cos mathematical function."><td>OscCosM</td><td>Oscillator</td><td>Sine Wave-Table-Based oscillator based on the cos mathematical function.</td></tr>
+          <tr data-ugen="osci oscillator interpolated phase sine wave-table-based oscillator."><td>OscI</td><td>Oscillator</td><td>Interpolated phase sine Wave-Table-Based oscillator.</td></tr>
+          <tr data-ugen="oscillator unitgenerator this class contains a collection of oscllators taken from the faust [oscillators.lib](https://faustlibraries.grame.fr/libs/oscillators/)."><td>Oscillator</td><td>UnitGenerator</td><td>This class contains a collection of Oscllators taken from the Faust [oscillators.lib](https://faustlibraries.grame.fr/libs/oscillators/).</td></tr>
+          <tr data-ugen="oscp oscillator wave-table based sine wave generator with controllable phase"><td>OscP</td><td>Oscillator</td><td>Wave-Table Based sine wave generator with controllable phase</td></tr>
+          <tr data-ugen="oscsin oscillator wave-table-based cosine wave oscillator"><td>OscSin</td><td>Oscillator</td><td>Wave-Table-Based Cosine wave oscillator</td></tr>
+          <tr data-ugen="oscsinm oscillator sine wave-table-based oscillator based on the sin mathematical function."><td>OscSinM</td><td>Oscillator</td><td>Sine Wave-Table-Based oscillator based on the sin mathematical function.</td></tr>
+          <tr data-ugen="phasor wavetablebasedoscillators a simple phasor to be used with a rdtable."><td>Phasor</td><td>WaveTableBasedOscillators</td><td>A simple phasor to be used with a rdtable.</td></tr>
+          <tr data-ugen="pulseosc oscillator alias-suppressed pulse train oscillator with a duty-cycle control."><td>PulseOsc</td><td>Oscillator</td><td>Alias-suppressed pulse train oscillator with a duty-cycle control.</td></tr>
+          <tr data-ugen="sawosc oscillator alias-suppressed sawtooth oscillator, sawtooth is a standard faust function."><td>SawOsc</td><td>Oscillator</td><td>Alias-suppressed sawtooth oscillator, sawtooth is a standard Faust function.</td></tr>
+          <tr data-ugen="sineosc oscillator default sine wave-table-based oscillator"><td>SineOsc</td><td>Oscillator</td><td>Default Sine Wave-Table-Based Oscillator</td></tr>
+          <tr data-ugen="sinwaveform wavetablebasedoscillators sine waveform ready to use with a rdtable."><td>SinWaveform</td><td>WaveTableBasedOscillators</td><td>Sine waveform ready to use with a rdtable.</td></tr>
+          <tr data-ugen="squareosc oscillator alias-suppressed square wave oscillator."><td>SquareOsc</td><td>Oscillator</td><td>Alias-suppressed square wave oscillator.</td></tr>
+          <tr data-ugen="triosc oscillator alias-suppressed triangle wave oscillator."><td>TriOsc</td><td>Oscillator</td><td>Alias-suppressed triangle wave oscillator.</td></tr>
+          <tr data-ugen="wavetablebasedoscillators unitgenerator abstract superclass for wave-table-based oscillators from faust standard libraries"><td>WaveTableBasedOscillators</td><td>UnitGenerator</td><td>Abstract superclass for Wave-Table-Based Oscillators from Faust standard libraries</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="noises">
+      <h2>2. Noise <span class="fam-count">4</span></h2>
+      <p>Aperiodic sources. The starting point for percussion, wind and breath, and for any subtractive patch that needs a dense spectrum.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="colorednoise unitgenerator generates a colored noise signal with an arbitrary spectral roll-off factor (alpha) over the entire audible frequency range (20-20000 hz)."><td>ColoredNoise</td><td>UnitGenerator</td><td>Generates a colored noise signal with an arbitrary spectral roll-off factor (alpha) over the entire audible frequency range (20-20000 Hz).</td></tr>
+          <tr data-ugen="noise unitgenerator phaust noise generators superclass, taken from faust [noises.lib](https://faustlibraries.grame.fr/libs/noises/) creating an instance of this class generates a white noise."><td>Noise</td><td>UnitGenerator</td><td>Phaust noise generators superclass, taken from Faust [noises.lib](https://faustlibraries.grame.fr/libs/noises/) Creating an instance of this class generates a white noise.</td></tr>
+          <tr data-ugen="pinknoise noise pink noise (1/f noise) generator (third-order approximation covering the audio band well)."><td>PinkNoise</td><td>Noise</td><td>Pink noise (1/f noise) generator (third-order approximation covering the audio band well).</td></tr>
+          <tr data-ugen="sparsenoise noise sparse noise generator."><td>SparseNoise</td><td>Noise</td><td>Sparse noise generator.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="envelopes">
+      <h2>3. Envelopes <span class="fam-count">13</span></h2>
+      <p>Non-periodic control shapes triggered by a gate. See the <a href="envelopes.html">Envelopes &amp; Modulation</a> guide for how the stages behave.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="adsrenv phenvelope adsr (attack, decay, sustain, release) exponential envelope generator."><td>ADSREnv</td><td>PhEnvelope</td><td>ADSR (Attack, Decay, Sustain, Release) exponential envelope generator.</td></tr>
+          <tr data-ugen="adsrenvbias phenvelope adsr (attack, decay, sustain, release) envelope generator with control over bias on each segment, and toggle for legato."><td>ADSREnvBias</td><td>PhEnvelope</td><td>ADSR (Attack, Decay, Sustain, Release) envelope generator with control over bias on each segment, and toggle for legato.</td></tr>
+          <tr data-ugen="adsrexpenv phenvelope adsr (attack, decay, sustain, release) exponential envelope generator."><td>ADSRExpEnv</td><td>PhEnvelope</td><td>ADSR (Attack, Decay, Sustain, Release) exponential envelope generator.</td></tr>
+          <tr data-ugen="adsrfenvbias phenvelope adsr (attack, decay, sustain, release) envelope generator with control over bias on each segment, and toggle for legato."><td>ADSRFEnvBias</td><td>PhEnvelope</td><td>ADSR (Attack, Decay, Sustain, Release) envelope generator with control over bias on each segment, and toggle for legato.</td></tr>
+          <tr data-ugen="ahdsrenvbias phenvelope adsr (attack, hold, decay, sustain, release) envelope generator with control over bias on each segment, and toggle for legato."><td>AHDSREnvBias</td><td>PhEnvelope</td><td>ADSR (Attack, Hold, Decay, Sustain, Release) envelope generator with control over bias on each segment, and toggle for legato.</td></tr>
+          <tr data-ugen="ahdsrexpenv phenvelope ahdsr (attack, hold, decay, sustain, release) envelope generator."><td>AHDSRExpEnv</td><td>PhEnvelope</td><td>AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator.</td></tr>
+          <tr data-ugen="ahdsrfenvbias phenvelope ahdsr (attack, hold, decay, sustain, release) envelope generator with control over bias on each segment, and toggle for legato."><td>AHDSRFEnvBias</td><td>PhEnvelope</td><td>AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator with control over bias on each segment, and toggle for legato.</td></tr>
+          <tr data-ugen="arenv phenvelope ar (attack, release) envelope generator (useful to create percussion envelopes)."><td>AREnv</td><td>PhEnvelope</td><td>AR (Attack, Release) envelope generator (useful to create percussion envelopes).</td></tr>
+          <tr data-ugen="arfexpenv phenvelope arfe (_attack and release-to-final-value exponentially_) envelope generator."><td>ARFExpEnv</td><td>PhEnvelope</td><td>ARFE (_Attack and Release-to-Final-value Exponentially_) envelope generator.</td></tr>
+          <tr data-ugen="asrenv phenvelope asr (attack, sustain, release) envelope generator"><td>ASREnv</td><td>PhEnvelope</td><td>ASR (Attack, Sustain, Release) envelope generator</td></tr>
+          <tr data-ugen="asrexpenv phenvelope asre (attack, sustain, release) envelope generator with exponential segments"><td>ASRExpEnv</td><td>PhEnvelope</td><td>ASRE (Attack, Sustain, Release) envelope generator with exponential segments</td></tr>
+          <tr data-ugen="phenvelope unitgenerator am the superclass for all phausto envelopes."><td>PhEnvelope</td><td>UnitGenerator</td><td>Am the superclass for all Phausto envelopes.</td></tr>
+          <tr data-ugen="smoothenv phenvelope an envelope with an exponential attack and release time."><td>SmoothEnv</td><td>PhEnvelope</td><td>An envelope with an exponential Attack and Release time.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="filters">
+      <h2>4. Filters <span class="fam-count">60</span></h2>
+      <p>The largest family: virtual-analogue ladders, state-variable sections, comb and allpass filters, EQ, and the primitive one-pole and one-zero sections. See <a href="filters.html">Filters</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="allpass_comb combfilters schroeder allpass comb filter."><td>Allpass_Comb</td><td>CombFilters</td><td>Schroeder Allpass Comb Filter.</td></tr>
+          <tr data-ugen="allpass_fcomb combfilters schroeder allpass comb filter."><td>Allpass_FComb</td><td>CombFilters</td><td>Schroeder Allpass Comb Filter.</td></tr>
+          <tr data-ugen="allpass_fcomb1a combfilters schroeder allpass comb filter."><td>Allpass_FComb1a</td><td>CombFilters</td><td>Schroeder Allpass Comb Filter.</td></tr>
+          <tr data-ugen="allpass_fcomb5 combfilters schroeder allpass comb filter."><td>Allpass_FComb5</td><td>CombFilters</td><td>Schroeder Allpass Comb Filter.</td></tr>
+          <tr data-ugen="butterworthlphp phfilter the butterworth filter is a type of signal processing filter designed to have a frequency response that is as flat as possible in the passband."><td>ButterworthLPHP</td><td>PhFilter</td><td>The Butterworth filter is a type of signal processing filter designed to have a frequency response that is as flat as possible in the passband.</td></tr>
+          <tr data-ugen="combfilters phfilter colllection of comb filters from the faust library in signal processing, a comb filter is a filter implemented by adding a delayed version of a signal to itself, causing constructive and…"><td>CombFilters</td><td>PhFilter</td><td>Colllection of Comb Filters from the Faust Library In signal processing, a comb filter is a filter implemented by adding a delayed version of a signal to itself, causing constructive and…</td></tr>
+          <tr data-ugen="dcblocker phfilter dc blocker."><td>DcBlocker</td><td>PhFilter</td><td>DC blocker.</td></tr>
+          <tr data-ugen="dcblockerat phfilter dc blocker with configurable &quot;break frequency&quot;."><td>DcBlockerAt</td><td>PhFilter</td><td>DC blocker with configurable &quot;break frequency&quot;.</td></tr>
+          <tr data-ugen="diodeladder mkofilter 4th order virtual analog diode ladder filter."><td>DiodeLadder</td><td>MKOFilter</td><td>4th order virtual analog diode ladder filter.</td></tr>
+          <tr data-ugen="fb_comb combfilters feed-back comb filter (integer delay)."><td>Fb_Comb</td><td>CombFilters</td><td>Feed-Back Comb Filter (integer delay).</td></tr>
+          <tr data-ugen="fb_fcomb combfilters feed-back comb filter (float delay)."><td>Fb_FComb</td><td>CombFilters</td><td>Feed-Back Comb Filter (float delay).</td></tr>
+          <tr data-ugen="fbcombfilter combfilters other special cases of feed-back comb filter."><td>FbCombFilter</td><td>CombFilters</td><td>Other special cases of Feed-Back Comb Filter.</td></tr>
+          <tr data-ugen="ff_comb combfilters feed-forward comb filter."><td>Ff_Comb</td><td>CombFilters</td><td>Feed-Forward Comb Filter.</td></tr>
+          <tr data-ugen="ff_fcomb combfilters feed-forward comb filter."><td>Ff_FComb</td><td>CombFilters</td><td>Feed-Forward Comb Filter.</td></tr>
+          <tr data-ugen="ffbcombfilter combfilters other special cases of feed-back comb filter."><td>FfbCombFilter</td><td>CombFilters</td><td>Other special cases of Feed-Back Comb Filter.</td></tr>
+          <tr data-ugen="ffcombfilter combfilters typical special case of ff_comb() where: b0 = 1."><td>FfCombFilter</td><td>CombFilters</td><td>Typical special case of ff_comb() where: b0 = 1.</td></tr>
+          <tr data-ugen="highpass butterworthlphp nth-order butterworth highpass filter"><td>HighPass</td><td>ButterworthLPHP</td><td>Nth-order Butterworth highpass filter</td></tr>
+          <tr data-ugen="integrator phfilter same as pole(1) [implemented separately for block-diagram clarity]."><td>Integrator</td><td>PhFilter</td><td>Same as pole(1) [implemented separately for block-diagram clarity].</td></tr>
+          <tr data-ugen="korg35hpf mkofilter virtual analog models of the korg 35 high-pass filter found in the ms-10 and ms-20 synthesizers."><td>Korg35HPF</td><td>MKOFilter</td><td>Virtual analog models of the Korg 35 high-pass filter found in the MS-10 and MS-20 synthesizers.</td></tr>
+          <tr data-ugen="korg35lpf mkofilter virtual analog models of the korg 35 low-pass filter found in the ms-10 and ms-20 synthesizers."><td>Korg35LPF</td><td>MKOFilter</td><td>Virtual analog models of the Korg 35 low-pass filter found in the MS-10 and MS-20 synthesizers.</td></tr>
+          <tr data-ugen="lowpass butterworthlphp nth-order butterworth lowpass filter a low-pass filter is a filter that passes signals with a frequency lower than a selected cutoff frequency and attenuates signals with frequencies…"><td>Lowpass</td><td>ButterworthLPHP</td><td>Nth-order Butterworth lowpass filter A low-pass filter is a filter that passes signals with a frequency lower than a selected cutoff frequency and attenuates signals with frequencies…</td></tr>
+          <tr data-ugen="mkofilter phfilter collection of moog, korg , oberheim style filters where:"><td>MKOFilter</td><td>PhFilter</td><td>Collection of Moog, Korg , Oberheim style filters where:</td></tr>
+          <tr data-ugen="mooghalfladder mkofilter virtual analog model of the 2nd-order moog half ladder (simplified version of (ve.)moogladder)."><td>MoogHalfLadder</td><td>MKOFilter</td><td>Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of (ve.)moogLadder).</td></tr>
+          <tr data-ugen="moogladder mkofilter virtual analog model of the 4th-order moog ladder, which is arguably the most well-known ladder filter in analog synthesizers."><td>MoogLadder</td><td>MKOFilter</td><td>Virtual analog model of the 4th-order Moog Ladder, which is arguably the most well-known ladder filter in analog synthesizers.</td></tr>
+          <tr data-ugen="moogvcf mkofilter moog &quot;voltage controlled filter&quot; (vcf) in &quot;analog&quot; form."><td>MoogVcf</td><td>MKOFilter</td><td>Moog &quot;Voltage Controlled Filter&quot; (VCF) in &quot;analog&quot; form.</td></tr>
+          <tr data-ugen="oberheim mkofilter generic multi-outputs oberheim filter that produces the bsf, bpf, hpf and lpf outputs (see description above)."><td>Oberheim</td><td>MKOFilter</td><td>Generic multi-outputs Oberheim filter that produces the BSF, BPF, HPF and LPF outputs (see description above).</td></tr>
+          <tr data-ugen="oberheimbpf mkofilter band-pass oberheim filter (see description above)."><td>OberheimBPF</td><td>MKOFilter</td><td>Band-Pass Oberheim filter (see description above).</td></tr>
+          <tr data-ugen="oberheimbsf mkofilter band-stop oberheim filter (see description above)."><td>OberheimBSF</td><td>MKOFilter</td><td>Band-Stop Oberheim filter (see description above).</td></tr>
+          <tr data-ugen="oberheimhpf mkofilter high-pass oberheim filter (see description above)."><td>OberheimHPF</td><td>MKOFilter</td><td>High-Pass Oberheim filter (see description above).</td></tr>
+          <tr data-ugen="oberheimlpf mkofilter low-pass oberheim filter (see description above)."><td>OberheimLPF</td><td>MKOFilter</td><td>Low-Pass Oberheim filter (see description above).</td></tr>
+          <tr data-ugen="phavgrect phfilter moving average."><td>PhAvgRect</td><td>PhFilter</td><td>Moving average.</td></tr>
+          <tr data-ugen="phavgt19 phavgrect averaging function based on a one-pole filter and the t19 response time."><td>PhAvgT19</td><td>PhAvgRect</td><td>Averaging function based on a one-pole filter and the t19 response time.</td></tr>
+          <tr data-ugen="phavgt60 phavgrect averaging function based on a one-pole filter and the t60 response time."><td>PhAvgT60</td><td>PhAvgRect</td><td>Averaging function based on a one-pole filter and the t60 response time.</td></tr>
+          <tr data-ugen="phavgtau phavgrect averaging function based on a one-pole filter and the tau response time."><td>PhAvgTau</td><td>PhAvgRect</td><td>Averaging function based on a one-pole filter and the tau response time.</td></tr>
+          <tr data-ugen="phdcblockerat phfilter dc blocker with configurable &quot;break frequency&quot;."><td>PhDcBlockerAt</td><td>PhFilter</td><td>DC blocker with configurable &quot;break frequency&quot;.</td></tr>
+          <tr data-ugen="phfilter unitgenerator in signal processing, a filter is a process or device that removes frequencies from a signal."><td>PhFilter</td><td>UnitGenerator</td><td>In signal processing, a filter is a process or device that removes frequencies from a signal.</td></tr>
+          <tr data-ugen="phhighshelf phfilter first-order &quot;high shelf&quot; filter (gain boost|cut between dc and some freque"><td>PhHighShelf</td><td>PhFilter</td><td>First-order &quot;high shelf&quot; filter (gain boost|cut between dc and some freque</td></tr>
+          <tr data-ugen="phiir phfilter nth-order infinite-impulse-response (iir) digital filter, implemented in terms of the transfer-function (tf) coefficients."><td>PhIIR</td><td>PhFilter</td><td>Nth-order Infinite-Impulse-Response (IIR) digital filter, implemented in terms of the Transfer-Function (TF) coefficients.</td></tr>
+          <tr data-ugen="phintegrator phfilter integrator same as pole(1) [implemented separately for block-diagram clarity]."><td>PhIntegrator</td><td>PhFilter</td><td>Integrator Same as pole(1) [implemented separately for block-diagram clarity].</td></tr>
+          <tr data-ugen="phlowshelf phfilter first-order &quot;low shelf&quot; filter (gain boost|cut between dc and some freque"><td>PhLowShelf</td><td>PhFilter</td><td>First-order &quot;low shelf&quot; filter (gain boost|cut between dc and some freque</td></tr>
+          <tr data-ugen="phlpt19 phlptau one-pole lowpass with a t19 time constant (approx."><td>PhLpT19</td><td>PhLpTau</td><td>One-pole lowpass with a T19 time constant (approx.</td></tr>
+          <tr data-ugen="phlpt60 phlptau one-pole lowpass with a t60 time constant (60 db attenuation after tn seconds)."><td>PhLpT60</td><td>PhLpTau</td><td>One-pole lowpass with a T60 time constant (60 dB attenuation after tN seconds).</td></tr>
+          <tr data-ugen="phlptau phfilter one-pole lowpass with a tau time constant (1/e attenuation after tn seconds)."><td>PhLpTau</td><td>PhFilter</td><td>One-pole lowpass with a tau time constant (1/e attenuation after tN seconds).</td></tr>
+          <tr data-ugen="phlptn phfilter one-pole lowpass filter with arbitrary dis/charging factors set in db and times set in seconds."><td>PhLptN</td><td>PhFilter</td><td>One-pole lowpass filter with arbitrary dis/charging factors set in dB and times set in seconds.</td></tr>
+          <tr data-ugen="phonezero phfilter one zero filter."><td>PhOneZero</td><td>PhFilter</td><td>One zero filter.</td></tr>
+          <tr data-ugen="phpeakeq phfilter second order &quot;peaking equalizer&quot; section (gain boost or cut near some frequency) also called a &quot;parametric equalizer&quot; section."><td>PhPeakEq</td><td>PhFilter</td><td>Second order &quot;peaking equalizer&quot; section (gain boost or cut near some frequency) Also called a &quot;parametric equalizer&quot; section.</td></tr>
+          <tr data-ugen="phpeakeqcq phfilter constant-q second order peaking equalizer section."><td>PhPeakEqCq</td><td>PhFilter</td><td>Constant-Q second order peaking equalizer section.</td></tr>
+          <tr data-ugen="phpeakeqrm phfilter regalia-mitra second order peaking equalizer section."><td>PhPeakEqRm</td><td>PhFilter</td><td>Regalia-Mitra second order peaking equalizer section.</td></tr>
+          <tr data-ugen="phpole phfilter one zero filter."><td>PhPole</td><td>PhFilter</td><td>One zero filter.</td></tr>
+          <tr data-ugen="phresonbp resonatorfilter simple resonant bandpass filters based on tf2s (virtual analog)."><td>PhResonBp</td><td>ResonatorFilter</td><td>Simple resonant bandpass filters based on tf2s (virtual analog).</td></tr>
+          <tr data-ugen="phresonhp resonatorfilter class: resonbp simple resonant highpass filters based on tf2s (virtual analog)."><td>PhResonHp</td><td>ResonatorFilter</td><td>Class: ResonBp Simple resonant highpass filters based on tf2s (virtual analog).</td></tr>
+          <tr data-ugen="phresonlp resonatorfilter class: resonbp simple resonant lowpass filters based on tf2s (virtual analog)."><td>PhResonLp</td><td>ResonatorFilter</td><td>Class: ResonBp Simple resonant lowpass filters based on tf2s (virtual analog).</td></tr>
+          <tr data-ugen="phstatevariablefilter phfilter super class for all svf filters"><td>PhStateVariableFilter</td><td>PhFilter</td><td>Super class for all SVF filters</td></tr>
+          <tr data-ugen="phsvfbp phstatevariablefilter notch svf"><td>PhSvfBp</td><td>PhStateVariableFilter</td><td>Notch SVF</td></tr>
+          <tr data-ugen="phsvfhp phstatevariablefilter highpass svf"><td>PhSvfHp</td><td>PhStateVariableFilter</td><td>Highpass SVF</td></tr>
+          <tr data-ugen="phsvflp phstatevariablefilter lowpass svf"><td>PhSvfLp</td><td>PhStateVariableFilter</td><td>Lowpass SVF</td></tr>
+          <tr data-ugen="phsvfnotch phstatevariablefilter bandpass svf"><td>PhSvfNotch</td><td>PhStateVariableFilter</td><td>Bandpass SVF</td></tr>
+          <tr data-ugen="phsvfpeak phstatevariablefilter peak svf filter"><td>PhSvfPeak</td><td>PhStateVariableFilter</td><td>Peak SVF filter</td></tr>
+          <tr data-ugen="phzero phfilter one zero filter."><td>PhZero</td><td>PhFilter</td><td>One zero filter.</td></tr>
+          <tr data-ugen="resonatorfilter phfilter simple resonant filters based on tf2s (virtual analog)."><td>ResonatorFilter</td><td>PhFilter</td><td>Simple resonant filters based on tf2s (virtual analog).</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="effects">
+      <h2>5. Effects <span class="fam-count">47</span></h2>
+      <p>Delays, saturation, modulation effects, wah and the seven reverbs. See <a href="effects.html">Effects, Reverbs &amp; Dynamics</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="arctan saturators first-order adaa atan() saturator."><td>ArcTan</td><td>Saturators</td><td>First-order ADAA atan() saturator.</td></tr>
+          <tr data-ugen="arctan2 saturators second-order adaa atan() saturator."><td>ArcTan2</td><td>Saturators</td><td>Second-order ADAA atan() saturator.</td></tr>
+          <tr data-ugen="asinh1 saturators first-order adaa asinh() saturator (unbounded)."><td>ASinh1</td><td>Saturators</td><td>First-order ADAA asinh() saturator (unbounded).</td></tr>
+          <tr data-ugen="asinh2 saturators second-order adaa asinh() saturator (unbounded)."><td>ASinh2</td><td>Saturators</td><td>Second-order ADAA asinh() saturator (unbounded).</td></tr>
+          <tr data-ugen="autowah phmonoeffect auto-wah effect from faust virtual analog effect library, where level is amount of effect desired (0 to 1)."><td>AutoWah</td><td>PhMonoEffect</td><td>Auto-wah effect from Faust Virtual Analog Effect Library, where level is amount of effect desired (0 to 1).</td></tr>
+          <tr data-ugen="crybaby phmonoeffect digitized crybaby wah pedal."><td>CryBaby</td><td>PhMonoEffect</td><td>Digitized CryBaby wah pedal.</td></tr>
+          <tr data-ugen="cubic1 saturators first-order adaa cubic saturator."><td>Cubic1</td><td>Saturators</td><td>First-order ADAA cubic saturator.</td></tr>
+          <tr data-ugen="cubicnl phmonoeffect cubic non linearity distortion"><td>CubicNl</td><td>PhMonoEffect</td><td>Cubic Non Linearity Distortion</td></tr>
+          <tr data-ugen="dattorrorev reverbs reverberator based on the dattorro reverb topology."><td>DattorroRev</td><td>Reverbs</td><td>Reverberator based on the Dattorro reverb topology.</td></tr>
+          <tr data-ugen="dopplershift phmonoeffect pitch shifter for signals with known fundamental frequency."><td>DopplerShift</td><td>PhMonoEffect</td><td>Pitch shifter for signals with known fundamental frequency.</td></tr>
+          <tr data-ugen="drywetmonomixer unitgenerator linear mono dry-wet mixer, implemented in phausto, not coming from faust standard library"><td>DryWetMonoMixer</td><td>UnitGenerator</td><td>Linear mono dry-wet mixer, implemented in Phausto, not coming from Faust standard library</td></tr>
+          <tr data-ugen="drywetstereomixer unitgenerator linear mono dry-wet mixer, implemented in phausto, not coming from faust standard library"><td>DryWetStereoMixer</td><td>UnitGenerator</td><td>Linear mono dry-wet mixer, implemented in Phausto, not coming from Faust standard library</td></tr>
+          <tr data-ugen="freeverbmono reverbs a simple schroeder reverberator primarily developed by &quot;jezar at dreampoint&quot; that is extensively used in the free-software world."><td>FreeverbMono</td><td>Reverbs</td><td>A simple Schroeder reverberator primarily developed by &quot;Jezar at Dreampoint&quot; that is extensively used in the free-software world.</td></tr>
+          <tr data-ugen="greyhole reverbs a complex echo-like effect (stereo in/out), inspired by the classic eventide effect of a similar name."><td>GreyHole</td><td>Reverbs</td><td>A complex echo-like effect (stereo in/out), inspired by the classic Eventide effect of a similar name.</td></tr>
+          <tr data-ugen="hardclip saturators first-order adaa hard-clip."><td>Hardclip</td><td>Saturators</td><td>First-order ADAA hard-clip.</td></tr>
+          <tr data-ugen="hardclip2 saturators second-order adaa hard-clip."><td>Hardclip2</td><td>Saturators</td><td>Second-order ADAA hard-clip.</td></tr>
+          <tr data-ugen="hyperbolic saturators first-order adaa hyperbolic saturator."><td>Hyperbolic</td><td>Saturators</td><td>First-order ADAA hyperbolic saturator.</td></tr>
+          <tr data-ugen="hyperbolic2 saturators second-order adaa hyperbolic saturator."><td>Hyperbolic2</td><td>Saturators</td><td>Second-order ADAA hyperbolic saturator.</td></tr>
+          <tr data-ugen="jpverb reverbs an algorithmic reverb (stereo in/out), inspired by the lush chorused sound of certain vintage lexicon and alesis reverberation units."><td>JpVerb</td><td>Reverbs</td><td>An algorithmic reverb (stereo in/out), inspired by the lush chorused sound of certain vintage Lexicon and Alesis reverberation units.</td></tr>
+          <tr data-ugen="panner phspatials a simple linear stereo panner."><td>Panner</td><td>PhSpatials</td><td>A simple linear stereo panner.</td></tr>
+          <tr data-ugen="parabolic saturators first-order adaa parabolic saturator."><td>Parabolic</td><td>Saturators</td><td>First-order ADAA parabolic saturator.</td></tr>
+          <tr data-ugen="parabolic2 saturators second-order adaa parabolic saturator."><td>Parabolic2</td><td>Saturators</td><td>Second-order ADAA parabolic saturator.</td></tr>
+          <tr data-ugen="phclip saturators clip the value of the input signal between min and max"><td>PhClip</td><td>Saturators</td><td>Clip the value of the input signal between min and max</td></tr>
+          <tr data-ugen="phdelays phmonoeffect a collection of delays from faust delays.lib."><td>PhDelays</td><td>PhMonoEffect</td><td>A collection of delays from Faust delays.lib.</td></tr>
+          <tr data-ugen="phecho phmonoeffect a simple echo effect."><td>PhEcho</td><td>PhMonoEffect</td><td>A simple echo effect.</td></tr>
+          <tr data-ugen="phfibonacci phmonoeffect fibonacci system where the current output is the current input plus the sum of the previous n outputs."><td>PhFibonacci</td><td>PhMonoEffect</td><td>Fibonacci system where the current output is the current input plus the sum of the previous N outputs.</td></tr>
+          <tr data-ugen="phflangermono phmonoeffect mono flanging effect."><td>PhFlangerMono</td><td>PhMonoEffect</td><td>Mono flanging effect.</td></tr>
+          <tr data-ugen="phfractionaldelay phdelays simple d samples fractional delay based on 2 interpolated delay lines where n is the maximum delay length as a number of samples."><td>PhFractionalDelay</td><td>PhDelays</td><td>Simple d samples fractional delay based on 2 interpolated delay lines where n is the maximum delay length as a number of samples.</td></tr>
+          <tr data-ugen="phmonoeffect unitgenerator abstract superclass for mono effects"><td>PhMonoEffect</td><td>UnitGenerator</td><td>Abstract superclass for mono effects</td></tr>
+          <tr data-ugen="phsimpledelay phdelays simple d samples delay where n is the maximum delay length as a number of samples."><td>PhSimpleDelay</td><td>PhDelays</td><td>Simple d samples delay where n is the maximum delay length as a number of samples.</td></tr>
+          <tr data-ugen="phsmoothdelay phdelays s(mooth)delay: a mono delay that doesn't click and doesn't transpose when the delay time is changed."><td>PhSmoothDelay</td><td>PhDelays</td><td>S(mooth)delay: a mono delay that doesn't click and doesn't transpose when the delay time is changed.</td></tr>
+          <tr data-ugen="phspatials phmonoeffect subclasse of spatials are tools for sound spatialization."><td>PhSpatials</td><td>PhMonoEffect</td><td>Subclasse of Spatials are tools for sound spatialization.</td></tr>
+          <tr data-ugen="phspeakerbp phmonoeffect dirt-simple speaker simulator (overall bandpass eq with observed roll-offs above and below the passband)."><td>PhSpeakerBp</td><td>PhMonoEffect</td><td>Dirt-simple speaker simulator (overall bandpass eq with observed roll-offs above and below the passband).</td></tr>
+          <tr data-ugen="phtranspose phmonoeffect a simple pitch shifter based on 2 delay lines."><td>PhTranspose</td><td>PhMonoEffect</td><td>A simple pitch shifter based on 2 delay lines.</td></tr>
+          <tr data-ugen="phwah phmonoeffect wah effect, 4th order"><td>PhWah</td><td>PhMonoEffect</td><td>Wah effect, 4th order</td></tr>
+          <tr data-ugen="phwavefold saturators wavefolding is a type of distortion synthesis that alters the shape of a waveform, creating complex spectra from simple tones."><td>PhWavefold</td><td>Saturators</td><td>Wavefolding is a type of distortion synthesis that alters the shape of a waveform, creating complex spectra from simple tones.</td></tr>
+          <tr data-ugen="reverbs unitgenerator a collection of envelopes from the faust envelopes.lib"><td>Reverbs</td><td>UnitGenerator</td><td>A collection of Envelopes from the Faust envelopes.lib</td></tr>
+          <tr data-ugen="satrev reverbs this artificial reverberator take a mono signal and output a stereo signal."><td>SatRev</td><td>Reverbs</td><td>This artificial reverberator take a mono signal and output a stereo signal.</td></tr>
+          <tr data-ugen="saturators phmonoeffect saturators, are effect that distort the input signal"><td>Saturators</td><td>PhMonoEffect</td><td>Saturators, are effect that distort the input signal</td></tr>
+          <tr data-ugen="sinarctan saturators first-order adaa sin(atan()) saturator."><td>SinArcTan</td><td>Saturators</td><td>First-order ADAA sin(atan()) saturator.</td></tr>
+          <tr data-ugen="sinarctan2 saturators second-order adaa sin(atan()) saturator."><td>SinArcTan2</td><td>Saturators</td><td>Second-order ADAA sin(atan()) saturator.</td></tr>
+          <tr data-ugen="softclipquadratic saturators quadratic softclip nonlinearity."><td>SoftClipQuadratic</td><td>Saturators</td><td>Quadratic softclip nonlinearity.</td></tr>
+          <tr data-ugen="softclipquadratic1 saturators first-order adaa quadratic softclip."><td>SoftClipQuadratic1</td><td>Saturators</td><td>First-order ADAA quadratic softclip.</td></tr>
+          <tr data-ugen="softclipquadratic2 saturators second-order adaa quadratic softclip."><td>SoftClipQuadratic2</td><td>Saturators</td><td>Second-order ADAA quadratic softclip.</td></tr>
+          <tr data-ugen="springreverb reverbs mono spring-inspired reverb originally designed for the chaos audio stratus, which defines all parameters in the [0..10] range."><td>SpringReverb</td><td>Reverbs</td><td>Mono spring-inspired reverb originally designed for the Chaos Audio Stratus, which defines all parameters in the [0..10] range.</td></tr>
+          <tr data-ugen="tanh1 saturators first-order adaa tanh() saturator."><td>Tanh1</td><td>Saturators</td><td>First-order ADAA tanh() saturator.</td></tr>
+          <tr data-ugen="zitarevstereo reverbs fdn+schroeder reverberator, free open-source c++ for linux by fons adriaensen,extend zitarevfdn to include zita_rev1 input/output mapping in stereo mode."><td>ZitaRevStereo</td><td>Reverbs</td><td>FDN+Schroeder reverberator, Free open-source C++ for Linux by Fons Adriaensen,Extend zitarevfdn to include zita_rev1 input/output mapping in stereo mode.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="compressors">
+      <h2>6. Dynamics <span class="fam-count">30</span></h2>
+      <p>Compressors, limiters, gates and expanders, plus the gain computers they are built from. The naming is systematic — see <a href="effects.html">Effects §7.2</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phcompressor unitgenerator convenience superclass for compressors and limiters more about compressors on [wikipedia](http://en.wikipedia.org/wiki/dynamicrangecompression) and on [julius smith iii…"><td>PhCompressor</td><td>UnitGenerator</td><td>Convenience superclass for Compressors and Limiters More about compressors on [Wikipedia](http://en.wikipedia.org/wiki/Dynamicrangecompression) and on [Julius Smith III…</td></tr>
+          <tr data-ugen="phcompressorladmono phcompressor mono dynamic range compressor with lookahead delay from faust standard library."><td>PhCompressorLadMono</td><td>PhCompressor</td><td>Mono dynamic range compressor with lookahead delay from Faust standard library.</td></tr>
+          <tr data-ugen="phcompressormono phcompressor mono dynamic range compressor from the faust standard libray"><td>PhCompressorMono</td><td>PhCompressor</td><td>Mono dynamic range compressor from the Faust standard libray</td></tr>
+          <tr data-ugen="phcompressorstereo phcompressor stereo dynamic range compressor from the faust standard libray"><td>PhCompressorStereo</td><td>PhCompressor</td><td>Stereo dynamic range compressor from the Faust standard libray</td></tr>
+          <tr data-ugen="phexpander phcompressor convenience super class for all expanders."><td>PhExpander</td><td>PhCompressor</td><td>Convenience super class for all expanders.</td></tr>
+          <tr data-ugen="phexpanderscstereo phexpander feed forward stereo dynamic range expander."><td>PhExpanderSCStereo</td><td>PhExpander</td><td>Feed forward stereo dynamic range expander.</td></tr>
+          <tr data-ugen="phexpanderstereo phexpander feed forward stereo dynamic range expander."><td>PhExpanderStereo</td><td>PhExpander</td><td>Feed forward stereo dynamic range expander.</td></tr>
+          <tr data-ugen="phfbcompressorgainstereo phcompressor feed back stereo dynamic range compressor"><td>PhFBCompressorGainStereo</td><td>PhCompressor</td><td>Feed back stereo dynamic range compressor</td></tr>
+          <tr data-ugen="phfbffcompressorgainstereo phcompressor feed forward / feed back stereo dynamic range compressor."><td>PhFBFFCompressorGainStereo</td><td>PhCompressor</td><td>Feed forward / feed back stereo dynamic range compressor.</td></tr>
+          <tr data-ugen="phffcompressorgainstereo phcompressor feed back stereo dynamic range compressor."><td>PhFFCompressorGainStereo</td><td>PhCompressor</td><td>Feed back stereo dynamic range compressor.</td></tr>
+          <tr data-ugen="phgatemono phcompressor mono signal gate."><td>PhGateMono</td><td>PhCompressor</td><td>Mono signal gate.</td></tr>
+          <tr data-ugen="phgatestereo phcompressor stereo signal gate."><td>PhGateStereo</td><td>PhCompressor</td><td>Stereo signal gate.</td></tr>
+          <tr data-ugen="phlimiter1176mono phcompressor mono limiter."><td>PhLimiter1176Mono</td><td>PhCompressor</td><td>Mono Limiter.</td></tr>
+          <tr data-ugen="phlimiter1176stereo phcompressor stereo limiter a limiter guards against hard-clipping."><td>PhLimiter1176Stereo</td><td>PhCompressor</td><td>Stereo limiter A limiter guards against hard-clipping.</td></tr>
+          <tr data-ugen="phlimiterladmono phlookaheadlimiter stereo lookahead limiter inspired by iohannes zmölnig's post, which is in turn based on the thesis by peter falkner &quot;entwicklung eines digitalen stereo-limiters mit hilfe des…"><td>PhLimiterLadMono</td><td>PhLookaheadLimiter</td><td>Stereo lookahead limiter inspired by IOhannes Zmölnig's post, which is in turn based on the thesis by Peter Falkner &quot;Entwicklung eines digitalen Stereo-Limiters mit Hilfe des…</td></tr>
+          <tr data-ugen="phlimiterladstereo phlookaheadlimiter mono lookahead limiter inspired by iohannes zmölnig's post, which is in turn based on the thesis by peter falkner &quot;entwicklung eines digitalen stereo-limiters mit hilfe des…"><td>PhLimiterLadStereo</td><td>PhLookaheadLimiter</td><td>Mono lookahead limiter inspired by IOhannes Zmölnig's post, which is in turn based on the thesis by Peter Falkner &quot;Entwicklung eines digitalen Stereo-Limiters mit Hilfe des…</td></tr>
+          <tr data-ugen="phlookaheadlimiter phcompressor convenience superclass for all lookahead limiters."><td>PhLookaheadLimiter</td><td>PhCompressor</td><td>Convenience superclass for all lookahead limiters.</td></tr>
+          <tr data-ugen="phpeakcompressiongainmono phcompressor mono rms dynamic range compressor gain computer with linear output."><td>PhPeakCompressionGainMono</td><td>PhCompressor</td><td>Mono RMS dynamic range compressor gain computer with linear output.</td></tr>
+          <tr data-ugen="phpeakcompressiongainmono_db phcompressor mono rms dynamic range compressor gain computer with linear output."><td>PhPeakCompressionGainMono_dB</td><td>PhCompressor</td><td>Mono RMS dynamic range compressor gain computer with linear output.</td></tr>
+          <tr data-ugen="phpeakcompressiongainstereo phcompressor stereo dynamic range compressor gain computer with linear output."><td>PhPeakCompressionGainStereo</td><td>PhCompressor</td><td>Stereo dynamic range compressor gain computer with linear output.</td></tr>
+          <tr data-ugen="phpeakcompressiongainstereo_db phcompressor stereo dynamic range compressor gain computer with db output from faust standard library"><td>PhPeakCompressionGainStereo_dB</td><td>PhCompressor</td><td>Stereo dynamic range compressor gain computer with dB output from Faust standard library</td></tr>
+          <tr data-ugen="phpeakexpansiongainstereo phexpander stereo dynamic range expander gain computer."><td>PhPeakExpansionGainStereo</td><td>PhExpander</td><td>Stereo dynamic range expander gain computer.</td></tr>
+          <tr data-ugen="phrmscompressiongainmono phcompressor mono dynamic range compressor gain computer with db output from faust standard library"><td>PhRMSCompressionGainMono</td><td>PhCompressor</td><td>Mono dynamic range compressor gain computer with dB output from Faust standard library</td></tr>
+          <tr data-ugen="phrmscompressiongainmono_db phcompressor mono dynamic range compressor gain computer with db output from faust standard library"><td>PhRMSCompressionGainMono_dB</td><td>PhCompressor</td><td>Mono dynamic range compressor gain computer with dB output from Faust standard library</td></tr>
+          <tr data-ugen="phrmscompressiongainstereo phcompressor stereo rms dynamic range compressor gain computer with linear output."><td>PhRMSCompressionGainStereo</td><td>PhCompressor</td><td>Stereo RMS dynamic range compressor gain computer with linear output.</td></tr>
+          <tr data-ugen="phrmscompressiongainstereo_db phcompressor stereo rms dynamic range compressor gain computer with linear output."><td>PhRMSCompressionGainStereo_dB</td><td>PhCompressor</td><td>Stereo RMS dynamic range compressor gain computer with linear output.</td></tr>
+          <tr data-ugen="phrmsfbcompressorgainstereo phcompressor stereo channel rms feed back compressor into peak limiter feeding back into the fb compressor."><td>PhRMSFBCompressorGainStereo</td><td>PhCompressor</td><td>Stereo channel RMS feed back compressor into peak limiter feeding back into the FB compressor.</td></tr>
+          <tr data-ugen="phrmsfbffcompressorgainstereo phcompressor rms feed forward / feed back stereo dynamic range compressor."><td>PhRMSFBFFCompressorGainStereo</td><td>PhCompressor</td><td>RMS feed forward / feed back stereo dynamic range compressor.</td></tr>
+          <tr data-ugen="ratio2strength unitgenerator converts a ratio to a strength."><td>Ratio2Strength</td><td>UnitGenerator</td><td>Converts a ratio to a strength.</td></tr>
+          <tr data-ugen="strength2ratio unitgenerator converts a ratio to a strength."><td>Strength2Ratio</td><td>UnitGenerator</td><td>Converts a ratio to a strength.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="physmodels">
+      <h2>7. Physical Models <span class="fam-count">87</span></h2>
+      <p>Instruments computed from physical simulation, and the waveguide primitives they are assembled from. See <a href="physical-models.html">Physical Modelling</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="brassmidi windinstruments ready-to-use midi-controllable brass instrument physical model with built-in ui."><td>BrassMIDI</td><td>WindInstruments</td><td>Ready-to-use MIDI-controllable brass instrument physical model with built-in UI.</td></tr>
+          <tr data-ugen="clarinetmidi windinstruments ready-to-use midi compliant clarinet physical model with built-in ui."><td>ClarinetMIDI</td><td>WindInstruments</td><td>Ready-to-use MIDI compliant clarinet physical model with built-in UI.</td></tr>
+          <tr data-ugen="closeins phpmoutelement closes the inputs of a bidirectional chain in all directions."><td>CloseIns</td><td>PhPmOutElement</td><td>Closes the inputs of a bidirectional chain in all directions.</td></tr>
+          <tr data-ugen="closeouts phpmelement closes the outputs of a bidirectional chain in all directions except for the main signal output (3d output)."><td>CloseOuts</td><td>PhPmElement</td><td>Closes the outputs of a bidirectional chain in all directions except for the main signal output (3d output).</td></tr>
+          <tr data-ugen="djembe modalpercussion dirt-simple djembe modal physical model."><td>Djembe</td><td>ModalPercussion</td><td>Dirt-simple djembe modal physical model.</td></tr>
+          <tr data-ugen="djembemidi modalpercussion simple midi controllable djembe physical model with built-in ui."><td>DjembeMIDI</td><td>ModalPercussion</td><td>Simple MIDI controllable djembe physical model with built-in UI.</td></tr>
+          <tr data-ugen="elecguitar stringinstruments a simple acoustic guitar model with steel strings (based on guitarmodel) implementing an excitation model."><td>ElecGuitar</td><td>StringInstruments</td><td>A simple acoustic guitar model with steel strings (based on guitarModel) implementing an excitation model.</td></tr>
+          <tr data-ugen="elecguitarmidi stringinstruments ready-to-use midi-enabled electric guitar physical model with built-in ui."><td>ElecGuitarMIDI</td><td>StringInstruments</td><td>Ready-to-use MIDI-enabled electric guitar physical model with built-in UI.</td></tr>
+          <tr data-ugen="englishbell modalpercussion french church bell modal model."><td>EnglishBell</td><td>ModalPercussion</td><td>French church bell modal model.</td></tr>
+          <tr data-ugen="exciter unitgenerator superclass for various kind of excitation signal generators."><td>Exciter</td><td>UnitGenerator</td><td>Superclass for various kind of excitation signal generators.</td></tr>
+          <tr data-ugen="flutemidi windinstruments ready-to-use midi-controllable flute physical model with built-in ui."><td>FluteMIDI</td><td>WindInstruments</td><td>Ready-to-use MIDI-controllable flute physical model with built-in UI.</td></tr>
+          <tr data-ugen="flutemodel windinstruments a simple generic flute instrument physical model without tone holes (pitch is changed by changing the length of the tube of the instrument)."><td>FluteModel</td><td>WindInstruments</td><td>A simple generic flute instrument physical model without tone holes (pitch is changed by changing the length of the tube of the instrument).</td></tr>
+          <tr data-ugen="formantsynthesis unitgenerator formant synthesis models and utilities from the faust standard library."><td>FormantSynthesis</td><td>UnitGenerator</td><td>Formant synthesis models and utilities from the Faust standard library.</td></tr>
+          <tr data-ugen="frenchbell modalpercussion french church bell modal model."><td>FrenchBell</td><td>ModalPercussion</td><td>French church bell modal model.</td></tr>
+          <tr data-ugen="germanbell modalpercussion french church bell modal model."><td>GermanBell</td><td>ModalPercussion</td><td>French church bell modal model.</td></tr>
+          <tr data-ugen="guitar stringinstruments a simple acoustic guitar model with steel strings (based on guitarmodel) implementing an excitation model."><td>Guitar</td><td>StringInstruments</td><td>A simple acoustic guitar model with steel strings (based on guitarModel) implementing an excitation model.</td></tr>
+          <tr data-ugen="guitarmidi stringinstruments ready-to-use midi-enabled steel strings acoustic guitar physical model with built-in ui."><td>GuitarMIDI</td><td>StringInstruments</td><td>Ready-to-use MIDI-enabled steel strings acoustic guitar physical model with built-in UI.</td></tr>
+          <tr data-ugen="inleftrightwave phpmelement adds a signal to left and right going waves anywhere in a chain of blocks."><td>InLeftRightWave</td><td>PhPmElement</td><td>Adds a signal to left and right going waves anywhere in a chain of blocks.</td></tr>
+          <tr data-ugen="inleftwave phpmelement adds a signal to left going waves anywhere in a chain of blocks."><td>InLeftWave</td><td>PhPmElement</td><td>Adds a signal to left going waves anywhere in a chain of blocks.</td></tr>
+          <tr data-ugen="inrightwave phpmelement adds a signal to right going waves anywhere in a chain of blocks."><td>InRightWave</td><td>PhPmElement</td><td>Adds a signal to right going waves anywhere in a chain of blocks.</td></tr>
+          <tr data-ugen="karplusstrongmidi stringinstruments ready-to-use, midi-enabled karplus-strong string with buil-in ui."><td>KarplusStrongMIDI</td><td>StringInstruments</td><td>Ready-to-use, MIDI-enabled Karplus-Strong string with buil-in UI.</td></tr>
+          <tr data-ugen="marimba modalpercussion simple marimba physical model implementing a single tone bar connected to tube."><td>Marimba</td><td>ModalPercussion</td><td>Simple marimba physical model implementing a single tone bar connected to tube.</td></tr>
+          <tr data-ugen="marimbamidi modalpercussion simple midi controllable djembe physical model with built-in ui."><td>MarimbaMIDI</td><td>ModalPercussion</td><td>Simple MIDI controllable djembe physical model with built-in UI.</td></tr>
+          <tr data-ugen="modalpercussion unitgenerator high and low level objects for modal synthesis of percussion instruments."><td>ModalPercussion</td><td>UnitGenerator</td><td>High and low level objects for modal synthesis of percussion instruments.</td></tr>
+          <tr data-ugen="nylonguitarmidi stringinstruments ready-to-use midi-enabled electric guitar physical model with built-in ui."><td>NylonGuitarMIDI</td><td>StringInstruments</td><td>Ready-to-use MIDI-enabled electric guitar physical model with built-in UI.</td></tr>
+          <tr data-ugen="outleftrightwave phpmoutelement sends the signal of right and left going waves to the output channel of the chain."><td>OutLeftRightWave</td><td>PhPmOutElement</td><td>Sends the signal of right and left going waves to the output channel of the chain.</td></tr>
+          <tr data-ugen="outleftwave phpmoutelement adds a signal to left going waves anywhere in a chain of blocks."><td>OutLeftWave</td><td>PhPmOutElement</td><td>Adds a signal to left going waves anywhere in a chain of blocks.</td></tr>
+          <tr data-ugen="outrightwave phpmoutelement sends the signal of right going waves to the output channel of the chain."><td>OutRightWave</td><td>PhPmOutElement</td><td>Sends the signal of right going waves to the output channel of the chain.</td></tr>
+          <tr data-ugen="phallpassnl phpmelement bidirectional block adding nonlinearities in both directions in a chain."><td>PhAllpassNL</td><td>PhPmElement</td><td>Bidirectional block adding nonlinearities in both directions in a chain.</td></tr>
+          <tr data-ugen="phbasicblock unitgenerator empty bidirectional block to be used with chain : 3 signals ins and 3 signals out."><td>PhBasicBlock</td><td>UnitGenerator</td><td>Empty bidirectional block to be used with chain : 3 signals ins and 3 signals out.</td></tr>
+          <tr data-ugen="phblower exciter a virtual blower creating a dc signal with some breath noise in it."><td>PhBlower</td><td>Exciter</td><td>A virtual blower creating a DC signal with some breath noise in it.</td></tr>
+          <tr data-ugen="phblower_ui exciter same as blower but with default ui and vibrato controls."><td>PhBlower_UI</td><td>Exciter</td><td>Same as blower but with default UI and vibrato controls.</td></tr>
+          <tr data-ugen="phbrasslipstable unitgenerator extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.)."><td>PhBrassLipsTable</td><td>UnitGenerator</td><td>Extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.).</td></tr>
+          <tr data-ugen="phbrassmodelui unitgenerator same as brassmodel but with a built-in ui."><td>PhBrassModelUI</td><td>UnitGenerator</td><td>Same as brassModel but with a built-in UI.</td></tr>
+          <tr data-ugen="phbrassui unitgenerator ready-to-use brass instrument physical model with built-in ui based on brassmodel."><td>PhBrassUI</td><td>UnitGenerator</td><td>Ready-to-use brass instrument physical model with built-in UI based on brassModel.</td></tr>
+          <tr data-ugen="phbridgefilter unitgenerator generic two zeros bridge fir filter (as implemented in the [stk](https://ccrma.stanford.edu/software/stk/)) that can be used to implement the reflectance violin, guitar, etc."><td>PhBridgeFilter</td><td>UnitGenerator</td><td>Generic two zeros bridge FIR filter (as implemented in the [STK](https://ccrma.stanford.edu/software/stk/)) that can be used to implement the reflectance violin, guitar, etc.</td></tr>
+          <tr data-ugen="phchain unitgenerator creates a chain of bidirectional blocks."><td>PhChain</td><td>UnitGenerator</td><td>Creates a chain of bidirectional blocks.</td></tr>
+          <tr data-ugen="phclarinetmodel unitgenerator a simple clarinet physical model without tone holes (pitch is changed by changing the length of the tube of the instrument)."><td>PhClarinetModel</td><td>UnitGenerator</td><td>A simple clarinet physical model without tone holes (pitch is changed by changing the length of the tube of the instrument).</td></tr>
+          <tr data-ugen="phclarinetmouthpiece unitgenerator bidirectional block implementing a clarinet mouthpiece as well as the various interactions happening with traveling waves."><td>PhClarinetMouthPiece</td><td>UnitGenerator</td><td>Bidirectional block implementing a clarinet mouthpiece as well as the various interactions happening with traveling waves.</td></tr>
+          <tr data-ugen="phclarinetreed unitgenerator extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.)."><td>PhClarinetReed</td><td>UnitGenerator</td><td>Extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.).</td></tr>
+          <tr data-ugen="phclarinetui unitgenerator ready-to-use clarinet physical model with built-in ui based on clarinetmodel."><td>PhClarinetUI</td><td>UnitGenerator</td><td>Ready-to-use clarinet physical model with built-in UI based on clarinetModel.</td></tr>
+          <tr data-ugen="phendchain phpmelement closes the inputs and outputs of a bidirectional chain in all directions except for the main signal output (3d output)."><td>PhEndChain</td><td>PhPmElement</td><td>Closes the inputs and outputs of a bidirectional chain in all directions except for the main signal output (3d output).</td></tr>
+          <tr data-ugen="phf2l unitgenerator converts a frequency in hertz to length in meters."><td>PhF2l</td><td>UnitGenerator</td><td>Converts a frequency in hertz to length in meters.</td></tr>
+          <tr data-ugen="phflutejettable unitgenerator extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.)."><td>PhFluteJetTable</td><td>UnitGenerator</td><td>Extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.).</td></tr>
+          <tr data-ugen="phflutemodelui unitgenerator same as flutemodel but with a built-in ui."><td>PhFluteModelUI</td><td>UnitGenerator</td><td>Same as fluteModel but with a built-in UI.</td></tr>
+          <tr data-ugen="phfluteui unitgenerator ready-to-use flute physical model with built-in ui based on flutemodel."><td>PhFluteUI</td><td>UnitGenerator</td><td>Ready-to-use flute physical model with built-in UI based on fluteModel.</td></tr>
+          <tr data-ugen="phguitarbridge unitgenerator bidirectional block implementing a simple acoustic guitar bridge."><td>PhGuitarBridge</td><td>UnitGenerator</td><td>Bidirectional block implementing a simple acoustic guitar bridge.</td></tr>
+          <tr data-ugen="phguitarnuts unitgenerator bidirectional block implementing a simple acoustic guitar nuts."><td>PhGuitarNuts</td><td>UnitGenerator</td><td>Bidirectional block implementing a simple acoustic guitar nuts.</td></tr>
+          <tr data-ugen="phidealstring phstringabstract an &quot;ideal&quot; string with rigid terminations and where the plucking position and the pick-up position are the same."><td>PhIdealString</td><td>PhStringAbstract</td><td>An &quot;ideal&quot; string with rigid terminations and where the plucking position and the pick-up position are the same.</td></tr>
+          <tr data-ugen="phimpulseexcitation exciter creates an impulse excitation of one sample."><td>PhImpulseExcitation</td><td>Exciter</td><td>Creates an impulse excitation of one sample.</td></tr>
+          <tr data-ugen="phkarplusstrong unitgenerator a karplus-strong string (in that case, the string is implemented as a one dimension waveguide)."><td>PhKarplusStrong</td><td>UnitGenerator</td><td>A Karplus-Strong string (in that case, the string is implemented as a one dimension waveguide).</td></tr>
+          <tr data-ugen="phksreflexionfilter unitgenerator the &quot;typical&quot; one-zero karplus-strong feedforward reflexion filter."><td>PhKsReflexionFilter</td><td>UnitGenerator</td><td>The &quot;typical&quot; one-zero Karplus-strong feedforward reflexion filter.</td></tr>
+          <tr data-ugen="phl2f unitgenerator length in meters to frequency."><td>PhL2f</td><td>UnitGenerator</td><td>Length in meters to frequency.</td></tr>
+          <tr data-ugen="phl2s unitgenerator length in meters to number of samples"><td>PhL2s</td><td>UnitGenerator</td><td>Length in meters to number of samples</td></tr>
+          <tr data-ugen="phlstringrigidtermination phpmelement bidirectional block implementing a left rigid string termination (no damping, just phase inversion)."><td>PhLStringRigidTermination</td><td>PhPmElement</td><td>Bidirectional block implementing a left rigid string termination (no damping, just phase inversion).</td></tr>
+          <tr data-ugen="phmodalmodel unitgenerator implement a single resonance modes using resonant bandpass filters."><td>PhModalModel</td><td>UnitGenerator</td><td>Implement a single resonance modes using resonant bandpass filters.</td></tr>
+          <tr data-ugen="phmodefilter unitgenerator resonant bandpass filter that can be used to implement a single resonance (mode)."><td>PhModeFilter</td><td>UnitGenerator</td><td>Resonant bandpass filter that can be used to implement a single resonance (mode).</td></tr>
+          <tr data-ugen="phnylonguitar phstringabstract a simple acoustic guitar model with nylon strings (based on nylonguitarmodel) implementing an excitation model."><td>PhNylonGuitar</td><td>PhStringAbstract</td><td>A simple acoustic guitar model with nylon strings (based on nylonGuitarModel) implementing an excitation model.</td></tr>
+          <tr data-ugen="phnylonguitarmodel phstringabstract a simple acoustic guitar model with nylon strings and selectable excitation position."><td>PhNylonGuitarModel</td><td>PhStringAbstract</td><td>A simple acoustic guitar model with nylon strings and selectable excitation position.</td></tr>
+          <tr data-ugen="phnylonstring phstringabstract a bidirectional block implementing a basic nylon string with selectable excitation position."><td>PhNylonString</td><td>PhStringAbstract</td><td>A bidirectional block implementing a basic nylon string with selectable excitation position.</td></tr>
+          <tr data-ugen="phopenstring phstringabstract a bidirectional block implementing a basic &quot;generic&quot; string with a selectable excitation position."><td>PhOpenString</td><td>PhStringAbstract</td><td>A bidirectional block implementing a basic &quot;generic&quot; string with a selectable excitation position.</td></tr>
+          <tr data-ugen="phopenstringpickdown phstringabstract a bidirectional block implementing a &quot;generic&quot; string with selectable excitation position and stiffness."><td>PhOpenStringPickdown</td><td>PhStringAbstract</td><td>A bidirectional block implementing a &quot;generic&quot; string with selectable excitation position and stiffness.</td></tr>
+          <tr data-ugen="phopenstringpickup phstringabstract a bidirectional block implementing a &quot;generic&quot; string with selectable excitation position."><td>PhOpenStringPickup</td><td>PhStringAbstract</td><td>A bidirectional block implementing a &quot;generic&quot; string with selectable excitation position.</td></tr>
+          <tr data-ugen="phopentube phtube a tube segment without terminations (same as stringsegment)."><td>PhOpenTube</td><td>PhTube</td><td>A tube segment without terminations (same as stringSegment).</td></tr>
+          <tr data-ugen="phpluckstring exciter creates a plucking excitation signal."><td>PhPluckString</td><td>Exciter</td><td>Creates a plucking excitation signal.</td></tr>
+          <tr data-ugen="phpmelement unitgenerator abstract superclass for all pysical models blocks with 3 inputs"><td>PhPmElement</td><td>UnitGenerator</td><td>Abstract superclass for all Pysical Models blocks with 3 inputs</td></tr>
+          <tr data-ugen="phpmoutelement unitgenerator abstract superclass for all pysical models blocks with 3 inputs"><td>PhPmOutElement</td><td>UnitGenerator</td><td>Abstract superclass for all Pysical Models blocks with 3 inputs</td></tr>
+          <tr data-ugen="phreedtable unitgenerator extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.)."><td>PhReedTable</td><td>UnitGenerator</td><td>Extremely basic reed table that can be used to implement a wide range of single reed types for many different instruments (saxophone, clarinet, etc.).</td></tr>
+          <tr data-ugen="phrstringrigidtermination phpmelement bidirectional block implementing a right rigid string termination (no damping, just phase inversion)."><td>PhRStringRigidTermination</td><td>PhPmElement</td><td>Bidirectional block implementing a right rigid string termination (no damping, just phase inversion).</td></tr>
+          <tr data-ugen="phsteelstring phstringabstract a bidirectional block implementing a basic steel string with selectable excitation position."><td>PhSteelString</td><td>PhStringAbstract</td><td>A bidirectional block implementing a basic steel string with selectable excitation position.</td></tr>
+          <tr data-ugen="phstrike exciter strikes generator with controllable excitation position"><td>PhStrike</td><td>Exciter</td><td>Strikes generator with controllable excitation position</td></tr>
+          <tr data-ugen="phstrikemodel exciter creates a filtered noise excitation"><td>PhStrikeModel</td><td>Exciter</td><td>Creates a filtered noise excitation</td></tr>
+          <tr data-ugen="phstringabstract phpmelement abstract super class for string elements"><td>PhStringAbstract</td><td>PhPmElement</td><td>Abstract super class for string elements</td></tr>
+          <tr data-ugen="phstringsegment unitgenerator a string segment without terminations (just a simple waveguide)."><td>PhStringSegment</td><td>UnitGenerator</td><td>A string segment without terminations (just a simple waveguide).</td></tr>
+          <tr data-ugen="phterminations unitgenerator creates terminations on both sides of a chain without closing the inputs and outputs of the bidirectional signals chain."><td>PhTerminations</td><td>UnitGenerator</td><td>Creates terminations on both sides of a chain without closing the inputs and outputs of the bidirectional signals chain.</td></tr>
+          <tr data-ugen="phtube unitgenerator abstract superclass for physical tubes"><td>PhTube</td><td>UnitGenerator</td><td>Abstract superclass for Physical Tubes</td></tr>
+          <tr data-ugen="phvoicegender unitgenerator calculate the gender for the provided voicetype value."><td>PhVoiceGender</td><td>UnitGenerator</td><td>Calculate the gender for the provided voiceType value.</td></tr>
+          <tr data-ugen="phwaveguide phpmelement standard pm.lib waveguide (based on waveguidefd4)."><td>PhWaveguide</td><td>PhPmElement</td><td>Standard pm.lib waveguide (based on waveguideFd4).</td></tr>
+          <tr data-ugen="russianbell modalpercussion french church bell modal model."><td>RussianBell</td><td>ModalPercussion</td><td>French church bell modal model.</td></tr>
+          <tr data-ugen="sfformantmodelbp formantsynthesis simple formant/vocal synthesizer based on a source/filter model."><td>SFFormantModelBP</td><td>FormantSynthesis</td><td>Simple formant/vocal synthesizer based on a source/filter model.</td></tr>
+          <tr data-ugen="sfformantmodelbp_ui formantsynthesis "><td>SFFormantModelBP_ui</td><td>FormantSynthesis</td><td><span class="no-desc">—</span></td></tr>
+          <tr data-ugen="sfformantmodelfofcycle formantsynthesis simple formant/vocal synthesizer based on a source/filter model."><td>SFFormantModelFofCycle</td><td>FormantSynthesis</td><td>Simple formant/vocal synthesizer based on a source/filter model.</td></tr>
+          <tr data-ugen="sfformantmodelfofcycle_ui formantsynthesis simple formant/vocal synthesizer based on a source/filter model."><td>SFFormantModelFofCycle_UI</td><td>FormantSynthesis</td><td>Simple formant/vocal synthesizer based on a source/filter model.</td></tr>
+          <tr data-ugen="stringinstruments unitgenerator low and high level string instruments parts."><td>StringInstruments</td><td>UnitGenerator</td><td>Low and high level string instruments parts.</td></tr>
+          <tr data-ugen="violinmidi stringinstruments ready-to-use midi-enabled violin physical model with built-in ui."><td>ViolinMIDI</td><td>StringInstruments</td><td>Ready-to-use MIDI-enabled violin physical model with built-in UI.</td></tr>
+          <tr data-ugen="violinmodel stringinstruments ready-to-use simple violin physical model."><td>ViolinModel</td><td>StringInstruments</td><td>Ready-to-use simple violin physical model.</td></tr>
+          <tr data-ugen="windinstruments unitgenerator wind instruments and utilities from the faust standard library."><td>WindInstruments</td><td>UnitGenerator</td><td>Wind instruments and utilities from the Faust standard library.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="synths">
+      <h2>8. Synths <span class="fam-count">12</span></h2>
+      <p>Complete ready-made instruments — drums and synth voices you can instantiate and play without wiring anything.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="clap synths clap synthesis through filtered white noise."><td>Clap</td><td>Synths</td><td>Clap synthesis through filtered white noise.</td></tr>
+          <tr data-ugen="combstring synths simplest string physical model ever based on a comb filter."><td>CombString</td><td>Synths</td><td>Simplest string physical model ever based on a comb filter.</td></tr>
+          <tr data-ugen="dubdub synths a simple synth based on a sawtooth wave filtered by a resonant lowpass."><td>DubDub</td><td>Synths</td><td>A simple synth based on a sawtooth wave filtered by a resonant lowpass.</td></tr>
+          <tr data-ugen="fm4op synths a simple fm synthesizer with an arbitrary number of modulators connected as a sequence."><td>Fm4Op</td><td>Synths</td><td>A simple FM synthesizer with an arbitrary number of modulators connected as a sequence.</td></tr>
+          <tr data-ugen="hat synths hi hat drum synthesis via phase modulation."><td>Hat</td><td>Synths</td><td>Hi hat drum synthesis via phase modulation.</td></tr>
+          <tr data-ugen="kick synths kick drum synthesis via a pitched sine sweep."><td>Kick</td><td>Synths</td><td>Kick drum synthesis via a pitched sine sweep.</td></tr>
+          <tr data-ugen="phloop tpsampler play a soundfile in a loop taking into account its sampling rate"><td>PhLoop</td><td>TpSampler</td><td>Play a soundfile in a loop taking into account its sampling rate</td></tr>
+          <tr data-ugen="phloopspeed phloop play a soundfile in a loop taking into account its sampling rate, with speed control."><td>PhLoopSpeed</td><td>PhLoop</td><td>Play a soundfile in a loop taking into account its sampling rate, with speed control.</td></tr>
+          <tr data-ugen="phloopspeedlevel phloopspeed play a soundfile in a loop taking into account its sampling rate, with speed control."><td>PhLoopSpeedLevel</td><td>PhLoopSpeed</td><td>Play a soundfile in a loop taking into account its sampling rate, with speed control.</td></tr>
+          <tr data-ugen="popfilterdrum synths a simple percussion instrument based on a &quot;popped&quot; resonant bandpass filter."><td>PopFilterDrum</td><td>Synths</td><td>A simple percussion instrument based on a &quot;popped&quot; resonant bandpass filter.</td></tr>
+          <tr data-ugen="sawtrombone synths a simple trombone based on a lowpassed sawtooth wave."><td>SawTrombone</td><td>Synths</td><td>A simple trombone based on a lowpassed sawtooth wave.</td></tr>
+          <tr data-ugen="synths unitgenerator this class contains a collection of synthesizers, including those of faust synths.lib  do not use this superclass directly; it exists only for grouping and establishing a basic…"><td>Synths</td><td>UnitGenerator</td><td>This class contains a collection of synthesizers, including those of Faust synths.lib  Do not use this superclass directly; it exists only for grouping and establishing a basic…</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="dx7">
+      <h2>9. Dx7 Operators <span class="fam-count">5</span></h2>
+      <p>DX7-style FM operators, envelopes and algorithms. See <a href="synthesis.html">Synthesis §5</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="dx7algo unitgenerator [more about operators and algorythms here](https://djjondent.blogspot.com/2019/10/yamaha-dx7-algorithms.html)."><td>Dx7Algo</td><td>UnitGenerator</td><td>[More about operators and algorythms here](https://djjondent.blogspot.com/2019/10/yamaha-dx7-algorithms.html).</td></tr>
+          <tr data-ugen="dx7algorithm unitgenerator dx7 function for a specific algorithm at compile-time."><td>Dx7Algorithm</td><td>UnitGenerator</td><td>DX7 function for a specific algorithm at compile-time.</td></tr>
+          <tr data-ugen="dx7env unitgenerator dx7 operator envelope generator with 4 independent rates and levels."><td>Dx7Env</td><td>UnitGenerator</td><td>DX7 operator envelope generator with 4 independent rates and levels.</td></tr>
+          <tr data-ugen="dx7op unitgenerator implements a phase-modulable sine wave oscillator connected to a dx7 envelope generator."><td>Dx7Op</td><td>UnitGenerator</td><td>Implements a phase-modulable sine wave oscillator connected to a DX7 envelope generator.</td></tr>
+          <tr data-ugen="dx7ui unitgenerator the yamaha dx7 is a synthesizer manufactured by yamaha corporation from 1983 to 1989."><td>Dx7UI</td><td>UnitGenerator</td><td>The Yamaha DX7 is a synthesizer manufactured by Yamaha Corporation from 1983 to 1989.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="basics">
+      <h2>10. Basics <span class="fam-count">16</span></h2>
+      <p>Small building blocks: sample-and-hold, latches, bit crushing, downsampling, lines and toggles.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phautomat phbasics record and replay in a loop the successives values of the input signal."><td>PhAutomat</td><td>PhBasics</td><td>Record and replay in a loop the successives values of the input signal.</td></tr>
+          <tr data-ugen="phbasics unitgenerator conveniece abstract super class for basics utilities with one input"><td>PhBasics</td><td>UnitGenerator</td><td>Conveniece abstract super class for basics utilities with one input</td></tr>
+          <tr data-ugen="phbitcrusher phbasics produce distortion by reduction of the signal resolution."><td>PhBitCrusher</td><td>PhBasics</td><td>Produce distortion by reduction of the signal resolution.</td></tr>
+          <tr data-ugen="phdownsampler phbasics this unitgenerator makes the work of the downsample standard faust function."><td>PhDownSampler</td><td>PhBasics</td><td>This UnitGenerator makes the work of the downSample standard Faust function.</td></tr>
+          <tr data-ugen="phdownsamplercv phbasics down sample a signal."><td>PhDownSamplerCV</td><td>PhBasics</td><td>Down sample a signal.</td></tr>
+          <tr data-ugen="phif unitgenerator if-then-else implemented with a select2."><td>PhIf</td><td>UnitGenerator</td><td>If-then-else implemented with a select2.</td></tr>
+          <tr data-ugen="phimpulsify unitgenerator turns a signal into an impulse with the value of the current sample (0.3,0.2,0.1 becomes 0.3,0.0,0.0)."><td>PhImpulsify</td><td>UnitGenerator</td><td>Turns a signal into an impulse with the value of the current sample (0.3,0.2,0.1 becomes 0.3,0.0,0.0).</td></tr>
+          <tr data-ugen="phkr2ar phbasics force a control rate signal to be used as an audio signal for example:"><td>PhKr2Ar</td><td>PhBasics</td><td>Force a control rate signal to be used as an audio signal For example:</td></tr>
+          <tr data-ugen="phlatch phbasics latch input on the rising edge of trig."><td>PhLatch</td><td>PhBasics</td><td>Latch input on the rising edge of trig.</td></tr>
+          <tr data-ugen="phline phbasics a ramp interpolator that generates a linear transition to reach a target value: the interpolation process restarts each time a new and distinct input value is received it utilizes 'n'…"><td>PhLine</td><td>PhBasics</td><td>A ramp interpolator that generates a linear transition to reach a target value: the interpolation process restarts each time a new and distinct input value is received it utilizes 'n'…</td></tr>
+          <tr data-ugen="phonandoff unitgenerator the first channel set the output to 1, the second channel to 0."><td>PhOnAndOff</td><td>UnitGenerator</td><td>The first channel set the output to 1, the second channel to 0.</td></tr>
+          <tr data-ugen="phpeakhold phbasics outputs current max value above zero."><td>PhPeakHold</td><td>PhBasics</td><td>Outputs current max value above zero.</td></tr>
+          <tr data-ugen="phpeakholder phbasics while peak-holder functions are scarcely discussed in the literature (please do send me an email if you know otherwise), common sense tells that the expected behaviour should be as…"><td>PhPeakHolder</td><td>PhBasics</td><td>While peak-holder functions are scarcely discussed in the literature (please do send me an email if you know otherwise), common sense tells that the expected behaviour should be as…</td></tr>
+          <tr data-ugen="phsampleandhold phbasics sample and hold."><td>PhSampleAndHold</td><td>PhBasics</td><td>Sample And Hold.</td></tr>
+          <tr data-ugen="phtestandhold phbasics test and hold: &quot;records&quot; the input when pred(input) is true, outputs a frozen value otherwise."><td>PhTestAndHold</td><td>PhBasics</td><td>Test And Hold: &quot;records&quot; the input when pred(input) is true, outputs a frozen value otherwise.</td></tr>
+          <tr data-ugen="phtoggle phbasics triggered by the change of 0 to 1, it toggles the output value between 0 and 1."><td>PhToggle</td><td>PhBasics</td><td>Triggered by the change of 0 to 1, it toggles the output value between 0 and 1.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="time">
+      <h2>11. Counters &amp; Time Tools <span class="fam-count">18</span></h2>
+      <p>Pulses, counters, ramps and beat clocks — time generated inside the signal graph. See <a href="sequencing.html">Sequencing §2</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="counter unitgenerator starts counting 0, 1, 2, 3..., and raise the current integer value at each upfront of the trigger."><td>Counter</td><td>UnitGenerator</td><td>Starts counting 0, 1, 2, 3..., and raise the current integer value at each upfront of the trigger.</td></tr>
+          <tr data-ugen="phbeat unitgenerator pulses at tempo in bpm."><td>PhBeat</td><td>UnitGenerator</td><td>Pulses at tempo in BPM.</td></tr>
+          <tr data-ugen="phcountdown unitgenerator starts counting up from 0 to n included."><td>PhCountDown</td><td>UnitGenerator</td><td>Starts counting up from 0 to n included.</td></tr>
+          <tr data-ugen="phcountup unitgenerator starts counting up from 0 to n included."><td>PhCountUp</td><td>UnitGenerator</td><td>Starts counting up from 0 to n included.</td></tr>
+          <tr data-ugen="phcycle unitgenerator split nonzero input values into n cycles."><td>PhCycle</td><td>UnitGenerator</td><td>Split nonzero input values into n cycles.</td></tr>
+          <tr data-ugen="phperiod unitgenerator basic sawtooth wave of period p."><td>PhPeriod</td><td>UnitGenerator</td><td>Basic sawtooth wave of period p.</td></tr>
+          <tr data-ugen="phramp unitgenerator a linear ramp with a slope of '(+/-)1/n' samples to reach the next target value."><td>PhRamp</td><td>UnitGenerator</td><td>A linear ramp with a slope of '(+/-)1/n' samples to reach the next target value.</td></tr>
+          <tr data-ugen="phresetctr unitgenerator function that lets through the mth impulse out of each consecutive group of n impulses."><td>PhResetCtr</td><td>UnitGenerator</td><td>Function that lets through the mth impulse out of each consecutive group of n impulses.</td></tr>
+          <tr data-ugen="phsweep unitgenerator counts from 0 to period-1 repeatedly, generating a sawtooth waveform, like os.lf_rawsaw, starting at 1 when run transitions from 0 to 1."><td>PhSweep</td><td>UnitGenerator</td><td>Counts from 0 to period-1 repeatedly, generating a sawtooth waveform, like os.lf_rawsaw, starting at 1 when run transitions from 0 to 1.</td></tr>
+          <tr data-ugen="phtempo unitgenerator converts a tempo in bpm into a number of samples."><td>PhTempo</td><td>UnitGenerator</td><td>Converts a tempo in BPM into a number of samples.</td></tr>
+          <tr data-ugen="phtime unitgenerator a simple timer that counts every samples from the beginning of the process."><td>PhTime</td><td>UnitGenerator</td><td>A simple timer that counts every samples from the beginning of the process.</td></tr>
+          <tr data-ugen="pulse unitgenerator pulses generated at period in seconds"><td>Pulse</td><td>UnitGenerator</td><td>Pulses generated at period in seconds</td></tr>
+          <tr data-ugen="pulsecountdown unitgenerator starts counting down pulses."><td>PulseCountDown</td><td>UnitGenerator</td><td>Starts counting down pulses.</td></tr>
+          <tr data-ugen="pulsecountdownloop unitgenerator starts counting down pulses from 0 to n included."><td>PulseCountDownLoop</td><td>UnitGenerator</td><td>Starts counting down pulses from 0 to n included.</td></tr>
+          <tr data-ugen="pulsecountup unitgenerator starts counting up pulses."><td>PulseCountUp</td><td>UnitGenerator</td><td>Starts counting up pulses.</td></tr>
+          <tr data-ugen="pulsecountuploop unitgenerator starts counting up pulses from 0 to n included."><td>PulseCountUpLoop</td><td>UnitGenerator</td><td>Starts counting up pulses from 0 to n included.</td></tr>
+          <tr data-ugen="pulsen unitgenerator ggenerator of pulses with length and period in seconds"><td>Pulsen</td><td>UnitGenerator</td><td>Ggenerator of pulses with length and period in seconds</td></tr>
+          <tr data-ugen="spulse unitgenerator produces a single pulse of n samples when trig goes from 0 to 1."><td>Spulse</td><td>UnitGenerator</td><td>Produces a single pulse of n samples when trig goes from 0 to 1.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="conversion">
+      <h2>12. Conversion Tools <span class="fam-count">17</span></h2>
+      <p>Unit conversions as UGens: decibels, MIDI note numbers, piano keys, cents, semitones, samples and time constants. See <a href="math.html">Math &amp; Conversion Tools</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phcent2ratio phconversiontool converts semitone cents in a frequency multiplicative ratio."><td>PhCent2Ratio</td><td>PhConversionTool</td><td>Converts semitone cents in a frequency multiplicative ratio.</td></tr>
+          <tr data-ugen="phconversiontool unitgenerator superclass for all conversion tools"><td>PhConversionTool</td><td>UnitGenerator</td><td>Superclass for all Conversion tools</td></tr>
+          <tr data-ugen="phdb2linear phconversiontool db-to-linear value converter."><td>PhDb2Linear</td><td>PhConversionTool</td><td>DB-to-linear value converter.</td></tr>
+          <tr data-ugen="phhz2midikey phconversiontool converts a frequency in hz to a midi key number (440 hz = midi key 69)."><td>PhHz2MidiKey</td><td>PhConversionTool</td><td>Converts a frequency in Hz to a MIDI key number (440 Hz = MIDI key 69).</td></tr>
+          <tr data-ugen="phhz2pianokey phconversiontool converts a frequency in hz to a midi key number (440 hz = midi key 69)."><td>PhHz2PianoKey</td><td>PhConversionTool</td><td>Converts a frequency in Hz to a MIDI key number (440 Hz = MIDI key 69).</td></tr>
+          <tr data-ugen="phlinear2db phconversiontool linear-to-db value converter."><td>PhLinear2Db</td><td>PhConversionTool</td><td>Linear-to-dB value converter.</td></tr>
+          <tr data-ugen="phlinear2loggain phconversiontool converts a linear gain (0-1) to a log gain (0-1)."><td>PhLinear2LogGain</td><td>PhConversionTool</td><td>Converts a linear gain (0-1) to a log gain (0-1).</td></tr>
+          <tr data-ugen="phlog2lineargain phconversiontool converts a log gain (0-1) to a linear gain (0-1)."><td>PhLog2LinearGain</td><td>PhConversionTool</td><td>Converts a log gain (0-1) to a linear gain (0-1).</td></tr>
+          <tr data-ugen="phmidikey2hz phconversiontool converts a midi key number to a frequency in hz (midi key 69 = 440 hz)."><td>PhMidiKey2Hz</td><td>PhConversionTool</td><td>Converts a MIDI key number to a frequency in Hz (MIDI key 69 = 440 Hz).</td></tr>
+          <tr data-ugen="phpianokey2hz phconversiontool converts a midi key number to a frequency in hz (midi key 69 = 440 hz)."><td>PhPianoKey2Hz</td><td>PhConversionTool</td><td>Converts a MIDI key number to a frequency in Hz (MIDI key 69 = 440 Hz).</td></tr>
+          <tr data-ugen="phpole2tau phconversiontool returns the time-constant, in seconds, corresponding to the given real, positive pole in (0-1)."><td>PhPole2tau</td><td>PhConversionTool</td><td>Returns the time-constant, in seconds, corresponding to the given real, positive pole in (0-1).</td></tr>
+          <tr data-ugen="phratio2cent phconversiontool converts a frequency multiplicative ratio in semitone cents."><td>PhRatio2Cent</td><td>PhConversionTool</td><td>Converts a frequency multiplicative ratio in semitone cents.</td></tr>
+          <tr data-ugen="phratio2semitone phconversiontool converts a frequency multiplicative ratio in semitones."><td>PhRatio2Semitone</td><td>PhConversionTool</td><td>Converts a frequency multiplicative ratio in semitones.</td></tr>
+          <tr data-ugen="phsamp2sec phconversiontool converts a number of samples to a duration in seconds at the current sampling rate ."><td>PhSamp2Sec</td><td>PhConversionTool</td><td>Converts a number of samples to a duration in seconds at the current sampling rate .</td></tr>
+          <tr data-ugen="phsec2samp phconversiontool converts a duration in seconds to a number of samples at the current sampling rate"><td>PhSec2Samp</td><td>PhConversionTool</td><td>Converts a duration in seconds to a number of samples at the current sampling rate</td></tr>
+          <tr data-ugen="phsemi2ratio phconversiontool converts semitones in a frequency multiplicative ratio."><td>PhSemi2Ratio</td><td>PhConversionTool</td><td>Converts semitones in a frequency multiplicative ratio.</td></tr>
+          <tr data-ugen="phtau2pole phconversiontool returns a real pole giving exponential decay."><td>PhTau2Pole</td><td>PhConversionTool</td><td>Returns a real pole giving exponential decay.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="signals">
+      <h2>13. Signals <span class="fam-count">11</span></h2>
+      <p>Signal plumbing: buses, smoothing, reversal and interpolation.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phblocksignal unitgenerator block - terminate n signals."><td>PhBlockSignal</td><td>UnitGenerator</td><td>Block - terminate N signals.</td></tr>
+          <tr data-ugen="phbsmooth phsmoo block smooth linear interpolation during a block of samples (given by the ma.bs value)."><td>PhBSmooth</td><td>PhSmoo</td><td>Block smooth linear interpolation during a block of samples (given by the ma.BS value).</td></tr>
+          <tr data-ugen="phbus unitgenerator put aninteger number of signals in parallel."><td>PhBus</td><td>UnitGenerator</td><td>Put anInteger number of signals in parallel.</td></tr>
+          <tr data-ugen="phinterpolate unitgenerator linear interpolation between two signals."><td>PhInterpolate</td><td>UnitGenerator</td><td>Linear interpolation between two signals.</td></tr>
+          <tr data-ugen="phonepoleswitching phsmoo one pole filter with independent attack and release times."><td>PhOnePoleSwitching</td><td>PhSmoo</td><td>One pole filter with independent attack and release times.</td></tr>
+          <tr data-ugen="phpolysmooth phsmoothandh a smoothing function based on smooth that doesn't smooth when a trigger signal is given."><td>PhPolySmooth</td><td>PhSmoothAndH</td><td>A smoothing function based on smooth that doesn't smooth when a trigger signal is given.</td></tr>
+          <tr data-ugen="phrev unitgenerator reverse the input signal by blocks of n&gt;0 samples."><td>PhRev</td><td>UnitGenerator</td><td>Reverse the input signal by blocks of n&gt;0 samples.</td></tr>
+          <tr data-ugen="phsmoo unitgenerator smoothing function based on smooth ideal to smooth ui signals (sliders, etc.) down."><td>PhSmoo</td><td>UnitGenerator</td><td>Smoothing function based on smooth ideal to smooth UI signals (sliders, etc.) down.</td></tr>
+          <tr data-ugen="phsmooth phsmoo exponential smoothing by a unity-dc-gain one-pole lowpass."><td>PhSmooth</td><td>PhSmoo</td><td>Exponential smoothing by a unity-dc-gain one-pole lowpass.</td></tr>
+          <tr data-ugen="phsmoothandh phsmooth a smoothing function based on smooth that holds its output signal when a trigger is sent to it."><td>PhSmoothAndH</td><td>PhSmooth</td><td>A smoothing function based on smooth that holds its output signal when a trigger is sent to it.</td></tr>
+          <tr data-ugen="phsmoothq phsmoo smoothing with continuously variable curves from exponential to linear, with a constant time."><td>PhSmoothQ</td><td>PhSmoo</td><td>Smoothing with continuously variable curves from Exponential to Linear, with a constant time.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="operations">
+      <h2>14. Operations <span class="fam-count">10</span></h2>
+      <p>Arithmetic and routing as objects rather than operators. See <a href="connecting.html">Connecting Unit Generators</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phadder phbinaryoperation add two unitgenerators"><td>PhAdder</td><td>PhBinaryOperation</td><td>Add two UnitGenerators</td></tr>
+          <tr data-ugen="phbinaryoperation unitgenerator super class for phausto binary operations."><td>PhBinaryOperation</td><td>UnitGenerator</td><td>Super class for Phausto binary operations.</td></tr>
+          <tr data-ugen="phdivider phbinaryoperation divide my first input (a unitgenerator) by a second input (also another unitgenerator)"><td>PhDivider</td><td>PhBinaryOperation</td><td>Divide my first input (a UnitGenerator) by a second input (also another UnitGenerator)</td></tr>
+          <tr data-ugen="phmergeoperation unitgenerator convenience class to merge unit generators before converting them into phboxes"><td>PhMergeOperation</td><td>UnitGenerator</td><td>Convenience class to merge unit generators before converting them into PhBoxes</td></tr>
+          <tr data-ugen="phmodulor phbinaryoperation modulo my first input (a unitgenerator) by a second input (also another unitgenerator)"><td>PhModulor</td><td>PhBinaryOperation</td><td>Modulo my first input (a UnitGenerator) by a second input (also another UnitGenerator)</td></tr>
+          <tr data-ugen="phmultiplicator phbinaryoperation multiplictae two unit generators"><td>PhMultiplicator</td><td>PhBinaryOperation</td><td>Multiplictae two Unit Generators</td></tr>
+          <tr data-ugen="phpower phbinaryoperation exponentiation where inputl is base and input r is exponent"><td>PhPower</td><td>PhBinaryOperation</td><td>Exponentiation where inputL is base and input R is exponent</td></tr>
+          <tr data-ugen="phsplitoperation unitgenerator convenience class to split unit generators before converting them into phboxes"><td>PhSplitOperation</td><td>UnitGenerator</td><td>Convenience class to split Unit Generators before converting them into PhBoxes</td></tr>
+          <tr data-ugen="phsubtractor phbinaryoperation divide my second input (a unitgenerator) to the first input (also another unitgenerator)"><td>PhSubtractor</td><td>PhBinaryOperation</td><td>Divide my second input (a UnitGenerator) to the first input (also another UnitGenerator)</td></tr>
+          <tr data-ugen="phunaryoperation unitgenerator super class for phausto unary operations (just one input)."><td>PhUnaryOperation</td><td>UnitGenerator</td><td>Super class for Phausto unary operations (just one input).</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="math">
+      <h2>15. Math <span class="fam-count">49</span></h2>
+      <p>Mathematical functions, constants, interpolators and quantisers applied sample by sample. See <a href="math.html">Math &amp; Conversion Tools</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phblocksize unitgenerator current block-size."><td>PhBlockSize</td><td>UnitGenerator</td><td>Current block-size.</td></tr>
+          <tr data-ugen="phchebychev unitgenerator "><td>PhChebychev</td><td>UnitGenerator</td><td><span class="no-desc">—</span></td></tr>
+          <tr data-ugen="phchebychevpoly unitgenerator "><td>PhChebychevPoly</td><td>UnitGenerator</td><td><span class="no-desc">—</span></td></tr>
+          <tr data-ugen="phconstante unitgenerator double-precision euler's number constant"><td>PhConstantE</td><td>UnitGenerator</td><td>Double-precision Euler's number constant</td></tr>
+          <tr data-ugen="phconstantepsilon unitgenerator constant epsilon available in simple/double/quad precision, as defined in the floating-point standard and machine epsilon, that is smallest positive number such that 1.0 + epsilon != 1.0."><td>PhConstantEpsilon</td><td>UnitGenerator</td><td>Constant EPSILON available in simple/double/quad precision, as defined in the floating-point standard and machine epsilon, that is smallest positive number such that 1.0 + EPSILON != 1.0.</td></tr>
+          <tr data-ugen="phconstantmax unitgenerator constant max available in simple/double/quad precision (minimal positive value)."><td>PhConstantMax</td><td>UnitGenerator</td><td>Constant MAX available in simple/double/quad precision (minimal positive value).</td></tr>
+          <tr data-ugen="phconstantmin unitgenerator constant min available in simple/double/quad precision (minimal positive value)."><td>PhConstantMin</td><td>UnitGenerator</td><td>Constant MIN available in simple/double/quad precision (minimal positive value).</td></tr>
+          <tr data-ugen="phconstantpi unitgenerator constant pi in double precision."><td>PhConstantPI</td><td>UnitGenerator</td><td>Constant PI in double precision.</td></tr>
+          <tr data-ugen="phconstantt unitgenerator current sample duration in seconds computed from the sampling rate given at init time."><td>PhConstantT</td><td>UnitGenerator</td><td>Current sample duration in seconds computed from the sampling rate given at init time.</td></tr>
+          <tr data-ugen="phcopysign phbinaryoperation changes the sign of x (first input) to that of y (second input)."><td>PhCopySign</td><td>PhBinaryOperation</td><td>Changes the sign of x (first input) to that of y (second input).</td></tr>
+          <tr data-ugen="phcuberoot phunaryoperation computes the cube root of of the input signal."><td>PhCubeRoot</td><td>PhUnaryOperation</td><td>Computes the cube root of of the input signal.</td></tr>
+          <tr data-ugen="phdeg2rad phunaryoperation convert degrees to radians."><td>PhDeg2Rad</td><td>PhUnaryOperation</td><td>Convert degrees to radians.</td></tr>
+          <tr data-ugen="phdiffn phunaryoperation negated first-order difference."><td>PhDiffn</td><td>PhUnaryOperation</td><td>Negated first-order difference.</td></tr>
+          <tr data-ugen="pherf phunaryoperation computes the error function of the input signal."><td>PhErf</td><td>PhUnaryOperation</td><td>Computes the error function of the input signal.</td></tr>
+          <tr data-ugen="pherfc phunaryoperation computes the complementary error function of the input signal."><td>PhErfC</td><td>PhUnaryOperation</td><td>Computes the complementary error function of the input signal.</td></tr>
+          <tr data-ugen="phexpm1 phunaryoperation return exponent of the input signal minus 1 with better precision."><td>PhExpM1</td><td>PhUnaryOperation</td><td>Return exponent of the input signal minus 1 with better precision.</td></tr>
+          <tr data-ugen="phfrac phunaryoperation gives the fractional part of its input"><td>PhFrac</td><td>PhUnaryOperation</td><td>Gives the fractional part of its input</td></tr>
+          <tr data-ugen="phftz phunaryoperation flush to zero: force samples under the &quot;maximum subnormal number&quot; to be zero."><td>PhFTZ</td><td>PhUnaryOperation</td><td>Flush to zero: force samples under the &quot;maximum subnormal number&quot; to be zero.</td></tr>
+          <tr data-ugen="phhypothenuse phbinaryoperation computes the euclidian distance of the two input signals sqrt(xx+yy) without undue overflow or underflow."><td>PhHypothenuse</td><td>PhBinaryOperation</td><td>Computes the euclidian distance of the two input signals sqrt(xx+yy) without undue overflow or underflow.</td></tr>
+          <tr data-ugen="philogb phunaryoperation return exponent of the input signal as a floating-point number."><td>PhILogB</td><td>PhUnaryOperation</td><td>Return exponent of the input signal as a floating-point number.</td></tr>
+          <tr data-ugen="phinterpolatelinear unitgenerator linear interpolation between 2 values."><td>PhInterpolateLinear</td><td>UnitGenerator</td><td>Linear interpolation between 2 values.</td></tr>
+          <tr data-ugen="phinterpolateraisemodulo unitgenerator a phraisemodulo is a looping fractional read-index generator, ported from faust's raise_modulo in interpolators.lib."><td>PhInterpolateRaiseModulo</td><td>UnitGenerator</td><td>A PhRaiseModulo is a looping fractional read-index generator, ported from Faust's raise_modulo in interpolators.lib.</td></tr>
+          <tr data-ugen="phinverse phunaryoperation compute the inverse (1/x) of the input signal."><td>PhInverse</td><td>PhUnaryOperation</td><td>Compute the inverse (1/x) of the input signal.</td></tr>
+          <tr data-ugen="phisinf phunaryoperation return non-zero if x is a positive or negative infinity."><td>PhIsInf</td><td>PhUnaryOperation</td><td>Return non-zero if x is a positive or negative infinity.</td></tr>
+          <tr data-ugen="phisnan unitgenerator return non-zero if x is a nan."><td>PhIsNan</td><td>UnitGenerator</td><td>Return non-zero if x is a NaN.</td></tr>
+          <tr data-ugen="phj0 phunaryoperation computes the bessel function of the first kind of order 0 of the input signal."><td>PhJ0</td><td>PhUnaryOperation</td><td>Computes the Bessel function of the first kind of order 0 of the input signal.</td></tr>
+          <tr data-ugen="phj1 phunaryoperation computes the bessel function of the first kind of order 1 of the input signal."><td>PhJ1</td><td>PhUnaryOperation</td><td>Computes the Bessel function of the first kind of order 1 of the input signal.</td></tr>
+          <tr data-ugen="phjn phbinaryoperation computes the bessel function of the first kind of order n of the input signal."><td>PhJn</td><td>PhBinaryOperation</td><td>Computes the Bessel function of the first kind of order n of the input signal.</td></tr>
+          <tr data-ugen="phldexp phbinaryoperation takes two input signals: x and n, and multiplies x by 2 to the power n."><td>PhLdExp</td><td>PhBinaryOperation</td><td>Takes two input signals: x and n, and multiplies x by 2 to the power n.</td></tr>
+          <tr data-ugen="phlgamma phunaryoperation calculates the natural logorithm of the absolute value of the gamma function of the input signal."><td>PhLGamma</td><td>PhUnaryOperation</td><td>Calculates the natural logorithm of the absolute value of the gamma function of the input signal.</td></tr>
+          <tr data-ugen="phlog1p phunaryoperation computes log(1 + x) without undue loss of accuracy when x is nearly zero."><td>PhLog1p</td><td>PhUnaryOperation</td><td>Computes log(1 + x) without undue loss of accuracy when x is nearly zero.</td></tr>
+          <tr data-ugen="phlog2 phunaryoperation returns the base 2 logarithm of x."><td>PhLog2</td><td>PhUnaryOperation</td><td>Returns the base 2 logarithm of x.</td></tr>
+          <tr data-ugen="phlogb phunaryoperation return exponent of the input signal as a floating-point number."><td>PhLogB</td><td>PhUnaryOperation</td><td>Return exponent of the input signal as a floating-point number.</td></tr>
+          <tr data-ugen="phmodulomath phbinaryoperation modulus operation using the (x%y+y)%y formula to ensures the result is always non-negative, even if x is negative."><td>PhModuloMath</td><td>PhBinaryOperation</td><td>Modulus operation using the (x%y+y)%y formula to ensures the result is always non-negative, even if x is negative.</td></tr>
+          <tr data-ugen="phneg phunaryoperation invert the sign (-x) of a signal."><td>PhNeg</td><td>PhUnaryOperation</td><td>Invert the sign (-x) of a signal.</td></tr>
+          <tr data-ugen="phnextpowerof2 phunaryoperation gives the next power of 2 of its input."><td>PhNextPowerOf2</td><td>PhUnaryOperation</td><td>Gives the next power of 2 of its input.</td></tr>
+          <tr data-ugen="phnot unitgenerator bitwise not implemented with xor as not(x) = x xor -1;."><td>PhNot</td><td>UnitGenerator</td><td>Bitwise not implemented with xor as not(x) = x xor -1;.</td></tr>
+          <tr data-ugen="phprimes phunaryoperation return the n-th prime using a waveform primitive."><td>PhPrimes</td><td>PhUnaryOperation</td><td>Return the n-th prime using a waveform primitive.</td></tr>
+          <tr data-ugen="phquantize unitgenerator "><td>PhQuantize</td><td>UnitGenerator</td><td><span class="no-desc">—</span></td></tr>
+          <tr data-ugen="phrad2deg phunaryoperation convert radians to degrees."><td>PhRad2Deg</td><td>PhUnaryOperation</td><td>Convert radians to degrees.</td></tr>
+          <tr data-ugen="phsampleduration unitgenerator current sample duration in seconds computed from the sampling rate given at init time."><td>PhSampleDuration</td><td>UnitGenerator</td><td>Current sample duration in seconds computed from the sampling rate given at init time.</td></tr>
+          <tr data-ugen="phsamplerate unitgenerator current sampling rate given at init time."><td>PhSampleRate</td><td>UnitGenerator</td><td>Current sampling rate given at init time.</td></tr>
+          <tr data-ugen="phscalb phbinaryoperation takes two input signals: x and n, and multiplies x by 2 to the power n."><td>PhScalb</td><td>PhBinaryOperation</td><td>Takes two input signals: x and n, and multiplies x by 2 to the power n.</td></tr>
+          <tr data-ugen="phsignum phunaryoperation the signum function signum(x) is defined as -1 for x&lt;0, 0 for x==0, and 1 for x&gt;0."><td>PhSignum</td><td>PhUnaryOperation</td><td>The signum function signum(x) is defined as -1 for x&lt;0, 0 for x==0, and 1 for x&gt;0.</td></tr>
+          <tr data-ugen="phsub phunaryoperation subtract x and y."><td>PhSub</td><td>PhUnaryOperation</td><td>Subtract x and y.</td></tr>
+          <tr data-ugen="phy0 phunaryoperation computes the linearly independent bessel function of the second kind of order 0 of the input signal."><td>PhY0</td><td>PhUnaryOperation</td><td>Computes the linearly independent Bessel function of the second kind of order 0 of the input signal.</td></tr>
+          <tr data-ugen="phy1 phunaryoperation computes the linearly independent bessel function of the second kind of order 1 of the input signal."><td>PhY1</td><td>PhUnaryOperation</td><td>Computes the linearly independent Bessel function of the second kind of order 1 of the input signal.</td></tr>
+          <tr data-ugen="phyn phbinaryoperation computes the linearly independent bessel function of the second kind of order n of the input signal."><td>PhYn</td><td>PhBinaryOperation</td><td>Computes the linearly independent Bessel function of the second kind of order n of the input signal.</td></tr>
+          <tr data-ugen="phzerocrossing phunaryoperation indicator function for zero-crossing: it returns 1 if a zero-crossing occurs, 0 otherwis"><td>PhZeroCrossing</td><td>PhUnaryOperation</td><td>Indicator function for zero-crossing: it returns 1 if a zero-crossing occurs, 0 otherwis</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="antialiased">
+      <h2>16. Antialiased <span class="fam-count">14</span></h2>
+      <p>Band-limited trigonometric and hyperbolic functions, for waveshaping without aliasing.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="aasine trigonometry first-order adaa sin()."><td>AASine</td><td>Trigonometry</td><td>First-order ADAA sin().</td></tr>
+          <tr data-ugen="aasine2 trigonometry second-order adaa sin()."><td>AASine2</td><td>Trigonometry</td><td>Second-order ADAA sin().</td></tr>
+          <tr data-ugen="acosh1 trigonometry first-order adaa acosh()."><td>ACosh1</td><td>Trigonometry</td><td>First-order ADAA acosh().</td></tr>
+          <tr data-ugen="acosh2 trigonometry second-order adaa acosh()."><td>ACosh2</td><td>Trigonometry</td><td>Second-order ADAA acosh().</td></tr>
+          <tr data-ugen="arccos trigonometry first-order adaa acos()."><td>ArcCos</td><td>Trigonometry</td><td>First-order ADAA acos().</td></tr>
+          <tr data-ugen="arccos2 trigonometry second-order adaa acos()."><td>ArcCos2</td><td>Trigonometry</td><td>Second-order ADAA acos().</td></tr>
+          <tr data-ugen="arcsin trigonometry first-order adaa cos()."><td>ArcSin</td><td>Trigonometry</td><td>First-order ADAA cos().</td></tr>
+          <tr data-ugen="arcsin2 trigonometry first-order adaa cos()."><td>ArcSin2</td><td>Trigonometry</td><td>First-order ADAA cos().</td></tr>
+          <tr data-ugen="atanh1 trigonometry first-order adaa atanh()."><td>ATanh1</td><td>Trigonometry</td><td>First-order ADAA atanh().</td></tr>
+          <tr data-ugen="atanh2 trigonometry first-order adaa cos()."><td>Atanh2</td><td>Trigonometry</td><td>First-order ADAA cos().</td></tr>
+          <tr data-ugen="cosine1 trigonometry first-order adaa cos()."><td>Cosine1</td><td>Trigonometry</td><td>First-order ADAA cos().</td></tr>
+          <tr data-ugen="cosine2 trigonometry first-order adaa cos()."><td>Cosine2</td><td>Trigonometry</td><td>First-order ADAA cos().</td></tr>
+          <tr data-ugen="tangent trigonometry first-order adaa tan()."><td>Tangent</td><td>Trigonometry</td><td>First-order ADAA tan().</td></tr>
+          <tr data-ugen="trigonometry unitgenerator collection of trigonomertric unitgenerators at audio rate"><td>Trigonometry</td><td>UnitGenerator</td><td>Collection of trigonomertric UnitGenerators at audio rate</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="toolkit">
+      <h2>17. Toolkit <span class="fam-count">23</span></h2>
+      <p>Higher-level utilities: sequencers, selectors, loopers, capture and routing helpers.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="lforandompos lfoformodulation lowfrequencyoscillator with random positive values"><td>LFORandomPos</td><td>LFOForModulation</td><td>LowFrequencyOscillator with random positive values</td></tr>
+          <tr data-ugen="ph2blockschain unitgenerator helper class to contruct chains for physical models"><td>Ph2BlocksChain</td><td>UnitGenerator</td><td>Helper class to contruct chains for physical models</td></tr>
+          <tr data-ugen="phcapture unitgenerator capture audio input while capture button is pressed."><td>PhCapture</td><td>UnitGenerator</td><td>Capture audio input while Capture button is pressed.</td></tr>
+          <tr data-ugen="phcontrolparameter object parameter of a unitgenerator that can be changed in real time if assigned to one subclass of uiprimitive §"><td>PhControlParameter</td><td>Object</td><td>Parameter of a UnitGenerator that can be changed in real time if assigned to one subclass of UIPrimitive §</td></tr>
+          <tr data-ugen="phdensitygate unitgenerator am phdensitygate a noise-based random gate."><td>PhDensityGate</td><td>UnitGenerator</td><td>Am PhDensityGate a noise-based random gate.</td></tr>
+          <tr data-ugen="phendrouting unitgenerator helper class to contruct chains for physical models"><td>PhEndRouting</td><td>UnitGenerator</td><td>Helper class to contruct chains for physical models</td></tr>
+          <tr data-ugen="phincrementer phbox increment by incrvalue at every step."><td>PhIncrementer</td><td>PhBox</td><td>Increment by incrValue at every step.</td></tr>
+          <tr data-ugen="phlist unitgenerator am the phausto implementation of a faust list, simulated in the language using parallel composition: (1,2,3,5,7,11)."><td>PhList</td><td>UnitGenerator</td><td>Am the Phausto implementation of a Faust list, simulated in the language using parallel composition: (1,2,3,5,7,11).</td></tr>
+          <tr data-ugen="phlooper unitgenerator a simple looper with speed playback control"><td>PhLooper</td><td>UnitGenerator</td><td>A simple looper with speed playback control</td></tr>
+          <tr data-ugen="phmem unitgenerator a 1 sample delay."><td>PhMem</td><td>UnitGenerator</td><td>A 1 sample delay.</td></tr>
+          <tr data-ugen="phpostrouting unitgenerator helper class to construct chains for physical models"><td>PhPostRouting</td><td>UnitGenerator</td><td>Helper class to construct chains for physical models</td></tr>
+          <tr data-ugen="phprerouting unitgenerator helper class to construct chains for physical models"><td>PhPreRouting</td><td>UnitGenerator</td><td>Helper class to construct chains for physical models</td></tr>
+          <tr data-ugen="phreaderwithspeed unitgenerator phreaderwithspeed, i read audio buffers at a desired speed."><td>PhReaderWithSpeed</td><td>UnitGenerator</td><td>PhReaderWithSpeed, I read audio buffers at a desired speed.</td></tr>
+          <tr data-ugen="phresetter unitgenerator resetter, when triggered, i set my value to 0."><td>PhResetter</td><td>UnitGenerator</td><td>Resetter, when triggered, I set my value to 0.</td></tr>
+          <tr data-ugen="phselect4 phbox select between 4 inputs, starts counting at 0"><td>PhSelect4</td><td>PhBox</td><td>Select between 4 inputs, starts counting at 0</td></tr>
+          <tr data-ugen="phselectn unitgenerator select inputs at index."><td>PhSelectN</td><td>UnitGenerator</td><td>Select inputs at index.</td></tr>
+          <tr data-ugen="phsequencer unitgenerator high level abstractio for sequencer"><td>PhSequencer</td><td>UnitGenerator</td><td>High level abstractio for sequencer</td></tr>
+          <tr data-ugen="phsubbeat unitgenerator tempo: the tempo in beays per minutes clockdivider: the clock divisions, set 2 for 16th notes, 4 to for 8th notes, 8 for beats."><td>PhSubBeat</td><td>UnitGenerator</td><td>Tempo: the tempo in beays per minutes clockDivider: the clock divisions, set 2 for 16th notes, 4 to for 8th notes, 8 for beats.</td></tr>
+          <tr data-ugen="phsynctrig unitgenerator am phsynctrig a sin-based resettable trigger generator"><td>PhSyncTrig</td><td>UnitGenerator</td><td>Am PhSyncTrig a sin-based resettable trigger generator</td></tr>
+          <tr data-ugen="phtkcounter unitgenerator phausto counter, i count from 1 to maxvalue when triggered."><td>PhTkCounter</td><td>UnitGenerator</td><td>Phausto counter, I count from 1 to maxValue when triggered.</td></tr>
+          <tr data-ugen="phzerolist phlist special subclass of phlist counting from zero, used for parallel composition that avoid transformation into phbox before cobersion to dsp"><td>PhZeroList</td><td>PhList</td><td>Special subclass of PhList counting from zero, used for parallel composition that avoid transformation into PhBox before cobersion to Dsp</td></tr>
+          <tr data-ugen="pulsegate phresetctr pulsegate is a class that selectively allows specific pulses to pass through from a sequence of impulses generated by an existing pulse generator."><td>PulseGate</td><td>PhResetCtr</td><td>PulseGate is a class that selectively allows specific pulses to pass through from a sequence of impulses generated by an existing pulse generator.</td></tr>
+          <tr data-ugen="sampleplayer phbox "><td>SamplePlayer</td><td>PhBox</td><td><span class="no-desc">—</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="ui">
+      <h2>18. UI Primitives <span class="fam-count">9</span></h2>
+      <p>Sliders, buttons, checkboxes and bargraphs. See <a href="ui-primitives.html">UI Primitives</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="phbutton uiprimitive represent a faust button, you need me to display a button in your ui"><td>PhButton</td><td>UIPrimitive</td><td>Represent a Faust button, you need me to display a button in your UI</td></tr>
+          <tr data-ugen="phcheckbox uiprimitive am checkbox/toggle faust ui primitive - i encode an information about my type separated with a tilde ~ from the label."><td>PhCheckbox</td><td>UIPrimitive</td><td>Am checkbox/toggle Faust UI primitive - I encode an information about my type separated with a tilde ~ from the label.</td></tr>
+          <tr data-ugen="phhbargraph unitgenerator the hbargraph primitive implements a vertical bar-graph (typically a meter displaying the level of a signal)."><td>PhHBarGraph</td><td>UnitGenerator</td><td>The hbargraph primitive implements a vertical bar-graph (typically a meter displaying the level of a signal).</td></tr>
+          <tr data-ugen="phhslider phslider faust horizontal slider"><td>PhHSlider</td><td>PhSlider</td><td>Faust horizontal slider</td></tr>
+          <tr data-ugen="phnumentry phslider the nentry primitive implements a &quot;numerical entry&quot;."><td>PhNumEntry</td><td>PhSlider</td><td>The nentry primitive implements a &quot;numerical entry&quot;.</td></tr>
+          <tr data-ugen="phslider uiprimitive super class for horizontal, vertical and numentry slider created by the faust compiler."><td>PhSlider</td><td>UIPrimitive</td><td>Super class for Horizontal, Vertical and NumEntry slider created by the Faust compiler.</td></tr>
+          <tr data-ugen="phvbargraph unitgenerator the hbargraph primitive implements a vertical bar-graph (typically a meter displaying the level of a signal)."><td>PhVBarGraph</td><td>UnitGenerator</td><td>The hbargraph primitive implements a vertical bar-graph (typically a meter displaying the level of a signal).</td></tr>
+          <tr data-ugen="phvslider phslider phausto vertical slider"><td>PhVSlider</td><td>PhSlider</td><td>Phausto vertical slider</td></tr>
+          <tr data-ugen="uiprimitive object faust user interface widgets/primitives allow for an abstract description of a user interface from within the faust code."><td>UIPrimitive</td><td>Object</td><td>Faust user interface widgets/primitives allow for an abstract description of a user interface from within the Faust code.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="turbo">
+      <h2>19. TurboPhausto <span class="fam-count">17</span></h2>
+      <p>The batteries-included layer: samplers, ready-made synths and engine parts. See <a href="turbophausto.html">TurboPhausto</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="acid tpsynth acid is the phausto clone of the roland tb-303."><td>Acid</td><td>TpSynth</td><td>Acid is the Phausto clone of the Roland TB-303.</td></tr>
+          <tr data-ugen="chordy tpsynth am chordy, a simple 3 voices oscillator with controllable mode (minor/major/ sus4 / sus2) and cutoff frequency of my resonant ;owpass filter"><td>Chordy</td><td>TpSynth</td><td>Am Chordy, a simple 3 voices oscillator with controllable mode (minor/major/ sus4 / sus2) and cutoff frequency of my resonant ;owpass filter</td></tr>
+          <tr data-ugen="customphausto turbophausto abstract subclass of turbophausto made to create custom version of turbophausto."><td>CustomPhausto</td><td>TurboPhausto</td><td>Abstract subclass of TurboPhausto made to create custom version of TurboPhausto.</td></tr>
+          <tr data-ugen="ecophausto customphausto lighter version of turbophausto designed for improved performance on windows/linux without audio interface."><td>EcoPhausto</td><td>CustomPhausto</td><td>Lighter version of TurboPhausto designed for improved performance on Windows/Linux without audio interface.</td></tr>
+          <tr data-ugen="fm2op tpsynth two operator fm synthesiser with adsr envelope."><td>Fm2Op</td><td>TpSynth</td><td>Two operator FM synthesiser with ADSR envelope.</td></tr>
+          <tr data-ugen="greyholedw unitgenerator greyhole reverb with dry/wet control."><td>GreyHoleDW</td><td>UnitGenerator</td><td>GreyHole reverb with dry/wet control.</td></tr>
+          <tr data-ugen="moophausto turbophausto the moophausto is a reduced turbophausto engine designed for the live coding performance with mooflod widgets."><td>MooPhausto</td><td>TurboPhausto</td><td>The MooPhausto is a reduced TurboPhausto engine designed for the live coding performance with MOOFLOD widgets.</td></tr>
+          <tr data-ugen="phaustoengine object an abstract superclass for turbophausto engines to be used with coypu for live coding"><td>PhaustoEngine</td><td>Object</td><td>An abstract superclass for TurboPhausto engines to be used with Coypu for live coding</td></tr>
+          <tr data-ugen="psgplus tpsynth synthesiser with selectable oscillators/noise with a basic lfo for pitch and a am modulation on output."><td>PsgPlus</td><td>TpSynth</td><td>Synthesiser with selectable Oscillators/Noise with a basic LFO for pitch and a AM Modulation on output.</td></tr>
+          <tr data-ugen="tphoover tpsynth hoover inspired sound modeled after roland alpha juno sound but using two sawtooth waves instead of a pulse with modulated pwm"><td>TpHoover</td><td>TpSynth</td><td>Hoover inspired sound modeled after Roland Alpha Juno sound but using two Sawtooth waves instead of a Pulse with modulated PWM</td></tr>
+          <tr data-ugen="tpkarplus unitgenerator ready to use karplus strong !"><td>TpKarplus</td><td>UnitGenerator</td><td>Ready to use Karplus strong !</td></tr>
+          <tr data-ugen="tpkick99 tpsynth 909 style kick implemented with the techinques explained https://www.soundonsound.com/techniques/practical-bass-drum-synthesis"><td>TpKick99</td><td>TpSynth</td><td>909 style kick implemented with the techinques explained https://www.soundonsound.com/techniques/practical-bass-drum-synthesis</td></tr>
+          <tr data-ugen="tpreese tpsynth reese bass synthesiser with adsr envelope."><td>TpReese</td><td>TpSynth</td><td>Reese bass synthesiser with ADSR envelope.</td></tr>
+          <tr data-ugen="tpsampler tpsynth (multi)sample player."><td>TpSampler</td><td>TpSynth</td><td>(Multi)Sample Player.</td></tr>
+          <tr data-ugen="tpsamplerreverb tpsynth (multi) sample player."><td>TpSamplerReverb</td><td>TpSynth</td><td>(Multi) Sample Player.</td></tr>
+          <tr data-ugen="tpsynth unitgenerator tpsynth stands for turbophauto synth."><td>TpSynth</td><td>UnitGenerator</td><td>TpSynth stands for TurboPhauto Synth.</td></tr>
+          <tr data-ugen="turbophausto phaustoengine this class is used to load all the instruments and effect of turbophausto."><td>TurboPhausto</td><td>PhaustoEngine</td><td>This class is used to load all the instruments and effect of TurboPhausto.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="demo">
+      <h2>20. Demos <span class="fam-count">37</span></h2>
+      <p>Ready-made FAUST demo patches, one line each. See the <a href="demos.html">Demo Gallery</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="colored_noise_demo phdemos a coloured noise signal generator."><td>Colored_Noise_Demo</td><td>PhDemos</td><td>A coloured noise signal generator.</td></tr>
+          <tr data-ugen="compressor_demo phdemosstereo audio compressor demo."><td>Compressor_Demo</td><td>PhDemosStereo</td><td>Audio Compressor demo.</td></tr>
+          <tr data-ugen="crybaby_demo phdemosmono the dunlop cry baby is a popular wah-wah pedal, manufactured by dunlop manufacturing, inc."><td>CryBaby_Demo</td><td>PhDemosMono</td><td>The Dunlop Cry Baby is a popular wah-wah pedal, manufactured by Dunlop Manufacturing, Inc.</td></tr>
+          <tr data-ugen="cubicnl_demo phdemosmono cubi distortion demo"><td>Cubicnl_Demo</td><td>PhDemosMono</td><td>Cubi Distortion demo</td></tr>
+          <tr data-ugen="dattorro_rev_demo phdemosstereo datorro reverb demo."><td>Dattorro_Rev_Demo</td><td>PhDemosStereo</td><td>Datorro Reverb Demo.</td></tr>
+          <tr data-ugen="envelopes_demo phdemos illustrate various envelopes overlaid, including their gate * 1.1."><td>Envelopes_Demo</td><td>PhDemos</td><td>Illustrate various envelopes overlaid, including their gate * 1.1.</td></tr>
+          <tr data-ugen="exciter_demo phdemosmono psychoacoustic harmonic exciter, with gui."><td>Exciter_Demo</td><td>PhDemosMono</td><td>Psychoacoustic harmonic exciter, with GUI.</td></tr>
+          <tr data-ugen="fft_spectral_level_demo phdemos make a real-time spectrum analyzer using fft from analyzers.lib."><td>Fft_Spectral_Level_demo</td><td>PhDemos</td><td>Make a real-time spectrum analyzer using FFT from analyzers.lib.</td></tr>
+          <tr data-ugen="filterbank_demo phdemosmono filter bank demo"><td>FilterBank_Demo</td><td>PhDemosMono</td><td>Filter bank demo</td></tr>
+          <tr data-ugen="flanger_demo phdemosstereo flanger effect demo."><td>Flanger_Demo</td><td>PhDemosStereo</td><td>Flanger effect demo.</td></tr>
+          <tr data-ugen="freeverb_demo phdemosstereo freeverb demo"><td>Freeverb_Demo</td><td>PhDemosStereo</td><td>Freeverb demo</td></tr>
+          <tr data-ugen="gate_demo phdemosstereo noise gate demo."><td>Gate_Demo</td><td>PhDemosStereo</td><td>Noise Gate demo.</td></tr>
+          <tr data-ugen="greyhole_demo phdemosstereo greyhole reverb demo"><td>GreyHole_Demo</td><td>PhDemosStereo</td><td>GreyHole Reverb demo</td></tr>
+          <tr data-ugen="jprev_demo phdemosstereo jp reverb demo"><td>JpRev_Demo</td><td>PhDemosStereo</td><td>Jp REverb demo</td></tr>
+          <tr data-ugen="kbromrev1 phdemosstereo keith barr reverb effect rom_rev1 demo application."><td>KbRomRev1</td><td>PhDemosStereo</td><td>Keith Barr reverb effect rom_rev1 demo application.</td></tr>
+          <tr data-ugen="latch_demo phdemos illustrate latch operation."><td>Latch_Demo</td><td>PhDemos</td><td>Illustrate latch operation.</td></tr>
+          <tr data-ugen="moog_vcf_demo phdemosmono illustrate and compare all three moog vcf implementations."><td>Moog_Vcf_Demo</td><td>PhDemosMono</td><td>Illustrate and compare all three Moog VCF implementations.</td></tr>
+          <tr data-ugen="oscrs_demo phdemos simple application demoing filter based oscillators."><td>Oscrs_Demo</td><td>PhDemos</td><td>Simple application demoing filter based oscillators.</td></tr>
+          <tr data-ugen="parametric_eq_demo phdemosmono demo of a parametric equalizer."><td>Parametric_Eq_Demo</td><td>PhDemosMono</td><td>Demo of a parametric equalizer.</td></tr>
+          <tr data-ugen="phaser2_demo phdemosstereo phaser effeect demo."><td>Phaser2_Demo</td><td>PhDemosStereo</td><td>Phaser effeect demo.</td></tr>
+          <tr data-ugen="phdemos unitgenerator subclasses of demo are complex unit generations with a ready-ui coming from faust examples"><td>PhDemos</td><td>UnitGenerator</td><td>Subclasses of demo are complex Unit Generations with a ready-UI coming from Faust examples</td></tr>
+          <tr data-ugen="phdemosmono phdemos superclass for mono demos"><td>PhDemosMono</td><td>PhDemos</td><td>Superclass for mono demos</td></tr>
+          <tr data-ugen="phdemosstereo phdemos superclass for stereo demos"><td>PhDemosStereo</td><td>PhDemos</td><td>Superclass for stereo demos</td></tr>
+          <tr data-ugen="phvitalrev_demo phdemosstereo vitalrev demo"><td>PhVitalRev_Demo</td><td>PhDemosStereo</td><td>VitalRev demo</td></tr>
+          <tr data-ugen="pospass_demo phdemosmono use positive-pass filter pospass() to frequency-shift a sine tone."><td>PosPass_Demo</td><td>PhDemosMono</td><td>Use Positive-Pass Filter pospass() to frequency-shift a sine tone.</td></tr>
+          <tr data-ugen="reverbtank_demo phdemosstereo this is a stereo reverb following the &quot;reverbtank&quot; example in [1], although some parameter ranges and scaling have been adjusted."><td>ReverbTank_Demo</td><td>PhDemosStereo</td><td>This is a stereo reverb following the &quot;ReverbTank&quot; example in [1], although some parameter ranges and scaling have been adjusted.</td></tr>
+          <tr data-ugen="reverse_echo_demo phdemosmono multichannel echo effect with reverse delays."><td>Reverse_Echo_Demo</td><td>PhDemosMono</td><td>Multichannel echo effect with reverse delays.</td></tr>
+          <tr data-ugen="sawtooth_demo phdemos an application demonstrating the different sawtooth oscillators of faust."><td>Sawtooth_Demo</td><td>PhDemos</td><td>An application demonstrating the different sawtooth oscillators of Faust.</td></tr>
+          <tr data-ugen="spectral_tilt_demo phdemosmono a spectral tilt application."><td>Spectral_Tilt_Demo</td><td>PhDemosMono</td><td>A spectral tilt application.</td></tr>
+          <tr data-ugen="tapestop_demo phdemosstereo tapestop effect demo."><td>TapeStop_Demo</td><td>PhDemosStereo</td><td>TapeStop effect demo.</td></tr>
+          <tr data-ugen="twin_osc_demo phdemos twinosc - virtual analog synthesis with a time-varying comb filter."><td>Twin_Osc_Demo</td><td>PhDemos</td><td>TwinOsc - virtual analog synthesis with a time-varying comb filter.</td></tr>
+          <tr data-ugen="velvet_noise_demo phdemos simple application demoing filter based oscillators."><td>Velvet_Noise_Demo</td><td>PhDemos</td><td>Simple application demoing filter based oscillators.</td></tr>
+          <tr data-ugen="virtual_analog_oscillator_demo phdemos virtual analog oscillator demo application."><td>Virtual_Analog_Oscillator_Demo</td><td>PhDemos</td><td>Virtual analog oscillator demo application.</td></tr>
+          <tr data-ugen="vocoder_demo phdemosmono use example of the vocoder function where an impulse train is used as excitation."><td>Vocoder_Demo</td><td>PhDemosMono</td><td>Use example of the vocoder function where an impulse train is used as excitation.</td></tr>
+          <tr data-ugen="wah4_demo phdemosmono wahwah pedal demo"><td>Wah4_Demo</td><td>PhDemosMono</td><td>WahWah pedal demo</td></tr>
+          <tr data-ugen="zitalight phdemosstereo light version of zita rev1 with only 2 ui elements."><td>ZitaLight</td><td>PhDemosStereo</td><td>Light version of Zita Rev1 with only 2 UI elements.</td></tr>
+          <tr data-ugen="zitarev1 phdemosstereo example gui for zitarev1stereo (mostly following the linux zita-rev1 gui)."><td>ZitaRev1</td><td>PhDemosStereo</td><td>Example GUI for zitarev1stereo (mostly following the Linux zita-rev1 GUI).</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="core">
+      <h2>21. Core &amp; Infrastructure <span class="fam-count">12</span></h2>
+      <p>The base classes and low-level boxes everything else is built on. See <a href="internals.html">Architecture &amp; Internals</a>.</p>
+      <div class="param-table-wrap">
+      <table class="param-table ugen-table">
+        <thead><tr><th>Class</th><th>Inherits from</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr data-ugen="cut phbox use the cut object to cut a signal (stop it!)"><td>Cut</td><td>PhBox</td><td>Use the Cut object to cut a signal (stop it!)</td></tr>
+          <tr data-ugen="dsp ffiopaqueobject opaque structure representing a dsp object."><td>DSP</td><td>FFIOpaqueObject</td><td>Opaque structure representing a DSP object.</td></tr>
+          <tr data-ugen="dspparameter object dspparameter represents a single adjustable value of a dsp unit."><td>DSPParameter</td><td>Object</td><td>DSPParameter represents a single adjustable value of a DSP unit.</td></tr>
+          <tr data-ugen="dspparameterstore object &quot;dspparameterstore holds all parameters of a dsp unit."><td>DSPParameterStore</td><td>Object</td><td>&quot;DSPParameterStore holds all parameters of a DSP unit.</td></tr>
+          <tr data-ugen="phbox ffiopaqueobject box class, used as a container for boxes."><td>PhBox</td><td>FFIOpaqueObject</td><td>Box class, used as a container for Boxes.</td></tr>
+          <tr data-ugen="phcrossnn unitgenerator cross two bus(n)s."><td>PhCrossnn</td><td>UnitGenerator</td><td>Cross two bus(N)s.</td></tr>
+          <tr data-ugen="phmultiplier phbox phmultiplier."><td>PhMultiplier</td><td>PhBox</td><td>PhMultiplier.</td></tr>
+          <tr data-ugen="select2 phbox the select2 primitive is a &quot;two-way selector&quot;."><td>Select2</td><td>PhBox</td><td>The select2 primitive is a &quot;two-way selector&quot;.</td></tr>
+          <tr data-ugen="soundfile phbox the soundfile primitive allows the access of a list of externally defined sound resources, described as the list of their filename, or complete paths."><td>SoundFile</td><td>PhBox</td><td>The soundfile primitive allows the access of a list of externally defined sound resources, described as the list of their filename, or complete paths.</td></tr>
+          <tr data-ugen="unitgenerator object super class of all unit generators."><td>UnitGenerator</td><td>Object</td><td>Super class of all Unit Generators.</td></tr>
+          <tr data-ugen="unitgeneratornullobject object am the unitgeneratornullobject, all the unitgenerators instances become an instance of my class after an underlying faust context is destroyed."><td>UnitGeneratorNullObject</td><td>Object</td><td>Am the UnitGeneratorNullObject, all the UnitGenerators instances become an instance of my class after an underlying Faust context is destroyed.</td></tr>
+          <tr data-ugen="wire phbox this box represents a wire ( _ )in the faust programming language."><td>Wire</td><td>PhBox</td><td>This box represents a wire ( _ )in the Faust programming language.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="next-steps" class="next-steps">
+      <h2>22. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="traits.html">Setter Traits</a></td><td>The selectors these classes respond to, and where they come from.</td></tr>
+          <tr><td><a href="basics.html">Unit Generators</a></td><td>What every entry in this table has in common.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>What to do with a UGen once you have chosen one.</td></tr>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>Joining several of these into a patch.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>23. Troubleshooting</h2>
+
+      <h4>I cannot find a class I know exists</h4>
+      <p>
+        Clear the filter first — it hides whole families. Test classes, traits, the Cmajor exporters
+        and the FFI layer are deliberately not listed here; see
+        <a href="internals.html">Architecture &amp; Internals</a> and <a href="exporting.html">Exporting</a>.
+      </p>
+
+      <h4>The class is listed but has no description</h4>
+      <p>It carries no class comment in the package. The superclass column is usually the best clue.</p>
+
+      <h4>A class here does not understand the setter I expect</h4>
+      <p>
+        Setters arrive by trait, and not every class composes every trait. Check
+        <a href="traits.html">Setter Traits</a>, then confirm with <code>traceAllParams</code>.
+      </p>
+
+      <h4>Two classes look like they do the same thing</h4>
+      <p>
+        Usually they differ in channel count (<code>Mono</code> versus <code>Stereo</code>), in
+        detection method, or in whether they apply a gain or merely compute one. The
+        <a href="effects.html">dynamics naming guide</a> explains the pattern.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+<script>
+(function () {
+  var input = document.getElementById("ugenFilter");
+  var count = document.getElementById("ugenCount");
+  var rows = Array.prototype.slice.call(document.querySelectorAll("tr[data-ugen]"));
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section[id]")).filter(function (s) {
+    return s.querySelector("tr[data-ugen]");
+  });
+  var total = rows.length;
+
+  function apply() {
+    var q = input.value.trim().toLowerCase();
+    var shown = 0;
+    rows.forEach(function (r) {
+      var hit = !q || r.getAttribute("data-ugen").indexOf(q) !== -1;
+      r.classList.toggle("filtered-out", !hit);
+      if (hit) shown++;
+    });
+    sections.forEach(function (s) {
+      var any = Array.prototype.slice.call(s.querySelectorAll("tr[data-ugen]")).some(function (r) {
+        return !r.classList.contains("filtered-out");
+      });
+      s.classList.toggle("filtered-out", !any);
+    });
+    count.textContent = q ? shown + " of " + total + " unit generators" : total + " unit generators";
+  }
+
+  input.addEventListener("input", apply);
+  apply();
+})();
+</script>
+</body>
+</html>

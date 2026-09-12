@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Exporting</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="exporting.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Advanced › Exporting</div>
+    <h1>Exporting</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      A patch built in a Playground does not have to stay there. Phausto can emit a CMajor patch, a
+      complete JUCE plugin project, or C++ for a Bela board — from the same object you have been
+      listening to.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#why">Why export at all</a></li>
+        <li><a href="#faust">Plain FAUST files</a></li>
+        <li><a href="#cmajor">CMajor patches</a>
+          <ol>
+            <li><a href="#cmajor-classes">The CMajor classes</a></li>
+            <li><a href="#cmajor-poly">Polyphonic wrapping</a></li>
+          </ol>
+        </li>
+        <li><a href="#juce">JUCE plugins</a>
+          <ol>
+            <li><a href="#juce-types">Plugin types</a></li>
+            <li><a href="#juce-apvts">APVTS: the parameter tree</a></li>
+            <li><a href="#juce-files">The generated files</a></li>
+          </ol>
+        </li>
+        <li><a href="#bela">Bela</a></li>
+        <li><a href="#portability">Writing a patch that travels</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="why">
+      <h2>1. Why export at all</h2>
+
+      <p>
+        Pharo is an excellent place to design a sound and a poor place to ship one. Exporting closes
+        that gap: the instrument you prototyped interactively becomes a plugin your collaborators can
+        load, or a binary on a board that boots without a computer attached.
+      </p>
+
+      <p>
+        Everything rests on the same fact — a Phausto patch <em>is</em> a FAUST program. The
+        exporters take the FAUST that <code>generatedCode</code> would give you and wrap it in
+        whatever scaffolding the target needs.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Export is a code generator, not a compiler</span>
+        Phausto writes source files. Building them is a separate step with the target's own
+        toolchain — the CMajor runtime, JUCE and CMake, or the Bela toolchain.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="faust">
+      <h2>2. Plain FAUST files</h2>
+
+      <p>
+        The simplest export is the FAUST source itself, which is also the most portable — anything
+        that accepts FAUST will take it.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Writes</th></tr></thead>
+        <tbody>
+          <tr><td>createFileNamed: aString</td><td>The DSP as a FAUST file</td></tr>
+          <tr><td>createFaustSynthFileNamed: aName</td><td>A synth-shaped FAUST file</td></tr>
+          <tr><td>createFaustPolySynthFileNamed: aName</td><td>A polyphonic synth file</td></tr>
+          <tr><td>createFaustSynthHeaderFileNamed: aName</td><td>The accompanying header</td></tr>
+          <tr><td>createFaustHeaderFileNamed: aName for: aPluginType</td><td>A header for a given plugin type</td></tr>
+          <tr><td>generatedCode</td><td>The source as a string, without writing anything</td></tr>
+          <tr><td>writeAsPosixText: aString to: aFileReference</td><td>Write text with POSIX line endings</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>synth := <span class="cls">SawOsc</span> new =&gt; <span class="cls">ADSREnv</span> new =&gt; <span class="cls">MoogVcf</span> new.
+dsp := synth stereo asDsp.
+dsp init.
+
+dsp generatedCode.                        <span class="cmt">"inspect it first"</span>
+dsp createFaustSynthFileNamed: <span class="str">'MySynth'</span>.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="cmajor">
+      <h2>3. CMajor patches</h2>
+
+      <p>
+        <a href="https://cmajor.dev/">CMajor</a> is a language and runtime for audio, with its own
+        patch format that loads in a host or standalone player. Phausto emits complete patches,
+        including the interface.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+        <tbody>
+          <tr><td>createCmajorPatchNamed: aName</td><td>An instrument patch</td></tr>
+          <tr><td>createCmajorFXPatchNamed: aName</td><td>An effect patch — audio in, audio out</td></tr>
+          <tr><td>createCmajorMIDIPatchNamed: aName</td><td>A MIDI-driven instrument patch</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>dsp createCmajorMIDIPatchNamed: <span class="str">'MyInstrument'</span>.</code></pre>
+
+      <section id="cmajor-classes">
+        <h3>3.1 The CMajor classes</h3>
+
+        <p>The export is modelled by objects rather than string templating, so it can be extended:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>CmajorPatch</td><td>A patch</td></tr>
+            <tr><td>CmajorFXPatch</td><td>An effect patch</td></tr>
+            <tr><td>CmajorMIDIPatch</td><td>A MIDI instrument patch</td></tr>
+            <tr><td>CmajorView</td><td>The patch's interface</td></tr>
+            <tr><td>CmajorUIElement</td><td>Superclass of the view elements</td></tr>
+            <tr><td>CmajorKnob</td><td>A knob</td></tr>
+            <tr><td>CmajorFader</td><td>A fader</td></tr>
+            <tr><td>CmajorBackground</td><td>The view background</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Your <a href="ui-primitives.html">UI primitives</a> become CMajor endpoints and view
+          elements automatically — a <code>PhHSlider</code> in the patch becomes a control in the
+          exported interface, with the range you declared.
+        </p>
+      </section>
+
+      <section id="cmajor-poly">
+        <h3>3.2 Polyphonic wrapping</h3>
+
+        <p>
+          A Phausto patch is monophonic by construction. To make a CMajor instrument polyphonic it
+          has to be wrapped in a voice allocator, and Phausto generates that wrapper:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+          <tbody>
+            <tr><td>asCmajorPolyWrapperFor: aName</td><td>A polyphonic voice wrapper</td></tr>
+            <tr><td>aDictionary asCmajorPolyWrapper</td><td>The wrapper from an endpoint description</td></tr>
+            <tr><td>aDictionary asCmajorEventEndpoint</td><td>An event endpoint</td></tr>
+            <tr><td>aDictionary asCmajorEventsToVoicesConnection</td><td>Event-to-voice routing</td></tr>
+            <tr><td>aDictionary asCmajorListOfUIEndpoints</td><td>The UI endpoint list</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Design for one voice</span>
+          Build and tune the instrument as a single voice. Polyphony is added at export, and a patch
+          that sounds right monophonically will almost always sound right multiplied.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="juce">
+      <h2>4. JUCE plugins</h2>
+
+      <p>
+        The most substantial exporter generates a complete
+        <a href="https://juce.com/">JUCE</a> project — processor, editor, parameter tree and build
+        files — ready to compile into a VST3 or Audio Unit.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+        <tbody>
+          <tr><td>export2JuceWithName: aString type: aPluginType</td><td>A JUCE project</td></tr>
+          <tr><td>export2JuceAPVTSWithName: aString type: aPluginType</td><td>A project with a full parameter tree</td></tr>
+          <tr><td>export2JuceAPVTSWithName: aString for: aPluginType</td><td>The same, alternative form</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>dsp export2JuceAPVTSWithName: <span class="str">'MyPlugin'</span> type: aPluginType.</code></pre>
+
+      <section id="juce-types">
+        <h3>4.1 Plugin types</h3>
+
+        <p>
+          The plugin type selects which project template is used. Phausto ships three, corresponding
+          to the three shapes a plugin can take:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Template</th><th>Shape</th></tr></thead>
+          <tbody>
+            <tr><td>Mono synth</td><td>MIDI in, audio out, one voice</td></tr>
+            <tr><td>Poly synth</td><td>MIDI in, audio out, multiple voices</td></tr>
+            <tr><td>Effects</td><td>Audio in, audio out</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The templates live in <code>faus2JuceTemplates</code> in the Phausto repository, as
+          <code>Source_monoSynth</code>, <code>Source_polySynth</code> and
+          <code>Source_effects</code>. Reading them is the quickest way to see what the exporter
+          fills in.
+        </p>
+      </section>
+
+      <section id="juce-apvts">
+        <h3>4.2 APVTS: the parameter tree</h3>
+
+        <p>
+          JUCE's <code>AudioProcessorValueTreeState</code> is how a plugin exposes automatable
+          parameters to a host. Phausto builds it from your patch's own controls, which is why
+          declaring proper ranges on your <a href="ui-primitives.html">widgets</a> pays off at export
+          time.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>apvtsControls</td><td>The controls to expose</td></tr>
+            <tr><td>apvtsParameterControls</td><td>Just the automatable parameters</td></tr>
+            <tr><td>apvtsControlsFrom: aJsonString</td><td>Controls parsed from a UI description</td></tr>
+            <tr><td>apvtsParameterControlsFrom: aJsonString</td><td>Parameters from a UI description</td></tr>
+            <tr><td>apvtsDescriptorRowFor: aControl</td><td>One row of the parameter descriptor</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">This is what DSPParameter was for</span>
+          A parameter's label, range, step and default all travel into the plugin. The separation
+          between <code>DSPParameter</code> and <code>DSPParameterStore</code> described in
+          <a href="dsp-api.html">DSP &amp; Parameter API §8</a> exists precisely so this mapping is
+          straightforward.
+        </div>
+      </section>
+
+      <section id="juce-files">
+        <h3>4.3 The generated files</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Writes</th></tr></thead>
+          <tbody>
+            <tr><td>createCppAPVTSFilesNamed:for:</td><td>Processor source with APVTS</td></tr>
+            <tr><td>createHeaderAPVTSFilesNamed:for:</td><td>Processor header</td></tr>
+            <tr><td>createCppEditorAPVTSFilesNamed:for:</td><td>Editor source</td></tr>
+            <tr><td>createHeaderEditorAPVTSFilesNamed:for:</td><td>Editor header</td></tr>
+            <tr><td>createPluginProcessorHeader:</td><td>Plugin processor header</td></tr>
+            <tr><td>createPhaustoParamsHeaderNamed:</td><td>A header of parameter definitions</td></tr>
+            <tr><td>createJucerFileNamed:for:</td><td>A Projucer project file</td></tr>
+            <tr><td>createCMakeFileNamed:for:</td><td>A CMake build file</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Setter code for the C++ side is generated from your parameter names through the
+          <code>String</code> and <code>Array</code> extensions —
+          <code>asCppSetterDefinition</code>, <code>asCppSetterImplementationFor:</code> and their
+          plural forms — so each Phausto parameter becomes a named C++ setter rather than a numeric
+          index.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="bela">
+      <h2>5. Bela</h2>
+
+      <p>
+        <a href="https://bela.io/">Bela</a> is an embedded platform for low-latency audio. Exporting
+        to it produces a C++ file to build on the board:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Writes</th></tr></thead>
+        <tbody>
+          <tr><td>createBelaCppFileNamed: aName</td><td>A Bela-ready C++ file</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Bela's analogue inputs are reached through widget metadata: declaring
+        <code>belaPin:</code> on a <a href="ui-primitives.html">UI primitive</a> binds that control
+        to a physical input. A potentiometer wired to the board then drives the parameter directly,
+        with no code in between.
+      </p>
+
+<pre><code><span class="cmt">"This slider becomes a hardware input on the board"</span>
+cutoff := <span class="cls">PhHSlider</span> new
+  label: <span class="str">'Cutoff'</span> values: #(<span class="num">800</span> <span class="num">40</span> <span class="num">12000</span> <span class="num">1</span>);
+  belaPin: <span class="num">0</span>.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Prototype with the mouse, deploy to the knob</span>
+        The same declaration is a slider in Pharo and an analogue pin on the board. You can develop
+        the instrument entirely on your laptop and only then move it, without changing the patch.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="portability">
+      <h2>6. Writing a patch that travels</h2>
+
+      <p>
+        Some habits cost nothing while prototyping and save real trouble at export. All of them
+        amount to the same principle: put information in the patch rather than in the Playground
+        around it.
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Use widgets, not numbers</strong> — a value fixed as a literal is invisible to every exporter. A <code>PhHSlider</code> becomes a plugin parameter, a CMajor endpoint or a Bela pin.</div>
+        <div class="step"><strong>Declare real ranges</strong> — the minimum, maximum, step and default travel with the parameter and become what the host shows. Sloppy ranges become a sloppy plugin.</div>
+        <div class="step"><strong>Name things deliberately</strong> — parameter names become the names musicians see. Relabel your UGens, as in <a href="basics.html">Unit Generators §2.2</a>.</div>
+        <div class="step"><strong>Express time in seconds</strong> — a delay fixed in samples changes pitch at a different sample rate. Use <code>PhSec2Samp</code> or <code>PhSampleRate</code>; see <a href="math.html">Math §6</a>.</div>
+        <div class="step"><strong>Keep sequencing outside the patch</strong> — forked Pharo loops do not export. Rhythm that must survive belongs in the signal graph, as pulses and counters; see <a href="sequencing.html">Sequencing §1</a>.</div>
+        <div class="step"><strong>Declare MIDI bindings on the widget</strong> — <code>midiCtrl:</code> is honoured by the FAUST runtime, by the plugin and by the board alike.</div>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">The one that catches everyone</span>
+        A patch driven by <code>[ ... ] fork</code> and <code>dsp setValue:parameter:</code> makes
+        sound in Pharo and silence everywhere else. Pharo is the sequencer in that arrangement, and
+        Pharo does not come with the plugin.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="ui-primitives.html">UI Primitives</a></td><td>Declaring the controls that become plugin parameters.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>The parameter model the exporters read.</td></tr>
+          <tr><td><a href="faust-box.html">Raw FAUST &amp; the Box API</a></td><td>Reading and shaping the FAUST that gets exported.</td></tr>
+          <tr><td><a href="midi.html">MIDI &amp; Playing Notes</a></td><td>Making an instrument playable before you export it.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4>The exported plugin has no parameters</h4>
+      <p>
+        The patch was built with literal numbers, so there was nothing to expose. Use widgets —
+        §6.
+      </p>
+
+      <h4>The plugin loads but is silent</h4>
+      <p>
+        If the sequencing lived in a forked Pharo loop, it did not come with you. Move the rhythm
+        into the signal graph, or drive the plugin from the host — §6.
+      </p>
+
+      <h4>Parameter ranges in the host look wrong</h4>
+      <p>
+        They are whatever you declared on the widget. Check the <code>values:</code> array order —
+        initial value first. See <a href="ui-primitives.html">UI Primitives §2.1</a>.
+      </p>
+
+      <h4>The exported instrument is monophonic</h4>
+      <p>
+        Phausto patches are single-voice by construction. Use a polyphonic template for JUCE, or the
+        CMajor poly wrapper — §3.2 and §4.1.
+      </p>
+
+      <h4>The generated project will not build</h4>
+      <p>
+        Export writes source, not binaries — the target's toolchain does the rest. Confirm JUCE,
+        CMake or the Bela toolchain is installed and that the template files are present — §1, §4.1.
+      </p>
+
+      <h4>The exported patch sounds different from the one in Pharo</h4>
+      <p>
+        Most often a sample-rate assumption. Anything specified in samples will shift; express times
+        in seconds — §6.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

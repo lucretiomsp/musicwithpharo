@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — MIDI &amp; Playing Notes</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="midi.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › MIDI &amp; Playing Notes</div>
+    <h1>MIDI &amp; Playing Notes</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Turning a DSP into an instrument you can play: note numbers instead of frequencies, MIDI-enabled
+      DSPs, on-screen keyboards, and mapping hardware controllers to parameters.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#notes">Notes, not frequencies</a>
+          <ol>
+            <li><a href="#notes-conversion">Converting by hand</a></li>
+          </ol>
+        </li>
+        <li><a href="#playnote">Playing a note</a>
+          <ol>
+            <li><a href="#playnote-labels">Preparing an instrument</a></li>
+            <li><a href="#playnote-patterns">Patterns</a></li>
+          </ol>
+        </li>
+        <li><a href="#midi-dsp">MIDI-enabled DSPs</a></li>
+        <li><a href="#keyboard">On-screen keyboards</a></li>
+        <li><a href="#mapping">Mapping controllers</a></li>
+        <li><a href="#instruments">The MIDI instrument classes</a></li>
+        <li><a href="#external">External MIDI hardware</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="notes">
+      <h2>1. Notes, not frequencies</h2>
+
+      <p>
+        A DSP thinks in hertz; music is usually written in notes. MIDI note numbers bridge the two:
+        an integer from 0 to 127, where 60 is middle C and each step is a semitone. Phausto converts
+        between the two representations in several places so you rarely have to.
+      </p>
+
+      <section id="notes-conversion">
+        <h3>1.1 Converting by hand</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Expression</th><th>Converts</th></tr></thead>
+          <tbody>
+            <tr><td>60 midiNNToFreq</td><td>MIDI note number to hertz, in Pharo</td></tr>
+            <tr><td>aSignal midikey2hz</td><td>MIDI note number to hertz, inside the signal graph</td></tr>
+            <tr><td>PhMidiKey2Hz</td><td>The same conversion as a UGen</td></tr>
+            <tr><td>PhHz2MidiKey</td><td>Hertz back to a MIDI note number</td></tr>
+            <tr><td>PhPianoKey2Hz</td><td>Piano key number to hertz</td></tr>
+            <tr><td>PhHz2PianoKey</td><td>Hertz to piano key number</td></tr>
+            <tr><td>PhSemi2Ratio</td><td>Semitones to a frequency ratio — for transposition</td></tr>
+            <tr><td>PhCent2Ratio</td><td>Cents to a frequency ratio — for fine tuning</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The distinction matters: <code>midiNNToFreq</code> is a Pharo message that computes a
+          number before the DSP is built, while <code>midikey2hz</code> and
+          <code>PhMidiKey2Hz</code> operate on a signal at audio rate. Use the first for a fixed
+          note, the second when the note number is itself modulated.
+        </p>
+
+<pre><code><span class="cmt">"A fixed note, converted once at build time"</span>
+osc := <span class="cls">SineOsc</span> new freq: <span class="num">69</span> midiNNToFreq.   <span class="cmt">"A4, 440 Hz"</span>
+
+<span class="cmt">"A note number that changes — converted in the graph"</span>
+osc := <span class="cls">SineOsc</span> new freq: (noteSignal midikey2hz).</code></pre>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="playnote">
+      <h2>2. Playing a note</h2>
+
+      <div class="method-sig"><span class="badge">method</span> playNote: aMidiNN prefix: aString dur: aDuration</div>
+
+      <p>
+        This one message does everything a note-on/note-off pair does: it converts the note number to
+        a frequency, writes it to the instrument's frequency parameter, opens the gate, waits, and
+        closes the gate again.
+      </p>
+
+<pre><code>dsp playNote: <span class="num">60</span> prefix: <span class="str">'ElecGuitar'</span> dur: <span class="num">0.25</span>.</code></pre>
+
+      <section id="playnote-labels">
+        <h3>2.1 Preparing an instrument</h3>
+
+        <p>
+          The <code>prefix:</code> is how the method finds the two parameters it needs. The
+          instrument must expose a frequency and a gate whose names begin with that prefix, which
+          you arrange by passing symbols to the setters:
+        </p>
+
+<pre><code><span class="cmt">"Symbols name the parameters rather than fixing their values"</span>
+synth := <span class="cls">ElecGuitar</span> new
+  freq:    #ElecGuitarFreq;
+  trigger: #ElecGuitarTrigger.
+
+dsp := synth asDsp.
+dsp init.
+dsp start.</code></pre>
+
+        <div class="callout note">
+          <span class="callout-title">Any UGen can become playable</span>
+          There is nothing guitar-specific here. Give any UGen with a frequency and a gate a matching
+          pair of symbol labels and <code>playNote:prefix:dur:</code> will play it — including a
+          <code>TpSampler</code>, which is how sample-based melodic playback works. See
+          <a href="sequencing.html">Sequencing §4.3</a>.
+        </div>
+      </section>
+
+      <section id="playnote-patterns">
+        <h3>2.2 Patterns</h3>
+
+        <p>
+          With that in place, a melody is an ordinary Pharo loop. Fork it so the image stays
+          responsive:
+        </p>
+
+<pre><code><span class="cmt">"A random line, 128 notes, one every 125 ms"</span>
+pattern := [
+  dsp playNote: (<span class="cls">Random</span> new nextIntegerBetween: <span class="num">28</span> and: <span class="num">76</span>)
+      prefix: <span class="str">'ElecGuitar'</span>
+      dur:    <span class="num">0.11</span>.
+  (<span class="cls">Delay</span> forMilliseconds: <span class="num">125</span>) wait
+].
+
+[<span class="num">128</span> timesRepeat: pattern] fork.</code></pre>
+
+        <p>
+          Because it is just Pharo, a scale is a collection, a chord is three sends, and a
+          probabilistic sequence is an <code>ifTrue:</code>. This is the point at which Phausto stops
+          being a synthesiser and starts being a composition environment.
+        </p>
+
+<pre><code><span class="cmt">"A D minor pentatonic scale, ascending"</span>
+scale := #(<span class="num">62</span> <span class="num">65</span> <span class="num">67</span> <span class="num">69</span> <span class="num">72</span>).
+[ scale do: [ :n |
+    dsp playNote: n prefix: <span class="str">'ElecGuitar'</span> dur: <span class="num">0.2</span>.
+    <span class="num">220</span> milliSeconds wait ] ] fork.</code></pre>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="midi-dsp">
+      <h2>3. MIDI-enabled DSPs</h2>
+
+      <p>
+        A DSP can be compiled with MIDI support built in, so that the FAUST runtime interprets MIDI
+        messages itself rather than requiring you to translate them:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>asDspMIDI</td><td>Compile the UGen chain as a MIDI-enabled DSP</td></tr>
+          <tr><td>asDspMIDIWithName:</td><td>The same, with a name you choose</td></tr>
+          <tr><td>isMIDI</td><td>Whether a DSP was built with MIDI support</td></tr>
+          <tr><td>isMIDI:</td><td>Set the MIDI flag</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>synth := <span class="cls">SawOsc</span> new =&gt; <span class="cls">ADSREnv</span> new =&gt; <span class="cls">MoogVcf</span> new.
+dsp := synth asDspMIDI.
+dsp init.
+dsp start.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Two different things called MIDI</span>
+        <code>playNote:prefix:dur:</code> uses MIDI <em>note numbers</em> but is not MIDI — it is
+        Pharo writing to parameters. <code>asDspMIDI</code> builds a DSP that understands actual MIDI
+        <em>messages</em>. You can use either, or both.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="keyboard">
+      <h2>4. On-screen keyboards</h2>
+
+      <p>
+        For trying an instrument out, Phausto can open a piano keyboard bound to it:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>keyBoardFor:</td><td>A keyboard presenter bound to a named instrument</td></tr>
+          <tr><td>requirePianoKeyboard</td><td>Ensure the keyboard component is available</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>kb := dsp keyBoardFor: <span class="str">'ElecGuitar'</span>.
+kb openInWindow.</code></pre>
+
+      <p>
+        The keyboard sends the same note events <code>playNote:prefix:dur:</code> does, so an
+        instrument prepared as in §2.1 works with it immediately.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="mapping">
+      <h2>5. Mapping controllers</h2>
+
+      <p>
+        FAUST supports metadata declarations that bind a UI element to a MIDI control, and Phausto
+        exposes them directly on <code>UIPrimitive</code>. The binding is declared on the widget when
+        you build the patch, and the runtime does the rest.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Binds to</th></tr></thead>
+        <tbody>
+          <tr><td>midiCtrl: aNumber</td><td>A MIDI continuous controller number, any channel</td></tr>
+          <tr><td>midiCtrl: aNumber channel: aChannel</td><td>A controller on a specific channel</td></tr>
+          <tr><td>midiKeyon: aPitch</td><td>Note-on for a given pitch</td></tr>
+          <tr><td>midiPitchwheel</td><td>The pitch bend wheel</td></tr>
+          <tr><td>declare: aKey value: aValue</td><td>Any FAUST metadata declaration</td></tr>
+          <tr><td>belaPin: aBelaPin</td><td>An analogue pin on a Bela board</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"Bind the filter cutoff to the modulation wheel (CC 1)"</span>
+cutoff := <span class="cls">PhHSlider</span> new
+  label: <span class="str">'Cutoff'</span> values: #(<span class="num">800</span> <span class="num">40</span> <span class="num">12000</span> <span class="num">1</span>);
+  midiCtrl: <span class="num">1</span>.
+
+voice := <span class="cls">SawOsc</span> new =&gt; (<span class="cls">MoogVcf</span> new cutoff: cutoff smoo).
+dsp := voice stereo asDspMIDI.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Smooth mapped controls</span>
+        MIDI controllers send coarse 7-bit values, so a mapped parameter steps in 128 increments and
+        will audibly zipper. Append <code>smoo</code> — see
+        <a href="envelopes.html">Envelopes §5</a>.
+      </div>
+
+      <p>
+        The same <code>belaPin:</code> declaration is what lets a patch exported to a Bela board read
+        its analogue inputs — see <a href="exporting.html">Exporting</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="instruments">
+      <h2>6. The MIDI instrument classes</h2>
+
+      <p>
+        Several physical models ship in a MIDI-ready variant, already wired so that note number and
+        gate arrive where they should. When you want to play an instrument rather than design one,
+        start with these:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Instrument</th></tr></thead>
+        <tbody>
+          <tr><td>DjembeMIDI</td><td>Goblet drum</td></tr>
+          <tr><td>MarimbaMIDI</td><td>Tuned bars</td></tr>
+          <tr><td>ElecGuitarMIDI</td><td>Electric guitar</td></tr>
+          <tr><td>GuitarMIDI</td><td>Acoustic guitar</td></tr>
+          <tr><td>NylonGuitarMIDI</td><td>Nylon-string guitar</td></tr>
+          <tr><td>ViolinMIDI</td><td>Bowed violin</td></tr>
+          <tr><td>KarplusStrongMIDI</td><td>Plucked string</td></tr>
+          <tr><td>ClarinetMIDI</td><td>Clarinet</td></tr>
+          <tr><td>FluteMIDI</td><td>Flute</td></tr>
+          <tr><td>BrassMIDI</td><td>Brass</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>See <a href="physical-models.html">Physical Modelling</a> for what each one models.</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="external">
+      <h2>7. External MIDI hardware</h2>
+
+      <p>
+        Phausto generates sound; it does not itself open MIDI ports. For sending and receiving MIDI
+        to and from external hardware inside Pharo, the companion package is
+        <strong>Pharo-Sound</strong>, which wraps PortMidi over uFFI. <strong>Coypu</strong> builds
+        on both and adds live-coding sequencing, including MIDI output to hardware synthesisers.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Package</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Phausto</td><td>Synthesis and DSP; consumes note numbers and controller values</td></tr>
+          <tr><td>Pharo-Sound</td><td>MIDI send and receive via PortMidi</td></tr>
+          <tr><td>Coypu</td><td>Live-coding sequencer; drives Phausto, MIDI, SuperDirt, Kyma and Pd</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">A patch built with symbols is already controllable</span>
+        Whatever ends up driving your DSP — a forked loop, a MIDI keyboard, Coypu, an OSC message —
+        it all arrives through the same named parameters. Designing with symbols rather than
+        constants is what keeps every one of those routes open.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="sequencing.html">Sequencing &amp; Sampling</a></td><td>Generating the patterns that call playNote:.</td></tr>
+          <tr><td><a href="ui-primitives.html">UI Primitives</a></td><td>The widgets that carry the MIDI metadata.</td></tr>
+          <tr><td><a href="turbophausto.html">TurboPhausto</a></td><td>A performance rack driven from Coypu.</td></tr>
+          <tr><td><a href="exporting.html">Exporting</a></td><td>Taking a MIDI patch out to a plugin or a Bela board.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4><code>playNote:prefix:dur:</code> produces no sound</h4>
+      <p>
+        The instrument's frequency and gate are not labelled with the prefix. Set them with symbols
+        and confirm the resulting names with <code>traceAllParams</code> — §2.1.
+      </p>
+
+      <h4>Notes sound but always at the same pitch</h4>
+      <p>
+        The frequency was fixed as a number at construction time, so the note number has nowhere to
+        go. Pass a symbol instead — §2.1.
+      </p>
+
+      <h4>Notes never release, and the sound piles up</h4>
+      <p>
+        The gate parameter is not being found, so the note-off half of the cycle does nothing. Check
+        the trigger label matches the prefix — §2.1.
+      </p>
+
+      <h4>My MIDI controller does nothing</h4>
+      <p>
+        Check three things in order: the DSP was built with <code>asDspMIDI</code> rather than
+        <code>asDsp</code> (§3); the widget carries a <code>midiCtrl:</code> declaration (§5); and
+        the controller number and channel match what the hardware sends.
+      </p>
+
+      <h4>A mapped control moves in audible steps</h4>
+      <p>MIDI is 7-bit. Add <code>smoo</code> — §5.</p>
+
+      <h4>I want to send MIDI out to a hardware synth</h4>
+      <p>That is Pharo-Sound or Coypu, not Phausto — §7.</p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

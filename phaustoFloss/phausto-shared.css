@@ -544,3 +544,463 @@ hr.section-divider {
   /* method sig wraps */
   .method-sig { font-size: .78rem; }
 }
+
+/* =========================================================
+   STRUCTURAL ADDITIONS — injected nav, page contents,
+   footer navigation, search, dark theme.
+   Everything above this line is unchanged.
+   ========================================================= */
+
+/* ---- SIDEBAR: injected markup ----
+   The sidebar element itself carries class .sidebar and IS the <nav>,
+   so links are addressed through .sidebar-nav rather than ".sidebar nav". */
+.sidebar-nav {
+  flex: 1;
+  padding: .4rem 0 2rem;
+}
+
+.sidebar-nav a,
+.nav-quicklinks .quicklink-row a {
+  display: block;
+  padding: .42rem 1.4rem .42rem 1.6rem;
+  font-size: .875rem;
+  color: #b8cbbf;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .15s, background .15s, border-color .15s;
+  font-weight: 400;
+}
+
+.sidebar-nav a:hover,
+.nav-quicklinks .quicklink-row a:hover {
+  color: var(--white);
+  background: rgba(255,255,255,.05);
+}
+
+.sidebar-nav a[aria-current="page"] {
+  color: var(--sage-light);
+  border-left-color: var(--sage-light);
+  background: rgba(192,64,79,.07);
+  font-weight: 500;
+}
+
+.nav-category {
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: .9rem 1.4rem .3rem;
+  font-weight: 500;
+}
+
+.nav-quicklinks {
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding-bottom: .6rem;
+}
+
+.nav-quicklinks .quicklink-row a {
+  color: var(--sage-pale);
+  font-size: .82rem;
+  padding-top: .28rem;
+  padding-bottom: .28rem;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: .68rem;
+  padding: .2rem .5rem;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+
+.theme-toggle:hover { color: var(--white); border-color: var(--sage-light); }
+
+/* ---- PAGE LEDE ---- */
+.lede {
+  font-size: 1.02rem;
+  color: var(--muted);
+  margin-bottom: 1.6rem;
+  max-width: 62ch;
+}
+
+/* ---- PER-PAGE CONTENTS BLOCK ---- */
+.page-toc {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.3rem;
+  margin: 0 0 2rem;
+}
+
+.page-toc h2 {
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 0 .5rem;
+  padding: 0;
+  border: none;
+}
+
+.page-toc ol {
+  margin: 0 0 0 1.3rem;
+  font-size: .88rem;
+  list-style: decimal;
+}
+
+.page-toc ol ol {
+  margin: .15rem 0 .35rem 1.2rem;
+  font-size: .84rem;
+  list-style: decimal;
+}
+
+.page-toc li { margin-bottom: .12rem; }
+
+.page-toc a { color: var(--text); text-decoration: none; }
+.page-toc a:hover { color: var(--sage); text-decoration: underline; }
+
+/* ---- SECTION ANCHORS ---- */
+.content section { scroll-margin-top: 1.5rem; }
+
+/* ---- WHERE TO GO NEXT ---- */
+.next-steps table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+  margin: .8rem 0 1.4rem;
+}
+
+.next-steps th {
+  text-align: left;
+  padding: .5rem .8rem;
+  background: var(--sage-pale);
+  color: var(--ink-mid);
+  font-weight: 600;
+  font-size: .78rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
+}
+
+.next-steps td {
+  padding: .55rem .8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.next-steps td:first-child { white-space: nowrap; font-weight: 600; }
+.next-steps td:first-child a { color: var(--sage); text-decoration: none; }
+.next-steps td:first-child a:hover { text-decoration: underline; }
+
+/* ---- TROUBLESHOOTING ---- */
+.troubleshooting h4 {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 1.5rem 0 .3rem;
+  padding-left: .9rem;
+  border-left: 3px solid var(--amber);
+}
+
+.troubleshooting h4 + p { margin-left: .9rem; }
+
+/* ---- FOOTER NAVIGATION (3 slots) ---- */
+.page-nav .up {
+  text-align: center;
+  flex: 0 0 auto;
+  max-width: none;
+  justify-content: center;
+}
+
+.page-nav .nav-label {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin-bottom: .2rem;
+}
+
+/* ---- EDIT ON GITHUB ---- */
+.edit-link {
+  margin: 1.4rem 0 2.4rem;
+  font-size: .8rem;
+}
+
+.edit-link a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--border);
+}
+
+.edit-link a:hover { color: var(--sage); border-bottom-color: var(--sage); }
+
+/* ---- SEARCH OVERLAY ---- */
+.search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(20,28,23,.55);
+  z-index: 300;
+  padding-top: 12vh;
+}
+
+.search-overlay.visible { display: block; }
+
+.search-panel {
+  width: min(560px, 92vw);
+  margin: 0 auto;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(0,0,0,.28);
+  overflow: hidden;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: .95rem 1.1rem;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--white);
+}
+
+.search-input:focus { outline: 2px solid var(--sage-pale); outline-offset: -2px; }
+
+.search-results { max-height: 52vh; overflow-y: auto; }
+
+.search-results a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: .55rem 1.1rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-results a:hover { background: var(--cream); }
+.search-results .hit-title { font-size: .9rem; color: var(--ink); font-weight: 500; }
+.search-results .hit-cat {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.search-empty { padding: 1rem 1.1rem; font-size: .88rem; color: var(--muted); }
+
+/* ---- MARKUP ALIASES ----
+   The original pages use a handful of class names the stylesheet
+   never defined. These make that existing markup render correctly. */
+.toc-title {
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .7rem;
+  font-weight: 500;
+}
+
+.callout.note { background: #fdeaec; border-color: var(--sage); color: var(--ink-mid); }
+
+.callout-title {
+  display: block;
+  font-weight: 600;
+  font-size: .78rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: .25rem;
+}
+
+.callout.tip .callout-title     { color: #8a6410; }
+.callout.warning .callout-title { color: #a05500; }
+
+.steps { margin: .8rem 0 1.2rem; }
+
+.step {
+  padding: .5rem .9rem;
+  border-left: 3px solid var(--sage-pale);
+  margin-bottom: .4rem;
+  font-size: .92rem;
+  background: var(--cream);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: .64rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  background: var(--sage);
+  color: var(--white);
+  padding: .1em .5em;
+  border-radius: 3px;
+  margin-right: .5rem;
+  vertical-align: middle;
+}
+
+pre code .cls { color: #1a4f8a; font-weight: 500; }
+
+/* ---- INDEX PAGE ---- */
+.hero {
+  background: var(--ink);
+  color: var(--white);
+  padding: clamp(2.4rem, 6vw, 4rem) clamp(1.1rem, 5vw, 3rem) clamp(2rem, 4vw, 3rem);
+  border-bottom: 2px solid var(--sage);
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: .7rem;
+}
+
+.hero h1 span { color: var(--sage-light); }
+
+.hero p {
+  color: #b8cbbf;
+  font-size: 1.02rem;
+  max-width: 60ch;
+  margin-bottom: 1.6rem;
+}
+
+.hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
+
+.btn {
+  display: inline-block;
+  padding: .6rem 1.3rem;
+  border-radius: var(--radius);
+  font-size: .9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s, background .15s;
+}
+
+.btn-primary { background: var(--sage); color: var(--white); }
+.btn-primary:hover { background: var(--sage-light); }
+.btn-ghost { border: 1px solid rgba(255,255,255,.25); color: var(--cream); }
+.btn-ghost:hover { background: rgba(255,255,255,.07); }
+
+.install-banner {
+  margin: 1.6rem clamp(1.1rem, 5vw, 3rem) 0;
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  padding: 1rem 1.3rem;
+  border-left: 3px solid var(--sage);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.install-banner span {
+  color: var(--muted);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.install-banner pre { margin: 0; padding: 0; background: none; border: none; flex: 1; }
+.install-banner code { font-size: .82rem; }
+
+.index-body { padding: 0 clamp(1.1rem, 5vw, 3rem) 3rem; }
+
+.index-category {
+  font-size: .7rem;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 2.2rem 0 .8rem;
+  padding-bottom: .4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.doc-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
+  display: block;
+}
+
+.doc-card:hover { border-color: var(--sage); box-shadow: 0 2px 12px rgba(139,34,50,.1); }
+.doc-card .card-title { display: block; font-size: .98rem; font-weight: 600; color: var(--ink); margin-bottom: .3rem; }
+.doc-card .card-desc  { display: block; font-size: .84rem; color: var(--muted); line-height: 1.5; }
+
+/* =========================================================
+   DARK THEME — custom-property swap only.
+   Toggled by phausto-nav.js, persisted under "phausto-theme".
+   ========================================================= */
+html.dark {
+  --ink:        #0d1310;
+  --ink-mid:    #cbd8d0;
+  --sage:       #e0707e;
+  --sage-light: #f08c98;
+  --sage-pale:  #3a1f25;
+  --amber:      #d9a24e;
+  --cream:      #1a231d;
+  --white:      #131a16;
+  --code-bg:    #16222c;
+  --code-line:  #1e2d3a;
+  --border:     #2b3a31;
+  --text:       #d3e0d8;
+  --muted:      #8aa294;
+}
+
+html.dark pre code           { color: #cfe2f2; }
+html.dark pre code .kw       { color: #f08c98; }
+html.dark pre code .str      { color: #e0b070; }
+html.dark pre code .cmt      { color: #7fa4c8; }
+html.dark pre code .num      { color: #7fd0a0; }
+html.dark pre code .sym      { color: #c79be0; }
+html.dark pre code .cls      { color: #7fb8f0; }
+html.dark code:not(pre code) { background: #2c1a20; color: #e8d0d4; }
+
+html.dark .callout.info,
+html.dark .callout.note      { background: #2a1a1e; }
+html.dark .callout.tip       { background: #2a2418; color: #e6dcc4; }
+html.dark .callout.warning   { background: #2c2013; color: #ecd9bd; }
+
+html.dark .page-nav a:hover  { background: #22171a; }
+html.dark .sidebar-nav a,
+html.dark .nav-quicklinks .quicklink-row a { color: #9fb4a8; }
+
+/* ---- RESPONSIVE: additions ---- */
+@media (max-width: 720px) {
+  .page-nav .up { order: -1; }
+  .page-toc { padding: .8rem 1rem; }
+  .search-overlay { padding-top: 6vh; }
+}

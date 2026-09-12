@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Physical Modelling</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="physical-models.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Physical Modelling</div>
+    <h1>Physical Modelling</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Eighty-seven classes that compute what a physical object would do rather than replaying a
+      recording of one. Ready-made instruments at the top, and the waveguide primitives to build
+      your own underneath.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#idea">The idea</a></li>
+        <li><a href="#percussion">Modal percussion</a></li>
+        <li><a href="#strings">String instruments</a>
+          <ol>
+            <li><a href="#strings-ready">Ready-made instruments</a></li>
+            <li><a href="#strings-parts">String parts</a></li>
+          </ol>
+        </li>
+        <li><a href="#winds">Wind instruments</a>
+          <ol>
+            <li><a href="#winds-parts">Wind parts</a></li>
+          </ol>
+        </li>
+        <li><a href="#exciters">Exciters</a></li>
+        <li><a href="#voice">Formant and vocal synthesis</a></li>
+        <li><a href="#waveguides">Building your own: bidirectional waveguides</a></li>
+        <li><a href="#setters">The physical setters</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="idea">
+      <h2>1. The idea</h2>
+
+      <p>
+        A physical model computes a mathematical description of a sound source — the stiffness of a
+        bar, the length of a tube, the pressure of a breath — and lets the sound emerge from that
+        simulation. Nothing is sampled and nothing is pre-baked.
+      </p>
+
+      <p>
+        The payoff is expressiveness. Because the parameters are physical, they behave the way
+        physical things behave: strike a modelled drum harder and the timbre changes, not just the
+        level; shorten a modelled string and the harmonics shift as they would on a real one. This is
+        very difficult to achieve with sampling and effortless here.
+      </p>
+
+      <p>
+        The cost is that a physical model, like a physical instrument, usually needs to be
+        <em>excited</em> before it does anything. This is the single most common reason a physical
+        model appears to be silent.
+      </p>
+
+<pre><code><span class="cmt">"A West African goblet drum, computed from first principles"</span>
+perc := <span class="cls">Djembe</span> new.
+dsp  := perc asDsp.
+dsp init.
+dsp start.
+dsp displayUI.   <span class="cmt">"press DjembeTrigger to strike it"</span>
+dsp stop.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="percussion">
+      <h2>2. Modal percussion</h2>
+
+      <p>
+        <code>ModalPercussion</code> covers struck objects, modelled as a bank of resonant modes.
+        Four of the eight are bells, tuned to the different national traditions of bell founding —
+        which is exactly the kind of thing a physical model can express and a sample library cannot
+        generalise.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Instrument</th></tr></thead>
+        <tbody>
+          <tr><td>Djembe</td><td>West African goblet drum</td></tr>
+          <tr><td>DjembeMIDI</td><td>Djembe with MIDI note input</td></tr>
+          <tr><td>Marimba</td><td>Sub-Saharan idiophone with tuned bars</td></tr>
+          <tr><td>MarimbaMIDI</td><td>Marimba with MIDI note input</td></tr>
+          <tr><td>EnglishBell</td><td>English bell tuning</td></tr>
+          <tr><td>FrenchBell</td><td>French bell tuning</td></tr>
+          <tr><td>GermanBell</td><td>German bell tuning</td></tr>
+          <tr><td>RussianBell</td><td>Russian bell tuning</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Underneath them are <code>PhModalModel</code> and <code>PhModeFilter</code>, which let you
+        specify your own set of modes — frequency, gain and decay time each — and so build an object
+        that has never existed. See <a href="synthesis.html">Synthesis §4</a>.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Swap and listen</span>
+        Every one of these takes the same messages. Substituting <code>Marimba</code> for
+        <code>Djembe</code> in a working patch requires changing exactly one word, which makes them
+        ideal for learning what modal parameters actually do.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="strings">
+      <h2>3. String instruments</h2>
+
+      <section id="strings-ready">
+        <h3>3.1 Ready-made instruments</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Instrument</th></tr></thead>
+          <tbody>
+            <tr><td>ElecGuitar</td><td>Electric guitar, plucked string model</td></tr>
+            <tr><td>ElecGuitarMIDI</td><td>Electric guitar with MIDI note input</td></tr>
+            <tr><td>Guitar</td><td>Acoustic guitar</td></tr>
+            <tr><td>GuitarMIDI</td><td>Acoustic guitar with MIDI note input</td></tr>
+            <tr><td>NylonGuitarMIDI</td><td>Nylon-string guitar</td></tr>
+            <tr><td>ViolinModel</td><td>Bowed violin</td></tr>
+            <tr><td>ViolinMIDI</td><td>Violin with MIDI note input</td></tr>
+            <tr><td>KarplusStrongMIDI</td><td>Karplus–Strong plucked string</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="cmt">"Guitar into a reverb — the example from MasterLu lesson 6"</span>
+synth := <span class="cls">ElecGuitar</span> new =&gt; <span class="cls">GreyHole</span> new.
+dsp := synth asDsp.
+dsp init.
+dsp start.
+dsp displayUI.   <span class="cmt">"press ElecGuitarTrigger to pluck"</span>
+dsp stop.</code></pre>
+
+        <p>
+          The bowed models are the ones that reward experimentation most: <code>bowPressure:</code>
+          and <code>bowVelocity:</code> interact the way a real bow does, including the ability to
+          produce a scratchy, unstable tone if you get the combination wrong.
+        </p>
+      </section>
+
+      <section id="strings-parts">
+        <h3>3.2 String parts</h3>
+
+        <p>
+          The instruments above are assemblies. The components are available separately, which is
+          how you build an instrument that does not exist yet:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>PhIdealString</td><td>A lossless ideal string</td></tr>
+            <tr><td>PhSteelString, PhNylonString</td><td>Strings with material-appropriate damping</td></tr>
+            <tr><td>PhOpenString</td><td>String open at both ends</td></tr>
+            <tr><td>PhOpenStringPickup, PhOpenStringPickdown</td><td>Open string with pickup direction</td></tr>
+            <tr><td>PhNylonGuitar, PhNylonGuitarModel</td><td>Assembled nylon guitar body</td></tr>
+            <tr><td>PhStringSegment</td><td>A length of string, for building composites</td></tr>
+            <tr><td>PhGuitarBridge, PhGuitarNuts</td><td>Terminations at each end of the string</td></tr>
+            <tr><td>PhLStringRigidTermination, PhRStringRigidTermination</td><td>Rigid terminations, left and right</td></tr>
+            <tr><td>PhKarplusStrong</td><td>The Karplus–Strong algorithm itself</td></tr>
+            <tr><td>PhKsReflexionFilter</td><td>Reflection filter for Karplus–Strong</td></tr>
+            <tr><td>PhBridgeFilter</td><td>Bridge filtering</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="winds">
+      <h2>4. Wind instruments</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Instrument</th></tr></thead>
+        <tbody>
+          <tr><td>FluteModel</td><td>Flute — a jet driving an open tube</td></tr>
+          <tr><td>FluteMIDI</td><td>Flute with MIDI note input</td></tr>
+          <tr><td>ClarinetMIDI</td><td>Clarinet, single reed</td></tr>
+          <tr><td>BrassMIDI</td><td>Brass instrument, lip-driven</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <section id="winds-parts">
+        <h3>4.1 Wind parts</h3>
+
+        <p>
+          Wind models are built from an excitation mechanism plus a resonating tube, and both halves
+          are separately available:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>PhTube, PhOpenTube</td><td>The resonating air column</td></tr>
+            <tr><td>PhReedTable</td><td>Reed nonlinearity table</td></tr>
+            <tr><td>PhClarinetReed, PhClarinetMouthPiece</td><td>Clarinet excitation</td></tr>
+            <tr><td>PhClarinetModel, PhClarinetUI</td><td>Assembled clarinet, with and without interface</td></tr>
+            <tr><td>PhFluteJetTable</td><td>Flute jet nonlinearity</td></tr>
+            <tr><td>PhFluteModelUI, PhFluteUI</td><td>Assembled flute with interface</td></tr>
+            <tr><td>PhBrassLipsTable</td><td>Brass lip-reed nonlinearity</td></tr>
+            <tr><td>PhBrassModelUI, PhBrassUI</td><td>Assembled brass model with interface</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">The nonlinear table is the instrument</span>
+          A tube on its own is just a filter. What makes a clarinet sound like a clarinet is the
+          reed's nonlinear response coupling back into the tube. That coupling is what the
+          <code>…Table</code> classes provide, and swapping one for another turns one instrument into
+          another.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="exciters">
+      <h2>5. Exciters</h2>
+
+      <p>
+        An exciter is what sets a model in motion: a strike, a pluck, a puff of air. Because they are
+        separate objects, any exciter can drive any resonator.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Excitation</th></tr></thead>
+        <tbody>
+          <tr><td>PhStrike, PhStrikeModel</td><td>A struck impulse, with contact modelling</td></tr>
+          <tr><td>PhPluckString</td><td>A plucked displacement</td></tr>
+          <tr><td>PhImpulseExcitation</td><td>A bare impulse</td></tr>
+          <tr><td>PhBlower, PhBlower_UI</td><td>Breath pressure for wind models</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Mix and match</span>
+        Driving a string model with <code>PhBlower</code> instead of <code>PhPluckString</code>, or a
+        modal bar with a noise burst, produces instruments that do not exist physically but remain
+        entirely coherent — because the resonator still behaves like an object.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="voice">
+      <h2>6. Formant and vocal synthesis</h2>
+
+      <p>
+        Formant synthesis models the resonances of the vocal tract — the fixed frequency bands that
+        make a vowel recognisable regardless of pitch.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Method</th></tr></thead>
+        <tbody>
+          <tr><td>SFFormantModelBP</td><td>Band-pass filter bank formant model</td></tr>
+          <tr><td>SFFormantModelBP_ui</td><td>Band-pass model with interface</td></tr>
+          <tr><td>SFFormantModelFofCycle</td><td>FOF granular formant synthesis</td></tr>
+          <tr><td>SFFormantModelFofCycle_UI</td><td>FOF model with interface</td></tr>
+          <tr><td>PhVoiceGender</td><td>Vocal tract gender parameter</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="waveguides">
+      <h2>7. Building your own: bidirectional waveguides</h2>
+
+      <p>
+        The deepest layer is a set of bidirectional waveguide primitives — where signals travel in
+        two directions along a medium and reflect at its ends, exactly as waves do in a real string
+        or tube. These are the pieces the instruments above are assembled from.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>PhWaveguide</td><td>The waveguide itself</td></tr>
+          <tr><td>PhPmElement</td><td>Superclass of bidirectional elements</td></tr>
+          <tr><td>PhPmOutElement</td><td>Superclass of output-side elements</td></tr>
+          <tr><td>PhChain, PhEndChain</td><td>Assemble elements into a chain and terminate it</td></tr>
+          <tr><td>PhBasicBlock</td><td>A generic block within a chain</td></tr>
+          <tr><td>PhTerminations</td><td>Termination behaviour at the chain ends</td></tr>
+          <tr><td>InLeftWave, InRightWave, InLeftRightWave</td><td>Inject a signal travelling in a given direction</td></tr>
+          <tr><td>OutLeftWave, OutRightWave, OutLeftRightWave</td><td>Tap a signal travelling in a given direction</td></tr>
+          <tr><td>CloseIns, CloseOuts</td><td>Close the unused ends of a chain</td></tr>
+          <tr><td>PhAllpassNL</td><td>Nonlinear allpass — adds the character of a driven medium</td></tr>
+          <tr><td>PhF2l, PhL2f, PhL2s</td><td>Conversions between frequency, length and samples</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">This is the deep end</span>
+        Building a waveguide instrument by hand means thinking about wave propagation, impedance and
+        reflection, and about where in the chain you inject and tap. Start by reading the assembled
+        models — <code>PhNylonGuitarModel</code>, <code>PhClarinetModel</code> — as worked examples
+        rather than starting from primitives.
+      </div>
+
+      <p>
+        <code>PhF2l</code> and its siblings are worth knowing about even if you never build a
+        waveguide: they convert between a pitch and the physical length that produces it, which is
+        how a model knows how long to make its string when you ask for a note.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="setters">
+      <h2>8. The physical setters</h2>
+
+      <p>
+        Physical models take physical parameters, supplied by two dedicated traits. These are what
+        make the family expressive:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Setter</th><th>Controls</th></tr></thead>
+        <tbody>
+          <tr><td>pressure:</td><td>Breath or bow pressure</td></tr>
+          <tr><td>breathGain:</td><td>Amount of breath noise in a wind model</td></tr>
+          <tr><td>bowPressure:</td><td>How hard the bow presses</td></tr>
+          <tr><td>bowVelocity:</td><td>How fast the bow moves</td></tr>
+          <tr><td>bowPosition:</td><td>Where along the string the bow contacts</td></tr>
+          <tr><td>pluckPosition:</td><td>Where along the string it is plucked</td></tr>
+          <tr><td>strikePosition:</td><td>Where the object is struck</td></tr>
+          <tr><td>strikeSHarpness:</td><td>How sharp the strike is — mallet hardness</td></tr>
+          <tr><td>stringLength:</td><td>Physical string length</td></tr>
+          <tr><td>tubeLength:</td><td>Physical tube length</td></tr>
+          <tr><td>bellOpening:</td><td>How open the bell of a brass instrument is</td></tr>
+          <tr><td>stiffness:</td><td>Material stiffness — affects inharmonicity</td></tr>
+          <tr><td>excitation:</td><td>The excitation signal itself</td></tr>
+          <tr><td>length:</td><td>Generic length parameter</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Position parameters are the expressive ones</span>
+        <code>pluckPosition:</code> and <code>strikePosition:</code> change timbre without changing
+        pitch or loudness, because they change which modes get energy. Sweeping one under an LFO or
+        an envelope is a very cheap way to make a model sound played rather than triggered.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="synthesis.html">Synthesis Techniques</a></td><td>Modal synthesis built by hand from mode filters.</td></tr>
+          <tr><td><a href="midi.html">MIDI &amp; Playing Notes</a></td><td>The <code>…MIDI</code> variants and how to play them.</td></tr>
+          <tr><td><a href="sequencing.html">Sequencing &amp; Sampling</a></td><td>Triggering models from pulses and patterns.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The full class list for this family.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4>The model is completely silent</h4>
+      <p>
+        It has not been excited. Open <code>dsp displayUI</code> and press the trigger, or send
+        <code>dsp trig: 'DjembeTrigger'</code> — §1.
+      </p>
+
+      <h4>A wind model makes a continuous tone I cannot stop</h4>
+      <p>
+        Breath pressure is a sustained parameter, not a trigger. Set <code>pressure:</code> or
+        <code>breathGain:</code> back to zero — §8.
+      </p>
+
+      <h4>The bowed string sounds scratchy and unstable</h4>
+      <p>
+        That is physically accurate: the bow pressure and velocity combination is outside the range
+        that sustains a stable Helmholtz motion. Adjust both together — §3.1.
+      </p>
+
+      <h4>Changing the frequency changes the timbre too</h4>
+      <p>
+        Expected. In a physical model, pitch comes from the size of the object, and size affects
+        which modes ring. This is the behaviour you are paying for.
+      </p>
+
+      <h4><code>playNote:prefix:dur:</code> does nothing on a model</h4>
+      <p>
+        Its frequency and gate are not labelled to match the prefix. Set them with symbols first —
+        see <a href="parameters.html">Parameters §2</a>.
+      </p>
+
+      <h4>My hand-built waveguide is silent, or explodes</h4>
+      <p>
+        Almost always the terminations: an unterminated chain leaks, and a chain terminated with too
+        much reflection gain runs away. Check <code>CloseIns</code>/<code>CloseOuts</code> and the
+        reflection coefficients — §7.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Effects, Reverbs &amp; Dynamics</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="effects.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Effects, Reverbs &amp; Dynamics</div>
+    <h1>Effects, Reverbs &amp; Dynamics</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Everything that processes a signal rather than generating one: delays, saturation, modulation
+      effects, seven reverbs, and a thirty-class dynamics section.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#placing">Placing an effect</a>
+          <ol>
+            <li><a href="#placing-drywet">Dry and wet</a></li>
+          </ol>
+        </li>
+        <li><a href="#delays">Delays and echo</a></li>
+        <li><a href="#saturation">Saturation and distortion</a></li>
+        <li><a href="#modulation">Modulation effects</a></li>
+        <li><a href="#wah">Wah and formant effects</a></li>
+        <li><a href="#reverbs">Reverbs</a></li>
+        <li><a href="#dynamics">Dynamics</a>
+          <ol>
+            <li><a href="#dynamics-compressors">Compressors</a></li>
+            <li><a href="#dynamics-detection">Peak or RMS, feed-forward or feedback</a></li>
+            <li><a href="#dynamics-limiters">Limiters</a></li>
+            <li><a href="#dynamics-gates">Gates and expanders</a></li>
+          </ol>
+        </li>
+        <li><a href="#spatial">Spatial</a></li>
+        <li><a href="#order">Order of the chain</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="placing">
+      <h2>1. Placing an effect</h2>
+
+      <p>
+        An effect is a UGen with an input, so it goes on the end of a chuck chain like anything
+        else:
+      </p>
+
+<pre><code>voice := <span class="cls">SawOsc</span> new =&gt; <span class="cls">ADSREnv</span> new =&gt; <span class="cls">MoogVcf</span> new =&gt; <span class="cls">GreyHole</span> new.
+
+dsp := voice stereo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+dsp stop.</code></pre>
+
+      <div class="callout warning">
+        <span class="callout-title">Mono and stereo effects are different objects</span>
+        Names ending <code>Mono</code> take one channel; those ending <code>Stereo</code> take two.
+        Send <code>stereo</code> <em>before</em> a stereo effect so it has two channels to work
+        with — see <a href="connecting.html">Connecting §7</a>.
+      </div>
+
+      <section id="placing-drywet">
+        <h3>1.1 Dry and wet</h3>
+
+        <p>
+          Most effects sound best blended with the untreated signal rather than replacing it. Two
+          mixers exist for exactly this:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>DryWetMonoMixer</td><td>Blend a mono effect with its input</td></tr>
+            <tr><td>DryWetStereoMixer</td><td>Blend a stereo effect with its input</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Many effects also expose <code>wetAmount:</code> directly, from the
+          <code>PhWetAmountSetter</code> trait, which is simpler when the effect supports it.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="delays">
+      <h2>2. Delays and echo</h2>
+
+      <p>
+        <code>PhDelays</code> and its subclasses are the raw delay lines; <code>PhEcho</code> is the
+        musical echo built on top of one.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>PhSimpleDelay</td><td>Integer-sample delay — cheapest, cannot be modulated smoothly</td></tr>
+          <tr><td>PhFractionalDelay</td><td>Interpolated delay — required for smooth pitch and modulation</td></tr>
+          <tr><td>PhSmoothDelay</td><td>Delay with a smoothed delay-time control, for artefact-free changes</td></tr>
+          <tr><td>PhEcho</td><td>Echo with feedback — a delay you can actually play with</td></tr>
+          <tr><td>PhFibonacci</td><td>Multi-tap delay with Fibonacci-spaced taps</td></tr>
+          <tr><td>PhLooper</td><td>Looping buffer, from the toolkit</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Delay time and feedback come from <code>PhParamsSetter</code>: <code>maxDel:</code>,
+        <code>fb:</code> and <code>feedBack:</code>.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Modulating a delay time</span>
+        Changing an integer delay's length produces clicks, because samples are skipped or repeated.
+        Any effect that sweeps its delay — flanging, chorus, vibrato, doppler — needs
+        <code>PhFractionalDelay</code> or <code>PhSmoothDelay</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="saturation">
+      <h2>3. Saturation and distortion</h2>
+
+      <p>
+        <code>Saturators</code> has nineteen subclasses, each a different waveshaping curve. They all
+        do the same thing — map input amplitude to output amplitude through a nonlinear function —
+        and differ entirely in the shape of that curve, which is what you hear as character.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Group</th><th>Classes</th><th>Character</th></tr></thead>
+        <tbody>
+          <tr><td>Hard clipping</td><td><code>Hardclip</code>, <code>Hardclip2</code>, <code>PhClip</code></td><td>Abrupt; harsh odd harmonics, digital-sounding</td></tr>
+          <tr><td>Soft quadratic</td><td><code>SoftClipQuadratic</code>, <code>SoftClipQuadratic1</code>, <code>SoftClipQuadratic2</code></td><td>Gentle onset; warm, tube-like</td></tr>
+          <tr><td>Hyperbolic</td><td><code>Tanh1</code>, <code>Hyperbolic</code>, <code>Hyperbolic2</code></td><td>Smooth compression into saturation; very musical</td></tr>
+          <tr><td>Trigonometric</td><td><code>ArcTan</code>, <code>ArcTan2</code>, <code>SinArcTan</code>, <code>SinArcTan2</code></td><td>Progressive, softer than tanh</td></tr>
+          <tr><td>Inverse hyperbolic</td><td><code>ASinh1</code>, <code>ASinh2</code></td><td>Expands rather than compresses near zero</td></tr>
+          <tr><td>Polynomial</td><td><code>Cubic1</code>, <code>Parabolic</code>, <code>Parabolic2</code></td><td>Predictable harmonic content, cheap</td></tr>
+          <tr><td>Folding</td><td><code>PhWavefold</code></td><td>Folds instead of clipping — wild, inharmonic, West Coast</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        <code>CubicNl</code> is a separate cubic nonlinearity with its own controls, and
+        <code>PhBitCrusher</code> and <code>PhDownSampler</code> in the Basics family give the
+        complementary digital degradations.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Drive is what makes a saturator audible</span>
+        A waveshaper only acts on the part of the signal that reaches the nonlinear region. Boost
+        into it with <code>drive:</code> or <code>uLevel:</code>, then reduce afterwards — that
+        difference is the effect. Add a <code>DcBlocker</code> after any asymmetric curve; see
+        <a href="filters.html">Filters §9</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="modulation">
+      <h2>4. Modulation effects</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>PhFlangerMono</td><td>Flanger — a swept short delay mixed with the dry signal</td></tr>
+          <tr><td>DopplerShift</td><td>Doppler pitch shift from a moving source</td></tr>
+          <tr><td>PhTranspose</td><td>Pitch transposition</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Controls come from <code>PhModulationSetter</code> — <code>modFreq:</code> and
+        <code>modDepth:</code> — and from <code>PhParamsSetter</code>'s <code>depth:</code> and
+        <code>fb:</code>.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">The class is PhFlangerMono</span>
+        Some older material refers to it as <code>FlangerMono</code>. The class name carries the
+        <code>Ph</code> prefix.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="wah">
+      <h2>5. Wah and formant effects</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>PhWah</td><td>Wah — a swept resonant band-pass</td></tr>
+          <tr><td>CryBaby</td><td>Model of the classic wah pedal</td></tr>
+          <tr><td>AutoWah</td><td>Envelope-following wah — the sweep tracks input level</td></tr>
+          <tr><td>PhSpeakerBp</td><td>Small-speaker simulation, band-limited</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        <code>AutoWah</code> is worth understanding as a pattern rather than only as an effect: it is
+        a filter whose cutoff is driven by an envelope follower on its own input. You can build the
+        same idea by hand with an averaging filter from <a href="filters.html">Filters §8</a> and any
+        filter you like.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="reverbs">
+      <h2>6. Reverbs</h2>
+
+      <p>
+        Seven reverb algorithms, each with a distinct personality. Reverb choice matters more to the
+        character of a patch than almost any other effect decision.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Algorithm</th><th>Character</th></tr></thead>
+        <tbody>
+          <tr><td>FreeverbMono</td><td>Schroeder–Moorer</td><td>The familiar workhorse; cheap and neutral</td></tr>
+          <tr><td>ZitaRevStereo</td><td>Zita-Rev1 (Fons Adriaensen)</td><td>High quality, natural; excellent as a send reverb</td></tr>
+          <tr><td>DattorroRev</td><td>Dattorro plate</td><td>Dense plate reverb; smooth tail, classic on drums and voice</td></tr>
+          <tr><td>GreyHole</td><td>Greyhole (from Faust/SC)</td><td>Diffuse, pitch-shifting, unpredictable — a texture generator</td></tr>
+          <tr><td>JpVerb</td><td>JPverb</td><td>Long, lush, ambient; designed for very long tails</td></tr>
+          <tr><td>SpringReverb</td><td>Spring tank</td><td>Boingy, resonant; guitar-amp character</td></tr>
+          <tr><td>SatRev</td><td>Saturating reverb</td><td>Reverb with built-in saturation</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"GreyHole is as much an instrument as an effect"</span>
+texture := <span class="cls">ElecGuitar</span> new =&gt; <span class="cls">GreyHole</span> new.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Choosing</span>
+        For a room that should not draw attention, use <code>ZitaRevStereo</code>. For a recognisable
+        plate on a drum, <code>DattorroRev</code>. For ambient washes, <code>JpVerb</code>. For
+        something that will surprise you, <code>GreyHole</code> — it shifts pitch as it diffuses and
+        does not sound like a room at all.
+      </div>
+
+      <p>
+        Related demo modules — <code>Freeverb_Demo</code>, <code>ZitaRev1</code>,
+        <code>JpRev_Demo</code>, <code>Dattorro_Rev_Demo</code>, <code>ReverbTank_Demo</code>,
+        <code>KbRomRev1</code>, <code>PhVitalRev_Demo</code> — are ready-made stereo patches; see the
+        <a href="demos.html">Demo Gallery</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="dynamics">
+      <h2>7. Dynamics</h2>
+
+      <p>
+        Thirty classes handle level control. The naming is systematic, and once you can read it the
+        family stops being intimidating.
+      </p>
+
+      <section id="dynamics-compressors">
+        <h3>7.1 Compressors</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>PhCompressorMono</td><td>Standard mono compressor</td></tr>
+            <tr><td>PhCompressorStereo</td><td>Standard stereo compressor, linked channels</td></tr>
+            <tr><td>PhCompressorLadMono</td><td>Lookahead-style mono compressor</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The <code>…CompressionGain…</code> classes are a level below these: they compute a gain
+          signal rather than applying it, so you can route it yourself — for sidechaining, for
+          ducking one source with another, or for visualising gain reduction.
+        </p>
+      </section>
+
+      <section id="dynamics-detection">
+        <h3>7.2 Peak or RMS, feed-forward or feedback</h3>
+
+        <p>Read the class names as a combination of three choices:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Name part</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>Peak…</code></td><td>Detects instantaneous peaks — fast, catches transients</td></tr>
+            <tr><td><code>RMS…</code></td><td>Detects average energy — slower, tracks perceived loudness</td></tr>
+            <tr><td><code>FF…</code></td><td>Feed-forward: measures the input. Precise, modern</td></tr>
+            <tr><td><code>FB…</code></td><td>Feedback: measures the output. Softer, more "analogue"</td></tr>
+            <tr><td><code>FBFF…</code></td><td>Both, blended</td></tr>
+            <tr><td><code>…_dB</code></td><td>Gain expressed in decibels rather than linear</td></tr>
+            <tr><td><code>…Mono</code> / <code>…Stereo</code></td><td>Channel count</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          So <code>PhRMSFBFFCompressorGainStereo</code> is an RMS-detecting, combined
+          feedback/feed-forward stereo gain computer. The names are long but entirely predictable.
+        </p>
+
+        <p>
+          <code>Ratio2Strength</code> and <code>Strength2Ratio</code> convert between the two ways of
+          expressing how hard a compressor works.
+        </p>
+      </section>
+
+      <section id="dynamics-limiters">
+        <h3>7.3 Limiters</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>PhLimiter1176Mono</td><td>1176-style limiter, mono — fast, coloured</td></tr>
+            <tr><td>PhLimiter1176Stereo</td><td>1176-style limiter, stereo</td></tr>
+            <tr><td>PhLookaheadLimiter</td><td>Lookahead limiter — catches transients before they arrive</td></tr>
+            <tr><td>PhLimiterLadMono</td><td>Lookahead limiter, mono</td></tr>
+            <tr><td>PhLimiterLadStereo</td><td>Lookahead limiter, stereo</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Put one at the end</span>
+          Resonant filters, feedback networks and stacked oscillators can all exceed full scale
+          without warning. A limiter as the last stage of a live patch is cheap insurance, especially
+          on stage.
+        </div>
+      </section>
+
+      <section id="dynamics-gates">
+        <h3>7.4 Gates and expanders</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>PhGateMono</td><td>Noise gate, mono</td></tr>
+            <tr><td>PhGateStereo</td><td>Noise gate, stereo</td></tr>
+            <tr><td>PhExpander</td><td>Downward expander — the gentle version of a gate</td></tr>
+            <tr><td>PhExpanderStereo</td><td>Stereo expander</td></tr>
+            <tr><td>PhExpanderSCStereo</td><td>Sidechain-controlled stereo expander</td></tr>
+            <tr><td>PhPeakExpansionGainStereo</td><td>Expansion gain computer</td></tr>
+            <tr><td>PhDensityGate</td><td>Density-based gate, from the toolkit</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="spatial">
+      <h2>8. Spatial</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>Panner</td><td>Position a mono source in the stereo field</td></tr>
+          <tr><td>PhSpatials</td><td>Superclass of the spatialisation effects</td></tr>
+          <tr><td>DopplerShift</td><td>Pitch shift from source movement</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        A <code>Panner</code> whose position is driven by an LFO is auto-panning; driven by an
+        envelope, it is a movement gesture tied to each note. As always, the destination accepts any
+        signal — see <a href="envelopes.html">Envelopes &amp; Modulation</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="order">
+      <h2>9. Order of the chain</h2>
+
+      <p>
+        Effects are not commutative, and a few orderings are conventional because they solve real
+        problems:
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Dynamics before distortion</strong> — compressing first gives the saturator a consistent level to work with; compressing after only flattens what the distortion already flattened.</div>
+        <div class="step"><strong>Filter before or after saturation, deliberately</strong> — filtering first shapes what gets distorted; filtering after tames the harmonics distortion created. Both are valid and sound entirely different.</div>
+        <div class="step"><strong>Modulation before reverb</strong> — flanging a reverb tail smears it; reverberating a flanged signal keeps the movement legible.</div>
+        <div class="step"><strong>Reverb late, limiter last</strong> — reverb belongs near the end, and the limiter after everything that could raise the level.</div>
+        <div class="step"><strong>DC blocker after anything nonlinear</strong> — saturation and rectification introduce offset. See <a href="filters.html">Filters §9</a>.</div>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>10. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="filters.html">Filters</a></td><td>The comb and allpass sections these effects are built from.</td></tr>
+          <tr><td><a href="demos.html">Demo Gallery</a></td><td>Ready-made effect patches, one line each.</td></tr>
+          <tr><td><a href="turbophausto.html">TurboPhausto</a></td><td>An effects rack with these already wired up.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>Every effect class, including those not named here.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>11. Troubleshooting</h2>
+
+      <h4>The effect makes no audible difference</h4>
+      <p>
+        Either the wet amount is at zero, or a saturator is not being driven hard enough to reach its
+        nonlinear region. See §1.1 and §3.
+      </p>
+
+      <h4>A stereo effect only outputs on one side</h4>
+      <p>
+        It received one channel. Send <code>stereo</code> before the effect, not after — §1.
+      </p>
+
+      <h4>My flanger clicks as it sweeps</h4>
+      <p>
+        It is built on an integer-sample delay. Use <code>PhFractionalDelay</code> or
+        <code>PhSmoothDelay</code> — §2.
+      </p>
+
+      <h4>The compressor pumps unpleasantly</h4>
+      <p>
+        A peak detector is reacting to individual transients. Move to an RMS variant, or lengthen the
+        release — §7.2.
+      </p>
+
+      <h4>The reverb sounds metallic and thin</h4>
+      <p>
+        The algorithm is not suited to the material, or the input is mono into a stereo reverb.
+        <code>GreyHole</code> in particular is deliberately not a room simulator — try
+        <code>ZitaRevStereo</code> — §6.
+      </p>
+
+      <h4>My patch clips only when the reverb is engaged</h4>
+      <p>
+        The reverb is adding energy on top of the dry signal. Lower the wet amount, or put a limiter
+        after it — §7.3.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

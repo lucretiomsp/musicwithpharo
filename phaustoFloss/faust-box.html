@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Raw FAUST &amp; the Box API</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="faust-box.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Advanced › Raw FAUST &amp; the Box API</div>
+    <h1>Raw FAUST &amp; the Box API</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Two ways out of the UGen layer when it does not reach far enough: write FAUST source directly,
+      or build FAUST boxes yourself through the API the UGens are themselves built on.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#layers">Three layers</a></li>
+        <li><a href="#source">Writing FAUST source</a>
+          <ol>
+            <li><a href="#source-create">Creating a DSP from a string</a></li>
+            <li><a href="#source-libraries">The standard libraries</a></li>
+            <li><a href="#source-controls">Reaching the controls</a></li>
+            <li><a href="#source-stored">Stored FAUST programs</a></li>
+          </ol>
+        </li>
+        <li><a href="#boxes">The box layer</a>
+          <ol>
+            <li><a href="#boxes-phbox">PhBox</a></li>
+            <li><a href="#boxes-subclasses">The concrete boxes</a></li>
+            <li><a href="#boxes-context">The library context</a></li>
+          </ol>
+        </li>
+        <li><a href="#boxapi">The Box API</a>
+          <ol>
+            <li><a href="#boxapi-composition">Composition primitives</a></li>
+            <li><a href="#boxapi-primitives">Values, wires and widgets</a></li>
+            <li><a href="#boxapi-math">Arithmetic and maths</a></li>
+          </ol>
+        </li>
+        <li><a href="#inspecting">Inspecting what Phausto generated</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="layers">
+      <h2>1. Three layers</h2>
+
+      <p>
+        Everything in Phausto compiles down to the same thing. Knowing which layer you are on tells
+        you what is available and what it costs:
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Unit Generators</strong> — objects with fluid setters. Readable, safe, and what the rest of this manual documents.</div>
+        <div class="step"><strong>Boxes</strong> — the FAUST box representation. Every UGen answers <code>asBox</code>; operators like <code>=&gt;</code> and <code>,</code> are box operations underneath.</div>
+        <div class="step"><strong>FAUST source</strong> — text compiled by the embedded FAUST compiler. The whole language and the whole standard library, with none of the Pharo conveniences.</div>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">You can mix them</span>
+        A UGen chain and a raw FAUST string both become a <code>DSP</code>, and both are driven by
+        the same <a href="dsp-api.html">DSP API</a>. Dropping to a lower layer for one part of a
+        patch does not commit you to it everywhere.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="source">
+      <h2>2. Writing FAUST source</h2>
+
+      <section id="source-create">
+        <h3>2.1 Creating a DSP from a string</h3>
+
+        <div class="method-sig"><span class="badge">class method</span> DSP create: aStringWithFaustCode</div>
+
+<pre><code>content := <span class="str">'import("stdfaust.lib");
+tempo = hslider("tempo", 10000, 300, 20000, 100);
+freq  = hslider("freq",  300,   200, 900,   100);
+process = ba.pulsen(1, tempo) : pm.djembe(freq, 0.3, 0.4, 1) &lt;: dm.freeverb_demo;'</span>.
+
+x1 := <span class="cls">DSP</span> create: content.
+x1 init.
+x1 start.
+x1 stop.</code></pre>
+
+        <p>
+          The resulting object is an ordinary <code>DSP</code>: <code>displayUI</code>,
+          <code>setValue:parameter:</code>, <code>traceAllParams</code> and the exporters all work
+          exactly as they do for a UGen-built patch.
+          <code>DSP create:withName:</code> names it.
+        </p>
+      </section>
+
+      <section id="source-libraries">
+        <h3>2.2 The standard libraries</h3>
+
+        <p>
+          <code>import("stdfaust.lib")</code> brings in the whole FAUST standard library under short
+          prefixes. This is the real reason to drop to source: Phausto wraps a large part of it, but
+          not all of it.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Prefix</th><th>Library</th></tr></thead>
+          <tbody>
+            <tr><td><code>os.</code></td><td>Oscillators</td></tr>
+            <tr><td><code>no.</code></td><td>Noises</td></tr>
+            <tr><td><code>fi.</code></td><td>Filters</td></tr>
+            <tr><td><code>en.</code></td><td>Envelopes</td></tr>
+            <tr><td><code>ef.</code></td><td>Misc effects</td></tr>
+            <tr><td><code>re.</code></td><td>Reverbs</td></tr>
+            <tr><td><code>co.</code></td><td>Compressors</td></tr>
+            <tr><td><code>pm.</code></td><td>Physical modelling</td></tr>
+            <tr><td><code>ba.</code></td><td>Basics</td></tr>
+            <tr><td><code>ma.</code></td><td>Maths</td></tr>
+            <tr><td><code>si.</code></td><td>Signals</td></tr>
+            <tr><td><code>an.</code></td><td>Analysis</td></tr>
+            <tr><td><code>dm.</code></td><td>Demos</td></tr>
+            <tr><td><code>sf.</code></td><td>Synth files</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Composition operators</span>
+          FAUST's five composition operators appear throughout: <code>:</code> sequential,
+          <code>,</code> parallel, <code>&lt;:</code> split, <code>:&gt;</code> merge, and
+          <code>~</code> recursive. Phausto's <code>=&gt;</code>, <code>,</code>,
+          <code>splitTo:</code>, <code>mergeWith:</code> and <code>~</code> map onto them one for
+          one — see <a href="connecting.html">Connecting Unit Generators</a>.
+        </div>
+      </section>
+
+      <section id="source-controls">
+        <h3>2.3 Reaching the controls</h3>
+
+        <p>
+          Controls declared in FAUST source behave like any other parameter. The label in the source
+          becomes the parameter name:
+        </p>
+
+<pre><code>s1 := x1 sliderFor: <span class="str">'tempo'</span>.  s1 openInWindow.
+s2 := x1 sliderFor: <span class="str">'freq'</span>.   s2 openInWindow.
+
+<span class="cmt">"Nested group paths for controls inside library modules"</span>
+s3 := x1 sliderFor: <span class="str">'Freeverb/0x00/RoomSize'</span>.  s3 openInWindow.
+
+x1 traceAllParams.   <span class="cmt">"the authoritative list"</span></code></pre>
+      </section>
+
+      <section id="source-stored">
+        <h3>2.4 Stored FAUST programs</h3>
+
+        <p>
+          <code>DSPCode</code> is a small convenience class holding complete FAUST programs as
+          strings, reachable from the class side:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>DSPCode basicKickWithADSR</td><td>A kick drum with an ADSR envelope</td></tr>
+            <tr><td>DSPCode basicHiHatFM</td><td>An FM hi-hat</td></tr>
+            <tr><td>DSPCode drumMachine7</td><td>A seven-voice drum machine</td></tr>
+            <tr><td>DSPCode drumMachine8</td><td>An eight-voice drum machine</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code>dsp := <span class="cls">DSP</span> create: <span class="cls">DSPCode</span> drumMachine8.
+dsp init.
+dsp start.
+dsp displayUI.</code></pre>
+
+        <p>These are also worth reading as examples of complete, working FAUST programs.</p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="boxes">
+      <h2>3. The box layer</h2>
+
+      <section id="boxes-phbox">
+        <h3>3.1 PhBox</h3>
+
+        <p>
+          A <em>box</em> is FAUST's internal representation of a signal expression. Phausto objects
+          are always converted to a box before being assembled into a DSP — <code>PhBox</code> is
+          the Pharo-side container, and every UGen ultimately produces one.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>asBox</td><td>The box for any UGen, number or widget</td></tr>
+            <tr><td>asFaustCode</td><td>The FAUST expression this box represents</td></tr>
+            <tr><td>fromString:</td><td>Build a box from a FAUST expression</td></tr>
+            <tr><td>asDsp / asDspWithName:</td><td>Compile the box into a DSP</td></tr>
+            <tr><td>asDspFile</td><td>Write the box out as a FAUST file</td></tr>
+            <tr><td>inputs / outputs</td><td>Channel counts</td></tr>
+            <tr><td>errorBuffer</td><td>The compiler's error output for this box</td></tr>
+            <tr><td>extractUIPrimitivesFromPrint</td><td>Recover the widgets a box declares</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          <code>PhBox</code> also carries the whole operator set — <code>=&gt;</code>,
+          <code>,</code>, arithmetic, comparison, <code>~</code>, <code>smoo</code>,
+          <code>db2linear</code> and the rest — which is why those operators work on anything that
+          can become a box.
+        </p>
+      </section>
+
+      <section id="boxes-subclasses">
+        <h3>3.2 The concrete boxes</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>Wire</td><td>A pass-through connection</td></tr>
+            <tr><td>Cut</td><td>Terminate a signal — discard a channel</td></tr>
+            <tr><td>Select2</td><td>Two-way selector</td></tr>
+            <tr><td>PhSelect4</td><td>Four-way selector</td></tr>
+            <tr><td>PhMultiplier</td><td>Multiplication box</td></tr>
+            <tr><td>PhIncrementer</td><td>Incrementing box</td></tr>
+            <tr><td>SoundFile</td><td>A sound file as a signal source</td></tr>
+            <tr><td>SamplePlayer</td><td>Sample playback box</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Wire and Cut are not trivial</span>
+          In FAUST, routing is explicit: a parallel block with more outputs than the next stage has
+          inputs needs the surplus terminated with <code>Cut</code>, and channels that must pass
+          through untouched need <code>Wire</code>. Most channel-count errors are solved with one or
+          the other.
+        </div>
+      </section>
+
+      <section id="boxes-context">
+        <h3>3.3 The library context</h3>
+
+        <p>
+          The FAUST compiler needs a library context to build boxes in. Phausto manages this for you
+          at start-up, but if you are constructing boxes by hand the messages are:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>BoxAPI new createLibContext</td><td>Create a compilation context</td></tr>
+            <tr><td>BoxAPI new destroyLibContext</td><td>Destroy it</td></tr>
+            <tr><td>PhBox libContext / libContext:</td><td>Whether a context is currently held</td></tr>
+            <tr><td>PhBox startUp:</td><td>Context handling at image start-up</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Boxes do not survive an image restart</span>
+          A box is a pointer into the FAUST compiler's memory. Saving an image with live boxes and
+          reopening it leaves dangling references — rebuild your patches after a restart rather than
+          expecting them to resume.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="boxapi">
+      <h2>4. The Box API</h2>
+
+      <p>
+        <code>BoxAPI</code> is the FFI binding to the C functions of FAUST's box API, compiled into
+        <code>libfaust</code>. This is the floor of the system: every operator in Phausto eventually
+        becomes a call here.
+      </p>
+
+      <section id="boxapi-composition">
+        <h3>4.1 Composition primitives</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>FAUST operator</th></tr></thead>
+          <tbody>
+            <tr><td>boxSeqFrom:to:</td><td><code>:</code> sequential composition</td></tr>
+            <tr><td>boxPar:and:</td><td><code>,</code> parallel composition</td></tr>
+            <tr><td>boxSplit:with:</td><td><code>&lt;:</code> split</td></tr>
+            <tr><td>boxMerge:with:</td><td><code>:&gt;</code> merge</td></tr>
+            <tr><td>boxRecursive:with:</td><td><code>~</code> recursive composition</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="boxapi-primitives">
+        <h3>4.2 Values, wires and widgets</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+          <tbody>
+            <tr><td>boxInt: / boxReal:</td><td>Integer and floating-point constants</td></tr>
+            <tr><td>boxWire / boxCut</td><td>A wire, and a terminated channel</td></tr>
+            <tr><td>boxButton: / boxCheckbox:</td><td>Discrete widgets</td></tr>
+            <tr><td>boxHslider:init:min:max:step:</td><td>A horizontal slider</td></tr>
+            <tr><td>boxVslider:init:min:max:step:</td><td>A vertical slider</td></tr>
+            <tr><td>boxNumEntry:init:min:max:step:</td><td>A numeric entry</td></tr>
+            <tr><td>boxHBarGraphAux:min:max:input:</td><td>A horizontal meter</td></tr>
+            <tr><td>boxVBarGraphAux:min:max:input:</td><td>A vertical meter</td></tr>
+            <tr><td>boxSoundFile:numChannels:</td><td>A sound file source</td></tr>
+            <tr><td>boxReadOnlyTable:init:index:</td><td>A read-only wavetable</td></tr>
+            <tr><td>boxSelect2Aux:input0:input1:</td><td>A two-way selector</td></tr>
+            <tr><td>boxFromString:inputs:outputs:buffer:</td><td>Compile a FAUST expression into a box</td></tr>
+            <tr><td>boxPrint:</td><td>Print a box for inspection</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="boxapi-math">
+        <h3>4.3 Arithmetic and maths</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Group</th><th>Messages</th></tr></thead>
+          <tbody>
+            <tr><td>Arithmetic</td><td><code>boxAdd:with:</code>, <code>boxSubtract:from:</code>, <code>boxMultiply:with:</code>, <code>boxDivide:by:</code>, <code>boxPower:exponent:</code>, <code>boxRem:with:</code>, <code>boxFModBetween:and:</code></td></tr>
+            <tr><td>Comparison</td><td><code>boxGt:than:</code>, <code>boxGE:than:</code>, <code>boxLT:than:</code>, <code>boxLE:than:</code>, <code>boxEQ:than:</code>, <code>boxNE:than:</code></td></tr>
+            <tr><td>Ranges</td><td><code>boxMinBetween:and:</code>, <code>boxMaxBetween:and:</code></td></tr>
+            <tr><td>Rounding</td><td><code>boxFloor</code>, <code>boxCeil</code>, <code>boxRound</code>, <code>boxRint</code>, <code>boxAbs</code></td></tr>
+            <tr><td>Transcendental</td><td><code>boxSin</code>, <code>boxCos</code>, <code>boxTan</code>, <code>boxAsin</code>, <code>boxAcos</code>, <code>boxAtan</code>, <code>boxExp</code>, <code>boxLog</code>, <code>boxLog10</code>, <code>boxSqrt</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">You rarely want this layer</span>
+          The Box API exists so the UGen layer can be built on it. Calling it directly means managing
+          contexts, checking for null boxes and tracking channel counts by hand. Prefer a raw FAUST
+          string — §2 — which gets you the same expressive power with the compiler checking your
+          work.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="inspecting">
+      <h2>5. Inspecting what Phausto generated</h2>
+
+      <p>
+        The most useful thing about the lower layers, for most people, is reading rather than
+        writing them. Any DSP will show you the FAUST it compiled:
+      </p>
+
+<pre><code>synth := <span class="cls">PulseOsc</span> new =&gt; <span class="cls">ADSREnv</span> new =&gt; <span class="cls">MoogVcf</span> new.
+dsp := synth stereo asDsp.
+dsp init.
+
+dsp generatedCode.        <span class="cmt">"the FAUST source Phausto built"</span>
+synth asBox asFaustCode.  <span class="cmt">"the expression for one box"</span></code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">The fastest way to learn the operators</span>
+        Build a small chain, read <code>generatedCode</code>, change one operator, read it again. The
+        difference between <code>,</code> and <code>+</code>, or between applying
+        <code>stereo</code> before and after an effect, becomes obvious immediately in the generated
+        source — and is often hard to hear.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="internals.html">Architecture &amp; Internals</a></td><td>The engine beneath the Box API.</td></tr>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>The operators these primitives implement.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>Driving a DSP however it was built.</td></tr>
+          <tr><td><a href="exporting.html">Exporting</a></td><td>Taking generated FAUST out of Pharo.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>My FAUST string fails to compile and the error is unhelpful</h4>
+      <p>
+        Ask the engine directly: <code>PhaustoDynamicEngine new getLastError</code> returns the FAUST
+        compiler's own message, which names the line. See
+        <a href="internals.html">Architecture &amp; Internals</a>.
+      </p>
+
+      <h4>A null box exception</h4>
+      <p>
+        A box expression produced nothing — nearly always a channel-count mismatch. Check
+        <code>inputs</code> and <code>outputs</code> on each part, and terminate surplus channels
+        with <code>Cut</code> — §3.2.
+      </p>
+
+      <h4>My FAUST code works in the online editor but not here</h4>
+      <p>
+        Check that <code>process</code> is defined and that every library you use is imported.
+        Phausto compiles exactly the string you give it, with no implicit preamble.
+      </p>
+
+      <h4>Controls declared in my FAUST source do not appear</h4>
+      <p>
+        A FAUST widget only exists if it is actually used in <code>process</code>. An unreferenced
+        slider is optimised away. §2.3.
+      </p>
+
+      <h4>Boxes stop working after saving and reopening the image</h4>
+      <p>They hold pointers into the compiler's memory. Rebuild after a restart — §3.3.</p>
+
+      <h4>I want a FAUST function Phausto has no UGen for</h4>
+      <p>That is exactly what §2 is for — write the string and wrap it in a DSP.</p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

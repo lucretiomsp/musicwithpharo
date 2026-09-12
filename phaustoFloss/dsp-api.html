@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — DSP &amp; Parameter API</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="dsp-api.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › DSP &amp; Parameter API</div>
+    <h1>DSP &amp; Parameter API</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      The complete protocol of the <code>DSP</code> object — the thing that actually makes sound —
+      together with the parameter classes that describe what can be changed inside it.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">What a DSP is</a></li>
+        <li><a href="#creating">Creating a DSP</a>
+          <ol>
+            <li><a href="#creating-ugen">From a UGen</a></li>
+            <li><a href="#creating-faust">From FAUST source</a></li>
+            <li><a href="#creating-registry">The registry</a></li>
+          </ol>
+        </li>
+        <li><a href="#lifecycle">Lifecycle</a></li>
+        <li><a href="#parameters">Parameter access</a>
+          <ol>
+            <li><a href="#parameters-set">Setting</a></li>
+            <li><a href="#parameters-read">Reading and discovery</a></li>
+          </ol>
+        </li>
+        <li><a href="#performance">Triggering and performance</a></li>
+        <li><a href="#ui">Interface</a></li>
+        <li><a href="#introspection">Introspection</a></li>
+        <li><a href="#parameter-objects">DSPParameter and DSPParameterStore</a></li>
+        <li><a href="#exceptions">Exceptions</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="what">
+      <h2>1. What a DSP is</h2>
+
+      <p>
+        <code>DSP</code> is an opaque handle on a compiled FAUST program. It is not a Pharo object in
+        the ordinary sense — it wraps memory owned by the FAUST engine, reached over uFFI. That has
+        two practical consequences: it must be initialised before it can do anything, and it must be
+        destroyed to release its memory.
+      </p>
+
+      <p>
+        Everything else on this page is a message you can send to that handle. A UGen chain is the
+        <em>description</em> of a sound; the DSP is the running instance of it.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="creating">
+      <h2>2. Creating a DSP</h2>
+
+      <section id="creating-ugen">
+        <h3>2.1 From a UGen</h3>
+
+        <p>The usual route — send one of these to any UGen:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+          <tbody>
+            <tr><td>asDsp</td><td>A mono DSP</td></tr>
+            <tr><td>asDspWithName:</td><td>A named DSP — useful when several run at once</td></tr>
+            <tr><td>asDspMIDI</td><td>A MIDI-enabled DSP</td></tr>
+            <tr><td>asDspMIDIWithName:</td><td>A named MIDI-enabled DSP</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>Send <code>stereo</code> to the UGen first for two-channel output.</p>
+      </section>
+
+      <section id="creating-faust">
+        <h3>2.2 From FAUST source</h3>
+
+        <p>
+          A DSP can also be built from a FAUST program as a string, bypassing the UGen layer
+          entirely:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class-side message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>DSP create: aString</td><td>Compile a FAUST program</td></tr>
+            <tr><td>DSP create: aString withName: aName</td><td>The same, named</td></tr>
+            <tr><td>DSP defaultName</td><td>The name used when none is given</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code>x1 := <span class="cls">DSP</span> create: <span class="str">'import("stdfaust.lib"); process = os.osc(400);'</span>.
+x1 init.
+x1 start.</code></pre>
+
+        <p>See <a href="faust-box.html">Raw FAUST &amp; the Box API</a> for when this is worth doing.</p>
+      </section>
+
+      <section id="creating-registry">
+        <h3>2.3 The registry</h3>
+
+        <p>
+          Phausto keeps track of the DSPs it has created, which is how you find one you have lost the
+          variable for:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class-side message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>DSP initializedDSPs</td><td>Every DSP currently initialised</td></tr>
+            <tr><td>DSP initializedDSP</td><td>The most recently initialised DSP</td></tr>
+            <tr><td>DSP register: aDsp</td><td>Add a DSP to the registry</td></tr>
+            <tr><td>DSP unregister: aDsp</td><td>Remove one</td></tr>
+            <tr><td>DSP rendererType</td><td>The audio renderer in use on this platform</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Stopping a runaway patch</span>
+          If sound is coming from a DSP you no longer have a reference to,
+          <code>DSP initializedDSPs do: [ :d | d stop ]</code> will silence everything.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="lifecycle">
+      <h2>3. Lifecycle</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>init</td><td>Compile to native code and allocate buffers. Required once before <code>start</code></td></tr>
+          <tr><td>start</td><td>Begin audio output on the audio thread</td></tr>
+          <tr><td>stop</td><td>Halt output; the DSP stays initialised and can be restarted</td></tr>
+          <tr><td>destroy</td><td>Release native memory and unregister</td></tr>
+          <tr><td>play</td><td>Convenience: <code>init</code> then <code>start</code></td></tr>
+          <tr><td>playFor: aDuration</td><td>Start, wait, then stop</td></tr>
+          <tr><td>isInitialized</td><td>Whether <code>init</code> has run</td></tr>
+          <tr><td>name / name:</td><td>The DSP's name</td></tr>
+          <tr><td>source / source:</td><td>The UGen this DSP was built from</td></tr>
+          <tr><td>isMIDI / isMIDI:</td><td>Whether MIDI support was compiled in</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">Destroy is not optional</span>
+        Undestroyed DSPs keep their native memory and keep consuming CPU. When iterating on a patch,
+        <code>stop</code> then <code>destroy</code> before rebuilding. See
+        <a href="first-sounds.html">First Sounds §2.2</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="parameters">
+      <h2>4. Parameter access</h2>
+
+      <section id="parameters-set">
+        <h3>4.1 Setting</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>setValue: aNumber parameter: aString</td><td>Set a parameter by name</td></tr>
+            <tr><td>setValue: aNumber parameterIndex: anInteger</td><td>Set by index — skips the name lookup</td></tr>
+            <tr><td>sweepToValue: aTarget parameter: aString in: seconds</td><td>Move gradually to a value</td></tr>
+            <tr><td>sweepToMfValue: aTarget parameter: aString in: seconds</td><td>The same, for multiplication-factor parameters</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="parameters-read">
+        <h3>4.2 Reading and discovery</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>traceAllParams</td><td>Prints every parameter and value to the Transcript</td></tr>
+            <tr><td>allParameters</td><td>All parameters as objects</td></tr>
+            <tr><td>parameters</td><td>The parameter collection</td></tr>
+            <tr><td>parameterStore</td><td>The <code>DSPParameterStore</code> — see §8</td></tr>
+            <tr><td>getParamCount</td><td>How many parameters exist</td></tr>
+            <tr><td>getParamValue: aString</td><td>Current value, by name</td></tr>
+            <tr><td>getParamValueIndex: anInteger</td><td>Current value, by index</td></tr>
+            <tr><td>getParamAddress: anInteger</td><td>The name at a given index</td></tr>
+            <tr><td>getParamIndex: aString</td><td>The index of a given name</td></tr>
+            <tr><td>includesParameter: aString</td><td>Whether a name exists</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Names are addresses</span>
+          A FAUST parameter name is really a path. Nested groups produce names like
+          <code>'Freeverb/0x00/RoomSize'</code>. Copy them verbatim from
+          <code>traceAllParams</code> rather than reconstructing them.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="performance">
+      <h2>5. Triggering and performance</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>trig: aString</td><td>Fire a named trigger</td></tr>
+          <tr><td>trig: aString for: seconds</td><td>Hold a gate open for a duration, then release</td></tr>
+          <tr><td>playNote: aMidiNN prefix: aString dur: seconds</td><td>Play a MIDI note on a prefixed instrument</td></tr>
+          <tr><td>syncTrigReset</td><td>Reset synchronised triggers to a common origin</td></tr>
+          <tr><td>startSubBeat</td><td>Start the sub-beat clock</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>See <a href="parameters.html">Parameters &amp; Control §5</a> and <a href="midi.html">MIDI &amp; Playing Notes</a>.</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="ui">
+      <h2>6. Interface</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Opens</th></tr></thead>
+        <tbody>
+          <tr><td>displayUI</td><td>The complete generated interface</td></tr>
+          <tr><td>sliderFor: aString</td><td>A slider presenter for one parameter</td></tr>
+          <tr><td>buttonFor: aString</td><td>A button presenter for one trigger</td></tr>
+          <tr><td>openSliderFor: aString</td><td>Build and open a slider in one step</td></tr>
+          <tr><td>openButtonFor: aString</td><td>Build and open a button in one step</td></tr>
+          <tr><td>keyBoardFor: aSynthName</td><td>A piano keyboard bound to an instrument</td></tr>
+          <tr><td>requirePianoKeyboard</td><td>Ensure the keyboard component is loaded</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>s := dsp sliderFor: <span class="str">'SineOscFreq'</span>.
+s openInWindow.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="introspection">
+      <h2>7. Introspection</h2>
+
+      <p>
+        The FAUST engine can describe its own interface, which is how <code>displayUI</code> is built
+        and how the exporters know what controls to generate:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td>getJSON</td><td>The full FAUST UI description as JSON</td></tr>
+          <tr><td>getUIfromJSON</td><td>The parsed UI structure</td></tr>
+          <tr><td>getUIItems</td><td>Every UI item</td></tr>
+          <tr><td>getUIItemsLabeledDictionary</td><td>UI items keyed by label</td></tr>
+          <tr><td>getUIButtons</td><td>Just the buttons</td></tr>
+          <tr><td>getUIKnobs</td><td>Just the continuous controls</td></tr>
+          <tr><td>getNumInput</td><td>Number of audio inputs</td></tr>
+          <tr><td>getNumOutput</td><td>Number of audio outputs</td></tr>
+          <tr><td>generatedCode</td><td>The FAUST source that was compiled</td></tr>
+          <tr><td>soundfiles</td><td>Sound files referenced by the DSP</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Reading the generated code</span>
+        <code>dsp generatedCode</code> returns the FAUST program Phausto built from your UGen chain.
+        It is the single best way to understand what an operator actually compiled to — and useful
+        when a patch does not behave as expected.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="parameter-objects">
+      <h2>8. DSPParameter and DSPParameterStore</h2>
+
+      <p>
+        Beyond raw name-and-value access, Phausto models parameters as objects. This is the layer
+        presets, automation and plugin exports are built on.
+      </p>
+
+      <div class="method-sig"><span class="badge">class</span> DSPParameter</div>
+      <p>
+        Represents a single adjustable value: its current value and its valid range. It knows nothing
+        about the UI, the DSP code, or presets — only what the parameter is.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Accessor</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>label / label:</td><td>Display label</td></tr>
+          <tr><td>shortName / shortName:</td><td>Abbreviated name</td></tr>
+          <tr><td>address / address:</td><td>Full FAUST path</td></tr>
+          <tr><td>initValue / initValue:</td><td>Default value</td></tr>
+          <tr><td>minValue / minValue:</td><td>Lower bound</td></tr>
+          <tr><td>maxValue / maxValue:</td><td>Upper bound</td></tr>
+          <tr><td>stepValue / stepValue:</td><td>Increment</td></tr>
+          <tr><td>type / type:</td><td>Widget type — slider, button, entry</td></tr>
+          <tr><td>DSPParameter fromDictionary:</td><td>Build one from a parsed JSON description</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="method-sig"><span class="badge">class</span> DSPParameterStore</div>
+      <p>
+        Holds all parameters of a DSP in one place. UI, presets, automation and the DSP itself read
+        from the store, but the store depends on none of them.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>DSPParameterStore from: aDSP</td><td>Build a store for a DSP</td></tr>
+          <tr><td>parameters</td><td>The stored parameters</td></tr>
+          <tr><td>dsp / dsp:</td><td>The DSP it belongs to</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Separation of concerns</span>
+        The split between <code>DSPParameter</code> (what a parameter is) and
+        <code>DSPParameterStore</code> (where values live) is deliberate. It is what makes it
+        possible to export a patch as a JUCE plugin with a full parameter tree — see
+        <a href="exporting.html">Exporting</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="exceptions">
+      <h2>9. Exceptions</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Exception</th><th>Raised when</th></tr></thead>
+        <tbody>
+          <tr><td>DSP uninitializedException</td><td>A DSP is used before <code>init</code></td></tr>
+          <tr><td>DSP invalidException</td><td>The DSP could not be compiled or is otherwise unusable</td></tr>
+          <tr><td>DSP paramException</td><td>A parameter operation failed</td></tr>
+          <tr><td>PhBox nullBoxException</td><td>A box expression produced nothing — usually a connection error</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        <code>getLastError</code> on <code>PhaustoDynamicEngine</code> returns the FAUST compiler's
+        own message, which is usually more specific than the Pharo-side exception. See
+        <a href="internals.html">Architecture &amp; Internals</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>10. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>These messages in the context of actually performing.</td></tr>
+          <tr><td><a href="internals.html">Architecture &amp; Internals</a></td><td>What sits beneath the DSP handle.</td></tr>
+          <tr><td><a href="exporting.html">Exporting</a></td><td>The export half of the DSP protocol.</td></tr>
+          <tr><td><a href="faust-box.html">Raw FAUST &amp; the Box API</a></td><td>Creating a DSP without UGens.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>11. Troubleshooting</h2>
+
+      <h4>An exception says the DSP is not initialised</h4>
+      <p><code>init</code> must run once before <code>start</code> or any parameter access — §3.</p>
+
+      <h4>Sound is playing and I have lost the reference</h4>
+      <p><code>DSP initializedDSPs do: [ :d | d stop ]</code> — §2.3.</p>
+
+      <h4><code>getParamValue:</code> returns nothing useful</h4>
+      <p>
+        The name does not exist. Check with <code>includesParameter:</code> first, or list them with
+        <code>traceAllParams</code> — §4.2.
+      </p>
+
+      <h4>The patch compiles but sounds wrong, and I cannot see why</h4>
+      <p>
+        Read <code>dsp generatedCode</code>. The FAUST source shows exactly what the operators
+        produced — §7.
+      </p>
+
+      <h4>A null box exception when building the DSP</h4>
+      <p>
+        A connection failed, usually a channel-count mismatch. See
+        <a href="connecting.html">Connecting §7</a>, and check
+        <code>PhaustoDynamicEngine getLastError</code> — §9.
+      </p>
+
+      <h4>The image slows down the longer I work</h4>
+      <p>DSPs are accumulating. Destroy them — §3.</p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

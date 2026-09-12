@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Learn in the Image</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="masterlu.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Getting Started › Learn in the Image</div>
+    <h1>Learn in the Image</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      MasterLu is an interactive Phausto tutorial that runs inside Pharo itself. Every lesson opens
+      in a Playground where the code is not an example to read but a program to evaluate.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">What MasterLu is</a></li>
+        <li><a href="#install">Installing it</a></li>
+        <li><a href="#running">Running the tutorial</a>
+          <ol>
+            <li><a href="#running-navigate">Moving between lessons</a></li>
+          </ol>
+        </li>
+        <li><a href="#curriculum">The sixteen lessons</a></li>
+        <li><a href="#fundamentals">Synthesis Fundamentals</a></li>
+        <li><a href="#known-issues">Known issues</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="what">
+      <h2>1. What MasterLu is</h2>
+
+      <p>
+        MasterLu is built on <strong>ProfStef</strong>, Pharo's own in-image tutorial framework. Each
+        lesson is displayed in a live Playground rather than a document viewer, so you step through
+        it the way you would step through your own code — selecting a line and evaluating it.
+      </p>
+
+      <p>
+        That difference matters more for audio than for most subjects. A written description of a
+        filter sweep tells you very little; the same three lines evaluated with the sound running
+        tell you everything. MasterLu is the recommended companion to this manual rather than a
+        replacement for it: the manual is organised by topic and meant to be searched, MasterLu is
+        organised as a path and meant to be walked.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Author</span>
+        MasterLu is by Domenico Cipriani (Lucretio), who also wrote Phausto and Coypu. The name is
+        the teacher persona the tutorial speaks in.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="install">
+      <h2>2. Installing it</h2>
+
+      <p>Evaluate in a Playground:</p>
+
+<pre><code><span class="cls">Metacello</span> new
+  baseline: <span class="str">'MasterLu'</span>;
+  repository: <span class="str">'github://lucretiomsp/MasterLu:main'</span>;
+  load.</code></pre>
+
+      <p>
+        The baseline pulls in Phausto, Coypu and CoypuIDE alongside MasterLu itself, so a bare image
+        ends up with the whole music stack. If you already have Phausto working, that is fine —
+        Metacello will not disturb it.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Native libraries still required</span>
+        MasterLu loads the Pharo code but not the platform binaries. If Phausto is not already
+        working in your image, put the <code>librariesBundle</code> folder in place first — see
+        <a href="setup.html">Installation §3</a>. The lessons make sound from the very first one, so
+        a half-installed Phausto becomes obvious immediately.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="running">
+      <h2>3. Running the tutorial</h2>
+
+      <p>One line starts it:</p>
+
+<pre><code><span class="cls">MasterLu</span> go.</code></pre>
+
+      <p>
+        A window titled <em>Master Lu</em> opens with the first lesson loaded. The window is a real
+        Playground: select any line and evaluate it with <kbd>Cmd-D</kbd> or <kbd>Ctrl-D</kbd>. You
+        can edit the code, add to it, and inspect results exactly as you would anywhere else in
+        Pharo.
+      </p>
+
+      <section id="running-navigate">
+        <h3>3.1 Moving between lessons</h3>
+
+        <p>
+          Navigation is itself code. Each lesson ends with two evaluable lines, and you advance by
+          evaluating one of them:
+        </p>
+
+<pre><code><span class="cls">MasterLu</span> next.
+<span class="cls">MasterLu</span> previous.</code></pre>
+
+        <p>
+          The lesson view reuses the same window instead of opening a new one each time, so you can
+          leave it in a corner of the screen and work through the sequence at your own pace.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="curriculum">
+      <h2>4. The sixteen lessons</h2>
+
+      <p>
+        The tutorial has a fixed order, designed so that each lesson introduces exactly one new idea.
+        The right-hand column points at the part of this manual that covers the same ground in
+        reference form.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>#</th><th>Lesson</th><th>Introduces</th><th>See also</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Hello Phausto</td><td><code>SineOsc</code>, <code>asDsp</code>, the lifecycle</td><td><a href="first-sounds.html">First Sounds</a></td></tr>
+          <tr><td>2</td><td>Hello Stereo</td><td><code>stereo</code> before <code>asDsp</code></td><td><a href="first-sounds.html">First Sounds</a></td></tr>
+          <tr><td>3</td><td>At the Controls</td><td><code>setValue:parameter:</code>, <code>traceAllParams</code></td><td><a href="parameters.html">Parameters</a></td></tr>
+          <tr><td>4</td><td>Display the UI</td><td><code>displayUI</code>, the <code>Djembe</code> model</td><td><a href="ui-primitives.html">UI Primitives</a></td></tr>
+          <tr><td>5</td><td>Unit Generators 101</td><td><code>Noise</code>, <code>uLevel</code>, what a UGen is</td><td><a href="basics.html">Unit Generators</a></td></tr>
+          <tr><td>6</td><td>chuckInto</td><td>The <code>=&gt;</code> operator</td><td><a href="connecting.html">Connecting</a></td></tr>
+          <tr><td>7</td><td>PlayNotes 101</td><td><code>playNote:prefix:dur:</code>, symbol labels</td><td><a href="midi.html">MIDI &amp; Notes</a></td></tr>
+          <tr><td>8</td><td>Our First Synthesiser</td><td>osc ⇒ env ⇒ filter</td><td><a href="synthesis.html">Synthesis §2</a></td></tr>
+          <tr><td>9</td><td>Additive Synthesis</td><td>Summing with <code>+</code></td><td><a href="synthesis.html">Synthesis §3</a></td></tr>
+          <tr><td>10</td><td>Additive with an Array</td><td><code>asSumOfUGen</code></td><td><a href="synthesis.html">Synthesis §3</a></td></tr>
+          <tr><td>11</td><td>Modal Synthesis</td><td><code>PhModeFilter</code>, <code>t60</code></td><td><a href="synthesis.html">Synthesis §4</a></td></tr>
+          <tr><td>12</td><td>TpSampler basics</td><td>Sample folders, algorithmic triggering</td><td><a href="sequencing.html">Sequencing §4</a></td></tr>
+          <tr><td>13</td><td>Basic waveforms</td><td><code>,</code> and <code>PhSelect4</code></td><td><a href="synthesis.html">Synthesis §1</a></td></tr>
+          <tr><td>14</td><td>Basic waveforms with SelectN</td><td><code>PhSelectN</code></td><td><a href="synthesis.html">Synthesis §1</a></td></tr>
+          <tr><td>15</td><td>Pitch Envelope</td><td><code>asBox</code>, envelopes as modulators</td><td><a href="envelopes.html">Envelopes</a></td></tr>
+          <tr><td>16</td><td>2-Operator FM Synthesis</td><td><code>Dx7Op</code>, <code>phaseMod:</code></td><td><a href="synthesis.html">Synthesis §5</a></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Do them in order the first time</span>
+        The sequence is not arbitrary — lesson 8 assumes the chuck operator from lesson 6, and lesson
+        15 assumes the arithmetic from lessons 9 and 10. After a first pass, jumping around is fine.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="fundamentals">
+      <h2>5. Synthesis Fundamentals</h2>
+
+      <p>
+        MasterLu ships a second, separate track: theory chapters rendered as Microdown rather than
+        executed as code. Where the sixteen lessons teach the Phausto API, these explain the concepts
+        underneath it.
+      </p>
+
+<pre><code><span class="cls">SynthesisFundamentals</span> new open.</code></pre>
+
+      <p>Three chapters are available, each also reachable as a class-side example:</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Chapter</th><th>Covers</th></tr></thead>
+        <tbody>
+          <tr><td>Five Types of Synthesis Modules</td><td>Generators, Combiners, Modifiers, Time-Variant Controllers, Storers — a vocabulary for taking any synthesiser apart</td></tr>
+          <tr><td>Five Types of Synthesis</td><td>Subtractive, additive, modulation/distortion, physical modelling and sample-based, each mapped to the Phausto classes that implement it</td></tr>
+          <tr><td>Time-Variant Controllers</td><td>Envelope generators and LFOs, and why Phausto has no separate control rate</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">One idea worth taking away early</span>
+        Phausto, like the FAUST compiler beneath it, does not distinguish audio-rate from
+        control-rate signals — every UGen runs at audio rate. The only exceptions are UI elements
+        such as <code>PhHSlider</code>, which update more slowly. This is why an LFO and an
+        oscillator are the same kind of object here, and why either can be used anywhere the other
+        can.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="known-issues">
+      <h2>6. Known issues</h2>
+
+      <p>
+        MasterLu is a teaching package under active development. A few rough edges are worth knowing
+        about before you meet them.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Where</th><th>Issue</th></tr></thead>
+        <tbody>
+          <tr><td>Lesson 11, Modal Synthesis</td><td>Calls <code>Impulsify</code> and <code>ModeFilter</code>. The classes are <code>PhImpulsify</code> and <code>PhModeFilter</code>; add the prefix and the lesson runs.</td></tr>
+          <tr><td>Lesson 12, TpSampler</td><td>The sample path is hardcoded to the author's machine. Substitute a folder of your own.</td></tr>
+          <tr><td>Lesson 14, SelectN</td><td>Five oscillators but an index capped at 3, so the noise source is unreachable. Change <code>max: 3</code> to <code>max: 4</code>.</td></tr>
+          <tr><td>Several lessons</td><td>A missing full stop after <code>dsp destroy</code> means selecting a whole snippet at once fails to parse. Evaluate line by line, as intended.</td></tr>
+          <tr><td>Baseline</td><td>ProfStef is not declared as a dependency even though MasterLu subclasses it. On an image without ProfStef, load it first.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Corrected, runnable versions of every lesson's material appear throughout this manual — see
+        the "See also" column in §4.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="basics.html">Unit Generators</a></td><td>The reference counterpart to lessons 1–5.</td></tr>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>Every operator, not only the chuck operator of lesson 6.</td></tr>
+          <tr><td><a href="synthesis.html">Synthesis Techniques</a></td><td>Lessons 8–16, expanded and corrected.</td></tr>
+          <tr><td><a href="community.html">Community</a></td><td>Where to report a lesson that no longer works.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4><code>MasterLu go</code> raises doesNotUnderstand</h4>
+      <p>
+        ProfStef, MasterLu's superclass, is missing from the image. The baseline does not declare it,
+        so on a minimal image you must load ProfStef yourself. See §6.
+      </p>
+
+      <h4>The lesson window opens but the code does nothing</h4>
+      <p>
+        Lessons are meant to be evaluated line by line, not read. Select a line and press
+        <kbd>Cmd-D</kbd>; opening the window runs nothing by itself.
+      </p>
+
+      <h4>Selecting a whole lesson at once gives a parse error</h4>
+      <p>
+        A missing full stop in the lesson text — see §6. Evaluate the lines individually and the
+        problem disappears.
+      </p>
+
+      <h4>Lesson 1 makes no sound although the code runs cleanly</h4>
+      <p>
+        Phausto's native libraries are not in place. MasterLu loads the Pharo side only; check
+        <a href="setup.html">Installation §3</a>.
+      </p>
+
+      <h4>I have several windows all titled "Master Lu"</h4>
+      <p>
+        There should only ever be one — the view reuses its window. Close them all and evaluate
+        <code>MasterLu go</code> again to restart cleanly.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

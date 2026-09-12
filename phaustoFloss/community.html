@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Community</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="community.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Project › Community</div>
+    <h1>Community</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Where the code lives, where to ask, and how to report something that does not work in a way
+      that gets it fixed.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#project">The project</a>
+          <ol>
+            <li><a href="#project-family">The wider family</a></li>
+          </ol>
+        </li>
+        <li><a href="#asking">Where to ask</a></li>
+        <li><a href="#reporting">Reporting a problem</a>
+          <ol>
+            <li><a href="#reporting-good">What makes a report useful</a></li>
+          </ol>
+        </li>
+        <li><a href="#contributing">Contributing</a>
+          <ol>
+            <li><a href="#contributing-docs">To this manual</a></li>
+            <li><a href="#contributing-code">To Phausto</a></li>
+          </ol>
+        </li>
+        <li><a href="#exploring">Exploring the package</a></li>
+        <li><a href="#credit">Credit where it is due</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="project">
+      <h2>1. The project</h2>
+
+      <p>
+        Phausto is written by <strong>Domenico Cipriani</strong>, who performs and publishes as
+        <em>Lucretio</em>. It sits alongside two sibling packages, and the three are designed to be
+        used together.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Resource</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto">lucretiomsp/phausto</a></td><td>The source</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/wiki">The wiki</a></td><td>Installation notes, kept current with the code</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/issues">Issues</a></td><td>Bug reports and feature discussion</td></tr>
+          <tr><td><a href="https://lucretiomsp.github.io/musicwithpharo/">Music with Pharo</a></td><td>The site this manual is part of, with a development blog</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <section id="project-family">
+        <h3>1.1 The wider family</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Package</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://github.com/lucretiomsp/phausto">Phausto</a></td><td>Synthesis and DSP — this manual</td></tr>
+            <tr><td><a href="https://github.com/lucretiomsp/coypu">Coypu</a></td><td>Live-coding client: patterns, sequencing, and output to SuperDirt, Kyma, Pure Data, MIDI and Phausto. <a href="../coypuFloss/index.html">Its manual</a></td></tr>
+            <tr><td><a href="https://github.com/pharo-contributions/pharo-sound">Pharo-Sound</a></td><td>MIDI send and receive via PortMidi</td></tr>
+            <tr><td><a href="https://github.com/lucretiomsp/MasterLu">MasterLu</a></td><td>The in-image tutorial — see <a href="masterlu.html">Learn in the Image</a></td></tr>
+            <tr><td><a href="https://github.com/pharo-graphics/CoypuIDE">CoypuIDE</a></td><td>Editor and browser tooling, including the Phausto class reference</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Underneath all of it is <a href="https://faust.grame.fr/">FAUST</a>, developed at GRAME.
+          The <a href="https://faustdoc.grame.fr/">FAUST documentation</a> and its
+          <a href="https://faustlibraries.grame.fr/">standard library reference</a> are worth knowing
+          about: when Phausto wraps a FAUST module, the FAUST documentation is the deeper description
+          of what it does.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="asking">
+      <h2>2. Where to ask</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Question</th><th>Best place</th></tr></thead>
+        <tbody>
+          <tr><td>Something in Phausto is broken</td><td><a href="https://github.com/lucretiomsp/phausto/issues">Phausto issues</a></td></tr>
+          <tr><td>Installation trouble</td><td>The <a href="https://github.com/lucretiomsp/phausto/wiki">wiki</a> first, then issues</td></tr>
+          <tr><td>A general Pharo question</td><td><a href="https://discord.gg/QewZMZa">Pharo Discord</a> or <a href="https://discourse.pharo.org/">Pharo Discourse</a></td></tr>
+          <tr><td>A FAUST language or library question</td><td><a href="https://faustdoc.grame.fr/">FAUST documentation</a> and the FAUST community</td></tr>
+          <tr><td>Sequencing and live coding</td><td>The <a href="https://github.com/lucretiomsp/coypu">Coypu</a> repository</td></tr>
+          <tr><td>An error or omission on this page</td><td>The edit link at the foot of it</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Check which layer you are on</span>
+        Phausto problems and FAUST problems look identical from a Playground but are answered in
+        different places. <code>dsp generatedCode</code> tells you which: if the generated FAUST is
+        not what you intended, it is a Phausto question; if it is exactly what you intended but
+        sounds wrong, it is a FAUST or DSP question.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="reporting">
+      <h2>3. Reporting a problem</h2>
+
+      <p>
+        Phausto is maintained by one person. A report that can be reproduced in thirty seconds is far
+        more likely to be fixed than one that needs a conversation first.
+      </p>
+
+      <section id="reporting-good">
+        <h3>3.1 What makes a report useful</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Include</th><th>Because</th></tr></thead>
+          <tbody>
+            <tr><td>A minimal snippet</td><td>The shortest code that shows the problem, ready to paste into a Playground</td></tr>
+            <tr><td>Pharo version</td><td>11, 12 and 13 are all supported and can differ</td></tr>
+            <tr><td>Platform and architecture</td><td>The native libraries are platform-specific</td></tr>
+            <tr><td>How Phausto was installed</td><td>Music image, or Metacello from which commit</td></tr>
+            <tr><td>What you expected, and what happened</td><td>Silence, an exception, or the wrong sound are three different bugs</td></tr>
+            <tr><td><code>getLastError</code></td><td>For build failures, the FAUST compiler's own message — see <a href="internals.html">Internals §3.3</a></td></tr>
+            <tr><td><code>generatedCode</code></td><td>For wrong-sound bugs, what was actually compiled</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Rule out the usual suspects first</span>
+          A large share of reports turn out to be the native libraries in the wrong place
+          (<a href="setup.html">Installation §3</a>), a patch that was never triggered
+          (<a href="first-sounds.html">First Sounds §8</a>), or a value fixed as a literal number and
+          therefore not controllable (<a href="parameters.html">Parameters §1.1</a>). Each page in
+          this manual ends with a troubleshooting section for exactly this reason.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="contributing">
+      <h2>4. Contributing</h2>
+
+      <section id="contributing-docs">
+        <h3>4.1 To this manual</h3>
+
+        <p>
+          Every page has an <strong>Edit this page on GitHub</strong> link at the foot, which opens
+          the source file directly in GitHub's editor. A typo fix is a two-minute pull request.
+        </p>
+
+        <p>Things that are always welcome:</p>
+
+        <div class="steps">
+          <div class="step"><strong>Corrections</strong> — a selector that does not exist, a class that has been renamed, a snippet that no longer runs.</div>
+          <div class="step"><strong>Missing descriptions</strong> — the <a href="ugen-library.html">UGen Library</a> is generated from class comments, so writing a class comment in Phausto improves the manual automatically.</div>
+          <div class="step"><strong>Troubleshooting entries</strong> — if something confused you, it will confuse the next person. Symptom-first phrasing, one or two sentences.</div>
+          <div class="step"><strong>Worked examples</strong> — short, runnable, and verified against the current package.</div>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">One structural rule</span>
+          Pages are driven by <code>phausto-nav.js</code>. Adding a page means adding one line to the
+          <code>PHAUSTO_PAGES</code> array — the sidebar, quick links, search and previous/next
+          navigation all follow from it. Do not hand-edit navigation into a page.
+        </div>
+      </section>
+
+      <section id="contributing-code">
+        <h3>4.2 To Phausto</h3>
+
+        <p>
+          Phausto is a Pharo package developed with Iceberg. Clone the repository, load the baseline,
+          and work in the image as usual.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Convention</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Branch</td><td><code>main</code></td></tr>
+            <tr><td>Commit messages</td><td>Prefixed <code>feature:</code> or <code>fix:</code></td></tr>
+            <tr><td>Tests</td><td>45 test classes; the expectation is that the suite stays green</td></tr>
+            <tr><td>Class comments</td><td>Expected on new classes — they are the package's documentation and this manual's source</td></tr>
+            <tr><td>Setters</td><td>Prefer composing an existing <a href="traits.html">trait</a> over defining a new selector</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The most valuable contribution for a new UGen is usually not the UGen: it is the class
+          comment and the test. Both are what make it findable and keep it working.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="exploring">
+      <h2>5. Exploring the package</h2>
+
+      <p>
+        With <a href="https://github.com/pharo-graphics/CoypuIDE">CoypuIDE</a> installed, Phausto
+        ships a visual class browser organised by UGen family:
+      </p>
+
+<pre><code><span class="cls">PhaustoClassReference</span> new openInSpace.</code></pre>
+
+      <p>
+        It groups classes the way the <a href="ugen-library.html">UGen Library</a> does — oscillators,
+        effects, envelopes and so on — and shows each class comment, many of which include a runnable
+        example. It is the in-image counterpart to this manual, and often the faster route when you
+        are already working.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Three ways to explore, all useful</span>
+        <code>PhaustoClassReference</code> for browsing by family,
+        <a href="masterlu.html">MasterLu</a> for a guided path, and
+        <code>traceAllParams</code> for the ground truth about any single UGen.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="credit">
+      <h2>6. Credit where it is due</h2>
+
+      <p>
+        Phausto is a thin and careful layer over a great deal of other people's work. When a patch
+        sounds good, much of the credit belongs upstream:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Whose work</th><th>What it gave us</th></tr></thead>
+        <tbody>
+          <tr><td>GRAME</td><td>The FAUST language, compiler and standard libraries</td></tr>
+          <tr><td>The FAUST library authors</td><td>Filters, reverbs, physical models and effects — the algorithms this manual catalogues</td></tr>
+          <tr><td>Julius O. Smith</td><td>Much of the physical modelling and filter theory the libraries implement</td></tr>
+          <tr><td>Fons Adriaensen</td><td>Zita-Rev1, wrapped as <code>ZitaRevStereo</code></td></tr>
+          <tr><td>Jon Dattorro</td><td>The plate reverb behind <code>DattorroRev</code></td></tr>
+          <tr><td>Max Mathews</td><td>The Unit Generator itself, at Bell Labs in the 1950s</td></tr>
+          <tr><td>The ChucK team</td><td>The <code>=&gt;</code> operator, borrowed with affection</td></tr>
+          <tr><td>The Pharo community</td><td>The live image that makes all of this immediate</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        If you use Phausto in a performance, a release or a paper, crediting Phausto and FAUST is
+        appreciated — and hearing about it more so.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="faq.html">FAQ</a></td><td>Short answers before you open an issue.</td></tr>
+          <tr><td><a href="changelog.html">Changelog</a></td><td>What changed, and how to pin a version.</td></tr>
+          <tr><td><a href="masterlu.html">Learn in the Image</a></td><td>The interactive tutorial.</td></tr>
+          <tr><td><a href="internals.html">Architecture &amp; Internals</a></td><td>Useful background before filing a deep bug.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4>I am not sure whether my problem is Phausto or FAUST</h4>
+      <p>Read <code>dsp generatedCode</code> — §2.</p>
+
+      <h4><code>PhaustoClassReference</code> is not understood</h4>
+      <p>CoypuIDE is not installed. It is a separate package — §5.</p>
+
+      <h4>My issue has not had a reply</h4>
+      <p>
+        The project is maintained by one person alongside other work. A minimal reproducible snippet
+        is the single biggest thing that speeds up a response — §3.1.
+      </p>
+
+      <h4>I found a mistake in this manual</h4>
+      <p>Use the edit link at the foot of the page — §4.1.</p>
+
+      <h4>I wrote a UGen and want it included</h4>
+      <p>
+        Open a pull request with a class comment and a test. Compose an existing setter trait rather
+        than inventing new selectors — §4.2.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

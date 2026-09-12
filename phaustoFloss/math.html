@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Math &amp; Conversion Tools</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="math.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › Math &amp; Conversion Tools</div>
+    <h1>Math &amp; Conversion Tools</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Arithmetic, mathematical functions, constants and unit conversions — as objects in the signal
+      graph rather than as operators between them.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#operator-or-ugen">Operator or UGen?</a></li>
+        <li><a href="#operations">Arithmetic operations</a>
+          <ol>
+            <li><a href="#operations-binary">Binary operations</a></li>
+            <li><a href="#operations-routing">Routing operations</a></li>
+          </ol>
+        </li>
+        <li><a href="#unary">Unary functions</a>
+          <ol>
+            <li><a href="#unary-general">General</a></li>
+            <li><a href="#unary-exp">Exponential and logarithmic</a></li>
+            <li><a href="#unary-special">Special functions</a></li>
+            <li><a href="#unary-tests">Tests and predicates</a></li>
+          </ol>
+        </li>
+        <li><a href="#binary-math">Binary mathematical functions</a></li>
+        <li><a href="#trig">Trigonometry and antialiasing</a></li>
+        <li><a href="#constants">Constants and the environment</a></li>
+        <li><a href="#conversions">Unit conversions</a>
+          <ol>
+            <li><a href="#conversions-gain">Gain</a></li>
+            <li><a href="#conversions-pitch">Pitch</a></li>
+            <li><a href="#conversions-time">Time and filter coefficients</a></li>
+          </ol>
+        </li>
+        <li><a href="#interp">Interpolation and quantisation</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="operator-or-ugen">
+      <h2>1. Operator or UGen?</h2>
+
+      <p>
+        Most of what is on this page exists twice: as a message you send to a signal, and as a UGen
+        class you instantiate. <code>aSignal log</code> and <code>PhLog2</code> do comparable jobs by
+        different routes.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Form</th><th>When to use it</th></tr></thead>
+        <tbody>
+          <tr><td>Message — <code>aSignal abs</code></td><td>Inline in an expression. Shorter, and reads naturally</td></tr>
+          <tr><td>UGen — <code>PhSignum new</code></td><td>When you need an object: to name it, reuse it, or place it in a collection</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The operator forms are documented in
+        <a href="connecting.html">Connecting Unit Generators §8</a>. This page catalogues the classes.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Everything here is sample-by-sample</span>
+        These are not computed once when the patch is built. Each one is part of the running signal
+        graph and evaluates at audio rate, which is what makes them usable as modulation shapers.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="operations">
+      <h2>2. Arithmetic operations</h2>
+
+      <section id="operations-binary">
+        <h3>2.1 Binary operations</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Operation</th><th>Operator form</th></tr></thead>
+          <tbody>
+            <tr><td>PhAdder</td><td>Sum</td><td><code>+</code></td></tr>
+            <tr><td>PhSubtractor</td><td>Difference</td><td><code>-</code></td></tr>
+            <tr><td>PhMultiplicator</td><td>Product</td><td><code>*</code></td></tr>
+            <tr><td>PhDivider</td><td>Quotient</td><td><code>/</code></td></tr>
+            <tr><td>PhModulor</td><td>Modulo</td><td><code>%</code></td></tr>
+            <tr><td>PhPower</td><td>Exponentiation</td><td>—</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="operations-routing">
+        <h3>2.2 Routing operations</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>PhBinaryOperation</td><td>Superclass of the two-input operations</td></tr>
+            <tr><td>PhUnaryOperation</td><td>Superclass of the one-input operations</td></tr>
+            <tr><td>PhSplitOperation</td><td>Fan one signal out to several destinations</td></tr>
+            <tr><td>PhMergeOperation</td><td>Fold several channels into fewer</td></tr>
+            <tr><td>PhCrossnn</td><td>Cross-route n channels</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="unary">
+      <h2>3. Unary functions</h2>
+
+      <section id="unary-general">
+        <h3>3.1 General</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Computes</th></tr></thead>
+          <tbody>
+            <tr><td>PhNeg</td><td>Negation</td></tr>
+            <tr><td>PhInverse</td><td>Reciprocal</td></tr>
+            <tr><td>PhSignum</td><td>Sign: −1, 0 or 1</td></tr>
+            <tr><td>PhFrac</td><td>Fractional part</td></tr>
+            <tr><td>PhSub</td><td>Subtraction as a unary operation</td></tr>
+            <tr><td>PhCubeRoot</td><td>Cube root</td></tr>
+            <tr><td>PhNextPowerOf2</td><td>Next power of two</td></tr>
+            <tr><td>PhDiffn</td><td>Difference between successive samples</td></tr>
+            <tr><td>PhZeroCrossing</td><td>Zero-crossing detection</td></tr>
+            <tr><td>PhFTZ</td><td>Flush denormals to zero</td></tr>
+            <tr><td>PhPrimes</td><td>Prime number generation</td></tr>
+            <tr><td>PhDeg2Rad, PhRad2Deg</td><td>Degrees and radians</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">PhZeroCrossing is a pitch detector's front end</span>
+          Counting zero crossings over a window is the cheapest usable estimate of frequency, and
+          <code>PhDiffn</code> next to it gives you slope. Together they are a lightweight analysis
+          pair for driving something from an input signal.
+        </div>
+      </section>
+
+      <section id="unary-exp">
+        <h3>3.2 Exponential and logarithmic</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Computes</th></tr></thead>
+          <tbody>
+            <tr><td>PhLog2</td><td>Base-2 logarithm</td></tr>
+            <tr><td>PhLogB</td><td>Exponent of the floating-point representation</td></tr>
+            <tr><td>PhILogB</td><td>The same, as an integer</td></tr>
+            <tr><td>PhLog1p</td><td>log(1 + x) — accurate for small x</td></tr>
+            <tr><td>PhExpM1</td><td>exp(x) − 1 — accurate for small x</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Why log1p and expm1 exist</span>
+          For very small x, computing <code>log(1 + x)</code> directly loses most of its precision to
+          rounding. These variants keep it. It matters in filter coefficient computation and in
+          anything working near unity gain.
+        </div>
+      </section>
+
+      <section id="unary-special">
+        <h3>3.3 Special functions</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Computes</th></tr></thead>
+          <tbody>
+            <tr><td>PhErf</td><td>Error function</td></tr>
+            <tr><td>PhErfC</td><td>Complementary error function</td></tr>
+            <tr><td>PhLGamma</td><td>Log gamma function</td></tr>
+            <tr><td>PhJ0, PhJ1</td><td>Bessel functions of the first kind, orders 0 and 1</td></tr>
+            <tr><td>PhY0, PhY1</td><td>Bessel functions of the second kind, orders 0 and 1</td></tr>
+            <tr><td>PhChebychev</td><td>Chebyshev polynomial</td></tr>
+            <tr><td>PhChebychevPoly</td><td>Chebyshev polynomial series</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Chebyshev polynomials are a waveshaping tool</span>
+          The nth Chebyshev polynomial maps a sine wave to its nth harmonic exactly. Feeding a sine
+          through a weighted sum of them gives precise control over the harmonic spectrum — classic
+          waveshaping synthesis, and far more predictable than an arbitrary saturator.
+        </div>
+
+        <p>
+          The Bessel functions appear in FM and in circular-membrane models, where they describe the
+          distribution of sideband energy and the modes of a drum head respectively.
+        </p>
+      </section>
+
+      <section id="unary-tests">
+        <h3>3.4 Tests and predicates</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Returns 1 when</th></tr></thead>
+          <tbody>
+            <tr><td>PhIsNan</td><td>The value is not a number</td></tr>
+            <tr><td>PhIsInf</td><td>The value is infinite</td></tr>
+            <tr><td>PhNot</td><td>Logical negation</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">A use for PhIsNan</span>
+          Feedback networks and unstable filters can produce NaN, at which point the whole patch goes
+          silent and stays silent. Inserting a NaN test lets you detect that in the graph rather than
+          wondering why the sound stopped.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="binary-math">
+      <h2>4. Binary mathematical functions</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Computes</th></tr></thead>
+        <tbody>
+          <tr><td>PhHypothenuse</td><td>√(x² + y²) without overflow</td></tr>
+          <tr><td>PhCopySign</td><td>Magnitude of one operand with the sign of the other</td></tr>
+          <tr><td>PhModuloMath</td><td>Mathematical modulo</td></tr>
+          <tr><td>PhLdExp</td><td>x × 2ⁿ</td></tr>
+          <tr><td>PhScalb</td><td>Scale by a power of the radix</td></tr>
+          <tr><td>PhJn, PhYn</td><td>Bessel functions of arbitrary order</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="trig">
+      <h2>5. Trigonometry and antialiasing</h2>
+
+      <p>
+        Ordinary trigonometric messages — <code>sin</code>, <code>cos</code>, <code>aTan</code> — are
+        available on any signal. The <code>Trigonometry</code> family under the
+        <em>Antialiased</em> tag is different: these are band-limited implementations built for
+        waveshaping.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Function</th></tr></thead>
+        <tbody>
+          <tr><td>AASine, AASine2</td><td>Antialiased sine</td></tr>
+          <tr><td>Cosine1, Cosine2</td><td>Antialiased cosine</td></tr>
+          <tr><td>Tangent</td><td>Antialiased tangent</td></tr>
+          <tr><td>ArcSin, ArcSin2</td><td>Arcsine</td></tr>
+          <tr><td>ArcCos, ArcCos2</td><td>Arccosine</td></tr>
+          <tr><td>ACosh1, ACosh2</td><td>Inverse hyperbolic cosine</td></tr>
+          <tr><td>ATanh1, Atanh2</td><td>Inverse hyperbolic tangent</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Why antialiased versions exist</span>
+        Waveshaping generates harmonics above the Nyquist frequency, which fold back down as
+        inharmonic aliasing — the metallic grit that makes naïve digital distortion sound cheap.
+        These implementations use antiderivative antialiasing to suppress it. Use them wherever a
+        function is being applied to a full-scale audio signal rather than to a control value.
+      </div>
+
+      <p>
+        The saturators in <a href="effects.html">Effects §3</a> are the applied form of the same
+        idea.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="constants">
+      <h2>6. Constants and the environment</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>PhConstantPI</td><td>π</td></tr>
+          <tr><td>PhConstantE</td><td>e</td></tr>
+          <tr><td>PhConstantEpsilon</td><td>Smallest representable difference</td></tr>
+          <tr><td>PhConstantMin, PhConstantMax</td><td>Representable range bounds</td></tr>
+          <tr><td>PhConstantT</td><td>The sample period</td></tr>
+          <tr><td>PhSampleRate</td><td>Current sample rate, as a signal</td></tr>
+          <tr><td>PhSampleDuration</td><td>Duration of one sample</td></tr>
+          <tr><td>PhBlockSize</td><td>Current audio block size</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Write sample-rate-independent patches</span>
+        A delay of "2000 samples" means different things at 44.1 and 96 kHz. Expressing it through
+        <code>PhSampleRate</code> or <code>PhSec2Samp</code> keeps a patch sounding the same wherever
+        it runs — which matters as soon as you export it. See <a href="exporting.html">Exporting</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="conversions">
+      <h2>7. Unit conversions</h2>
+
+      <p>
+        Sixteen <code>PhConversionTool</code> subclasses translate between the units audio actually
+        uses. Each has an inverse, and they come in pairs.
+      </p>
+
+      <section id="conversions-gain">
+        <h3>7.1 Gain</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Converts</th></tr></thead>
+          <tbody>
+            <tr><td>PhDb2Linear</td><td>Decibels to a linear multiplier</td></tr>
+            <tr><td>PhLinear2Db</td><td>Linear multiplier to decibels</td></tr>
+            <tr><td>PhLinear2LogGain</td><td>Linear to logarithmic gain</td></tr>
+            <tr><td>PhLog2LinearGain</td><td>Logarithmic to linear gain</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          <code>uLevel</code> is linear, but loudness perception is closer to logarithmic. Putting a
+          fader through <code>PhDb2Linear</code> is what makes it feel even across its travel — see
+          <a href="basics.html">Unit Generators §2.1</a>.
+        </p>
+      </section>
+
+      <section id="conversions-pitch">
+        <h3>7.2 Pitch</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Converts</th></tr></thead>
+          <tbody>
+            <tr><td>PhMidiKey2Hz</td><td>MIDI note number to hertz — key 69 is 440 Hz</td></tr>
+            <tr><td>PhHz2MidiKey</td><td>Hertz to MIDI note number</td></tr>
+            <tr><td>PhPianoKey2Hz</td><td>Piano key number to hertz</td></tr>
+            <tr><td>PhHz2PianoKey</td><td>Hertz to piano key number</td></tr>
+            <tr><td>PhSemi2Ratio</td><td>Semitones to a frequency ratio</td></tr>
+            <tr><td>PhRatio2Semitone</td><td>Frequency ratio to semitones</td></tr>
+            <tr><td>PhCent2Ratio</td><td>Cents to a frequency ratio</td></tr>
+            <tr><td>PhRatio2Cent</td><td>Frequency ratio to cents</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Semitone and cent conversions are the right tools for transposition and detuning, because
+          a musical interval is a <em>ratio</em>, not an offset — detuning by "2 Hz" means something
+          different at every pitch, while detuning by 5 cents does not.
+        </p>
+      </section>
+
+      <section id="conversions-time">
+        <h3>7.3 Time and filter coefficients</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Converts</th></tr></thead>
+          <tbody>
+            <tr><td>PhSec2Samp</td><td>Seconds to samples</td></tr>
+            <tr><td>PhSamp2Sec</td><td>Samples to seconds</td></tr>
+            <tr><td>PhTau2Pole</td><td>A time constant to a one-pole filter coefficient</td></tr>
+            <tr><td>PhPole2tau</td><td>A one-pole coefficient back to a time constant</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Tau and pole</span>
+          A one-pole smoother is normally specified by a coefficient between 0 and 1, which is
+          meaningless to think in. <code>PhTau2Pole</code> lets you say "settle in 30 milliseconds"
+          instead. The same reasoning produces the <code>T60</code> and <code>Tau</code> filter
+          variants in <a href="filters.html">Filters §8</a>.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="interp">
+      <h2>8. Interpolation and quantisation</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>PhInterpolateLinear</td><td>Linear interpolation between two values</td></tr>
+          <tr><td>PhInterpolateRaiseModulo</td><td>Interpolation with modulo wrapping — for phase and index values</td></tr>
+          <tr><td>PhInterpolate</td><td>General interpolation</td></tr>
+          <tr><td>PhQuantize</td><td>Quantise a signal to discrete steps</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Interpolation controls come from the <code>PhInterpSetter</code> trait —
+        <code>v0:</code>, <code>v1:</code>, <code>dv:</code> and <code>interpControl:</code>. See
+        <a href="traits.html">Setter Traits §7</a>.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Quantise pitch, not frequency</span>
+        <code>PhQuantize</code> on a frequency signal gives arbitrary steps; on a MIDI note number
+        it gives semitones. Convert to note numbers, quantise, convert back — which is how a
+        random-walk melody is kept in a scale.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>The operator forms of everything here.</td></tr>
+          <tr><td><a href="filters.html">Filters</a></td><td>Where time constants and coefficients are used.</td></tr>
+          <tr><td><a href="effects.html">Effects</a></td><td>Waveshaping as an applied use of these functions.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The complete class list.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4>My patch went silent and will not come back</h4>
+      <p>
+        Something produced NaN or an infinity — usually a division by zero or a runaway feedback
+        loop. Rebuild the DSP, and consider a <code>PhIsNan</code> test while debugging — §3.4.
+      </p>
+
+      <h4>Waveshaping sounds gritty and metallic</h4>
+      <p>Aliasing. Use the antialiased functions — §5.</p>
+
+      <h4>My fader feels uneven — all the action is at the bottom</h4>
+      <p>It is linear. Put it through <code>PhDb2Linear</code> — §7.1.</p>
+
+      <h4>A detuned pair sounds right low down and wrong high up</h4>
+      <p>You are detuning by a frequency offset rather than a ratio. Use cents — §7.2.</p>
+
+      <h4>The patch sounds different at a different sample rate</h4>
+      <p>A time is specified in samples. Express it in seconds — §6.</p>
+
+      <h4>Quantising the frequency gives out-of-tune notes</h4>
+      <p>Quantise MIDI note numbers instead, then convert — §8.</p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

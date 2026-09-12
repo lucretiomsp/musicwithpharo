@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — First Sounds</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="first-sounds.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Getting Started › First Sounds</div>
+    <h1>First Sounds</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Every Phausto patch, from a bare sine wave to a forty-voice physical model, follows the same
+      five-step lifecycle. Learn it once here and every later page is a variation on it.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#hello">The shortest program</a></li>
+        <li><a href="#lifecycle">The DSP lifecycle</a>
+          <ol>
+            <li><a href="#lifecycle-messages">The five messages</a></li>
+            <li><a href="#lifecycle-destroy">Why destroy matters</a></li>
+          </ol>
+        </li>
+        <li><a href="#stereo">Mono and stereo</a></li>
+        <li><a href="#ui">Opening the interface</a></li>
+        <li><a href="#parameters">Finding and changing parameters</a>
+          <ol>
+            <li><a href="#parameters-trace">Discovering names with traceAllParams</a></li>
+            <li><a href="#parameters-set">Setting a value while it plays</a></li>
+          </ol>
+        </li>
+        <li><a href="#instrument">Something with a body</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="hello">
+      <h2>1. The shortest program</h2>
+
+      <p>
+        A <code>SineOsc</code> with no arguments oscillates at 440 Hz — concert A. Open a Playground
+        and evaluate these lines <strong>one at a time</strong>, with <kbd>Cmd-D</kbd> (macOS) or
+        <kbd>Ctrl-D</kbd>, so you can hear each step take effect:
+      </p>
+
+      <div class="method-sig"><span class="badge">step by step</span> Hello Phausto</div>
+<pre><code><span class="cmt">"Create a sine oscillator — 440 Hz by default"</span>
+sine := <span class="cls">SineOsc</span> new.
+
+<span class="cmt">"Wrap it in a DSP: the object that can actually make sound"</span>
+dsp := sine asDsp.
+
+<span class="cmt">"Compile the FAUST code to native audio and allocate buffers"</span>
+dsp init.
+
+<span class="cmt">"Start the audio thread — the tone begins here"</span>
+dsp start.
+
+<span class="cmt">"Silence"</span>
+dsp stop.</code></pre>
+
+      <p>
+        Note what is <em>not</em> here: no sample rate, no buffer size, no output device, no build
+        step, no file. A UGen becomes a DSP, and a DSP makes sound.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">A UGen is not a sound</span>
+        <code>SineOsc new</code> makes no noise on its own. It is a description of a signal. Only
+        <code>asDsp</code> hands that description to the FAUST engine, and only <code>start</code>
+        connects the result to your speakers.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="lifecycle">
+      <h2>2. The DSP lifecycle</h2>
+
+      <p>
+        The same five messages govern every patch in this manual. Learning where each one belongs is
+        most of what "knowing Phausto" means at the start.
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Create</strong> — build a UGen or a chain of them, then send <code>asDsp</code>.</div>
+        <div class="step"><strong>Init</strong> — <code>dsp init</code> compiles the patch to machine code and allocates buffers.</div>
+        <div class="step"><strong>Start</strong> — <code>dsp start</code> hands the DSP to the audio thread. Sound begins.</div>
+        <div class="step"><strong>Stop</strong> — <code>dsp stop</code> halts output. The DSP stays alive and can be started again.</div>
+        <div class="step"><strong>Destroy</strong> — <code>dsp destroy</code> frees the native resources for good.</div>
+      </div>
+
+      <section id="lifecycle-messages">
+        <h3>2.1 The five messages</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>asDsp</td><td>Wrap the UGen chain in a <code>DSP</code> object</td></tr>
+            <tr><td>asDspWithName:</td><td>Same, with a name you choose — useful when several DSPs run at once</td></tr>
+            <tr><td>init</td><td>Compile and allocate. Required before <code>start</code></td></tr>
+            <tr><td>start</td><td>Begin audio output on the audio thread</td></tr>
+            <tr><td>stop</td><td>Halt output; the DSP remains initialised</td></tr>
+            <tr><td>destroy</td><td>Release native memory and unregister the DSP</td></tr>
+            <tr><td>play</td><td>Convenience: <code>init</code> and <code>start</code> together</td></tr>
+            <tr><td>playFor:</td><td>Start, wait for a duration, then stop</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          <code>stop</code> and <code>start</code> can be alternated freely — that is the basis of
+          live performance. <code>init</code> only needs to happen once.
+        </p>
+      </section>
+
+      <section id="lifecycle-destroy">
+        <h3>2.2 Why destroy matters</h3>
+        <p>
+          A DSP holds memory allocated outside the Pharo heap, in the FAUST engine. Stopping a DSP
+          does not release it. If you are working iteratively — evaluating a patch, changing it,
+          evaluating again — destroy the old DSP before building the next one, or you will
+          accumulate live DSPs that continue to consume CPU:
+        </p>
+
+<pre><code>dsp stop.
+dsp destroy.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Habit worth forming</span>
+          End every experiment with <code>stop</code> then <code>destroy</code>. Several lessons in
+          <a href="masterlu.html">MasterLu</a> finish exactly this way, and for this reason.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="stereo">
+      <h2>3. Mono and stereo</h2>
+
+      <p>
+        <code>asDsp</code> on its own produces a mono DSP. Send <code>stereo</code> to the UGen
+        first to duplicate the signal across two channels:
+      </p>
+
+<pre><code><span class="cmt">"A sawtooth, this time in stereo"</span>
+saw := <span class="cls">SawOsc</span> new.
+
+<span class="cmt">"note 'stereo' before 'asDsp'"</span>
+dsp := saw stereo asDsp.
+
+dsp init.
+dsp start.
+dsp stop.</code></pre>
+
+      <p>
+        The counterpart <code>mono</code> collapses a stereo signal back down to one channel. Both
+        are ordinary messages on the UGen, so they compose with everything else — you will usually
+        see <code>stereo</code> as the last thing before <code>asDsp</code>.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Reach for stereo by default</span>
+        Reverbs and other stereo effects — <code>GreyHole</code>, <code>FreeverbMono</code>'s stereo
+        siblings, <code>ZitaRevStereo</code> — expect two channels of input. Building in stereo from
+        the start saves rewiring later. See <a href="effects.html">Effects, Reverbs &amp; Dynamics</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="ui">
+      <h2>4. Opening the interface</h2>
+
+      <p>
+        FAUST derives a user interface from the sliders, buttons and numeric entries declared inside
+        each module, and Phausto can render it as a Pharo window. One message:
+      </p>
+
+<pre><code>dsp displayUI.</code></pre>
+
+      <p>
+        This is the fastest way to understand an unfamiliar UGen. Rather than reading its class
+        comment, start it and look at what knobs appear. For UGens that need to be triggered —
+        envelopes, drums, plucked strings — the UI is also the only way to make a sound before you
+        have learned <a href="parameters.html">programmatic triggering</a>.
+      </p>
+
+      <p>
+        You can also open a single control in its own window, which is convenient when you want one
+        slider to hand during a performance:
+      </p>
+
+<pre><code>slider := dsp sliderFor: <span class="str">'SineOscFreq'</span>.
+slider openInWindow.
+
+button := dsp buttonFor: <span class="str">'DjembeTrigger'</span>.
+button openInWindow.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="parameters">
+      <h2>5. Finding and changing parameters</h2>
+
+      <p>
+        Every controllable value in a running DSP has a string name. Those names are generated from
+        the UGen's label and the parameter's own label, so a <code>PulseOsc</code> contributes
+        <code>PulseOscFreq</code>, <code>PulseOscDuty</code> and so on.
+      </p>
+
+      <section id="parameters-trace">
+        <h3>5.1 Discovering names with traceAllParams</h3>
+
+        <p>
+          You rarely need to guess. After <code>init</code>, ask the DSP to print everything it
+          exposes to the Transcript:
+        </p>
+
+<pre><code>dsp traceAllParams.</code></pre>
+
+        <div class="callout note">
+          <span class="callout-title">Why this matters more than it looks</span>
+          Most Phausto setters are supplied by <a href="traits.html">shared traits</a> rather than
+          defined on the UGen class itself — <code>SineOsc</code> defines only
+          <code>initialize</code>. Browsing a single class will therefore not show you its API, but
+          <code>traceAllParams</code> always will.
+        </div>
+      </section>
+
+      <section id="parameters-set">
+        <h3>5.2 Setting a value while it plays</h3>
+
+        <p>
+          <code>PulseOsc</code> is a square wave with a variable duty cycle — a good UGen to hear
+          parameter changes on, because both of its controls have an obvious audible effect:
+        </p>
+
+<pre><code>pulse := <span class="cls">PulseOsc</span> new.
+dsp := pulse asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Narrow the pulse — the timbre thins and gains harmonics"</span>
+dsp setValue: <span class="num">0.2</span> parameter: <span class="str">'PulseOscDuty'</span>.
+
+<span class="cmt">"Drop the pitch two octaves and a bit"</span>
+dsp setValue: <span class="num">120</span> parameter: <span class="str">'PulseOscFreq'</span>.
+
+<span class="cmt">"List everything this DSP exposes"</span>
+dsp traceAllParams.
+
+dsp stop.</code></pre>
+
+        <div class="method-sig"><span class="badge">method</span> setValue: aNumber parameter: aString</div>
+        <p>
+          <code>aNumber</code> is the new value, in the parameter's own units — hertz, seconds,
+          decibels or a normalised 0–1 range depending on the control. <code>aString</code> must
+          match the parameter name exactly.
+        </p>
+
+        <div class="callout warning">
+          <span class="callout-title">Only UI parameters are live</span>
+          A value baked in at construction time — <code>SineOsc new freq: 200</code> — becomes a
+          constant in the compiled DSP and cannot be changed afterwards. To change something at
+          runtime, leave it at its default or give it a
+          <a href="ui-primitives.html">UI primitive</a>. This trips up almost everyone once.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="instrument">
+      <h2>6. Something with a body</h2>
+
+      <p>
+        Oscillators are the "hello world" of synthesis, but Phausto's physical models are where the
+        FAUST standard library earns its reputation. <code>Djembe</code> models the West African
+        goblet drum:
+      </p>
+
+<pre><code>perc := <span class="cls">Djembe</span> new.
+dsp  := perc asDsp.
+dsp init.
+dsp start.
+
+<span class="cmt">"Open the UI and press DjembeTrigger to strike the drum"</span>
+dsp displayUI.
+
+dsp stop.</code></pre>
+
+      <p>
+        Then substitute <code>Marimba</code> for <code>Djembe</code> and run it again. The code is
+        identical; only the model changes. That interchangeability — every UGen accepting the same
+        lifecycle — is the point of the design. See
+        <a href="physical-models.html">Physical Modelling</a> for the full family.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="basics.html">Unit Generators</a></td><td>What every UGen has in common, and the families they fall into.</td></tr>
+          <tr><td><a href="connecting.html">Connecting UGens</a></td><td>The operators that join UGens into chains, stacks and feedback loops.</td></tr>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Naming, triggering, sweeping and automating parameters.</td></tr>
+          <tr><td><a href="masterlu.html">Learn in the Image</a></td><td>The same ground covered as sixteen runnable in-image lessons.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4>I evaluated the whole snippet at once and nothing happened</h4>
+      <p>
+        Evaluate line by line. Evaluating the block in one go runs <code>start</code> and
+        <code>stop</code> within microseconds of each other, so the tone exists for no audible time.
+      </p>
+
+      <h4><code>dsp start</code> complains that the DSP is not initialised</h4>
+      <p>
+        <code>init</code> has to happen first, and only once per DSP. If you rebuilt the UGen chain
+        you also built a new DSP, and the new one needs its own <code>init</code> — see §2.1.
+      </p>
+
+      <h4>Sound keeps playing after I stopped it</h4>
+      <p>
+        You are probably hearing an <em>earlier</em> DSP that was never stopped. Each
+        <code>asDsp</code> creates a new object; the variable <code>dsp</code> pointing somewhere
+        else does not silence the old one. Keep the habit in §2.2.
+      </p>
+
+      <h4><code>setValue:parameter:</code> does nothing</h4>
+      <p>
+        Either the name is wrong — run <code>traceAllParams</code> and copy it exactly, including
+        capitalisation — or the value was fixed at construction time and is now a compiled constant.
+        See §5.2.
+      </p>
+
+      <h4>A physical model or envelope makes no sound at all</h4>
+      <p>
+        It is waiting to be triggered. Open <code>dsp displayUI</code> and press the trigger button,
+        or trigger it from code with <code>dsp trig: 'DjembeTrigger'</code>. See
+        <a href="parameters.html">Parameters &amp; Control</a>.
+      </p>
+
+      <h4>The image gets slower every time I evaluate my patch</h4>
+      <p>
+        Undestroyed DSPs are stacking up. Send <code>destroy</code> before rebuilding — §2.2.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

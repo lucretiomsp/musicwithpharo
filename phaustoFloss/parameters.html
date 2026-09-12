@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Parameters &amp; Control</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="parameters.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Parameters &amp; Control</div>
+    <h1>Parameters &amp; Control</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      What you can change while the sound is running, how it gets a name, and every way to change
+      it — by hand, from code, or on a schedule.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#three-kinds">Three kinds of argument</a>
+          <ol>
+            <li><a href="#three-kinds-constant">A number is a constant</a></li>
+            <li><a href="#three-kinds-signal">A UGen is modulation</a></li>
+            <li><a href="#three-kinds-symbol">A symbol is a control</a></li>
+          </ol>
+        </li>
+        <li><a href="#naming">How parameters get their names</a></li>
+        <li><a href="#discovery">Discovering what exists</a></li>
+        <li><a href="#setting">Setting values</a></li>
+        <li><a href="#triggering">Triggering</a></li>
+        <li><a href="#sweeps">Sweeps and ramps</a></li>
+        <li><a href="#batch">Setting many at once</a></li>
+        <li><a href="#widgets">Individual widgets</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="three-kinds">
+      <h2>1. Three kinds of argument</h2>
+
+      <p>
+        Almost every Phausto setter is declared as taking
+        <code>aNumberOrABoxOrASymbol</code>, and that signature is the single most important thing
+        on this page. The <em>kind</em> of argument you pass decides whether the value is frozen,
+        modulated, or exposed as a control.
+      </p>
+
+      <section id="three-kinds-constant">
+        <h3>1.1 A number is a constant</h3>
+
+<pre><code>osc := <span class="cls">SineOsc</span> new freq: <span class="num">440</span>.</code></pre>
+
+        <p>
+          440 is compiled into the DSP as a literal. It is efficient and it is permanent: no
+          parameter appears in the UI, and <code>setValue:parameter:</code> has nothing to address.
+          Use numbers for values that genuinely never change.
+        </p>
+      </section>
+
+      <section id="three-kinds-signal">
+        <h3>1.2 A UGen is modulation</h3>
+
+<pre><code><span class="cmt">"Vibrato: ±20 Hz at 6 Hz around a 440 Hz centre"</span>
+osc := <span class="cls">SineOsc</span> new freq: (<span class="cls">LFOTri</span> new freq: <span class="num">6</span>) * <span class="num">20</span> asBox + <span class="num">440</span> asBox.</code></pre>
+
+        <p>
+          The value now comes from another part of the signal graph and changes every sample. This
+          is how envelopes, LFOs and audio-rate modulation are wired — see
+          <a href="envelopes.html">Envelopes &amp; Modulation</a>.
+        </p>
+      </section>
+
+      <section id="three-kinds-symbol">
+        <h3>1.3 A symbol is a control</h3>
+
+<pre><code>osc := <span class="cls">SineOsc</span> new freq: #myFreq.</code></pre>
+
+        <p>
+          Passing a symbol creates a <strong>named, runtime-controllable parameter</strong>. It
+          appears in <code>displayUI</code>, it shows up in <code>traceAllParams</code>, and
+          <code>setValue:parameter:</code> can reach it. This is the mechanism you need for anything
+          you intend to perform with.
+        </p>
+
+        <div class="callout note">
+          <span class="callout-title">The single most common mistake</span>
+          Building a patch with numbers everywhere and then discovering nothing can be changed while
+          it plays. If you want to control it later, give it a symbol or a
+          <a href="ui-primitives.html">UI primitive</a> now.
+        </div>
+
+        <p>Symbols also convert directly into widgets when you want to specify a range:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Expression</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>#gate asPhButton</td><td>A momentary button named <code>gate</code></td></tr>
+            <tr><td>#cutoff asPhHSlider</td><td>A horizontal slider named <code>cutoff</code></td></tr>
+            <tr><td>'Level' asPhFader</td><td>A fader from a string label</td></tr>
+            <tr><td>#freq &lt;- 440</td><td>Set a symbol-named parameter's value</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="naming">
+      <h2>2. How parameters get their names</h2>
+
+      <p>
+        A parameter's name is its UGen's <strong>label</strong> followed by the parameter's own
+        label. A <code>PulseOsc</code> whose label is the default class name therefore contributes
+        <code>PulseOscFreq</code> and <code>PulseOscDuty</code>.
+      </p>
+
+      <p>Relabel the UGen and every one of its parameters is renamed with it:</p>
+
+<pre><code><span class="cmt">"Two oscillators that would otherwise share parameter names"</span>
+left  := <span class="cls">SineOsc</span> new label: <span class="str">'Left'</span>.
+right := <span class="cls">SineOsc</span> new label: <span class="str">'Right'</span>.
+
+<span class="cmt">"now LeftFreq and RightFreq, individually addressable"</span>
+dsp setValue: <span class="num">440</span> parameter: <span class="str">'LeftFreq'</span>.
+dsp setValue: <span class="num">443</span> parameter: <span class="str">'RightFreq'</span>.</code></pre>
+
+      <p>
+        The same technique makes an arbitrary instrument work with
+        <code>playNote:prefix:dur:</code>, which looks for a frequency and a gate under a prefix you
+        choose:
+      </p>
+
+<pre><code>synth := <span class="cls">ElecGuitar</span> new
+  freq:    #ElecGuitarFreq;
+  trigger: #ElecGuitarTrigger.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Label early</span>
+        Labels are baked in when the DSP is compiled. Renaming after <code>asDsp</code> has no
+        effect on the running DSP — rebuild it.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="discovery">
+      <h2>3. Discovering what exists</h2>
+
+      <p>
+        You should almost never guess a parameter name. After <code>init</code>, the DSP can list
+        everything it exposes:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td>traceAllParams</td><td>Prints every parameter and its current value to the Transcript</td></tr>
+          <tr><td>allParameters</td><td>The parameters as objects</td></tr>
+          <tr><td>getParamCount</td><td>How many there are</td></tr>
+          <tr><td>getParamAddress:</td><td>The name at a given index</td></tr>
+          <tr><td>getParamIndex:</td><td>The index of a given name</td></tr>
+          <tr><td>getParamValue:</td><td>The current value of a named parameter</td></tr>
+          <tr><td>includesParameter:</td><td>Whether a name exists — useful before setting it</td></tr>
+          <tr><td>getUIButtons</td><td>Just the buttons</td></tr>
+          <tr><td>getUIKnobs</td><td>Just the continuous controls</td></tr>
+          <tr><td>getUIItems</td><td>Every UI item</td></tr>
+          <tr><td>getJSON</td><td>The full FAUST UI description as JSON</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>dsp traceAllParams.
+dsp getParamValue: <span class="str">'PulseOscDuty'</span>.
+(dsp includesParameter: <span class="str">'PulseOscFreq'</span>) ifTrue: [ <span class="cmt">"safe to set"</span> ].</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Why this matters here more than elsewhere</span>
+        Phausto's setters mostly come from <a href="traits.html">shared traits</a>, so browsing a
+        UGen class does not reveal its API. <code>traceAllParams</code> is the authoritative answer
+        and costs one line.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="setting">
+      <h2>4. Setting values</h2>
+
+      <div class="method-sig"><span class="badge">method</span> setValue: aNumber parameter: aString</div>
+
+<pre><code>dsp setValue: <span class="num">0.2</span> parameter: <span class="str">'PulseOscDuty'</span>.
+dsp setValue: <span class="num">120</span> parameter: <span class="str">'PulseOscFreq'</span>.</code></pre>
+
+      <p>
+        Values are in the parameter's own units — hertz, seconds, decibels, or a normalised 0–1
+        range, depending on the control. Out-of-range values are clamped to the declared minimum and
+        maximum rather than raising.
+      </p>
+
+      <p>
+        The index form, <code>setValue:parameterIndex:</code>, avoids the name lookup and is
+        marginally faster; it is worth using inside a tight control loop, but the name form is
+        clearer everywhere else.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Silence is the failure mode</span>
+        Setting a name that does not exist does nothing and reports nothing. If a change appears to
+        have no effect, check the spelling and capitalisation against
+        <code>traceAllParams</code> before assuming the value is wrong.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="triggering">
+      <h2>5. Triggering</h2>
+
+      <p>
+        Envelopes, drums and plucked models do nothing until gated. A button parameter is a signal
+        that is 1 while pressed and 0 otherwise, and <code>trig:</code> presses it from code.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>trig: aString</td><td>Fire the named trigger</td></tr>
+          <tr><td>trig: aString for: seconds</td><td>Hold the gate open for a duration, then release</td></tr>
+          <tr><td>playNote: n prefix: aString dur: seconds</td><td>Set the frequency from a MIDI note number and gate it for a duration</td></tr>
+          <tr><td>syncTrigReset</td><td>Reset synchronised triggers to a common origin</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"Strike a drum"</span>
+dsp trig: <span class="str">'DjembeTrigger'</span>.
+
+<span class="cmt">"Hold a note for a quarter of a second"</span>
+dsp trig: <span class="str">'ADSREnvGate'</span> for: <span class="num">0.25</span>.
+
+<span class="cmt">"Play middle C for a quarter of a second"</span>
+dsp playNote: <span class="num">60</span> prefix: <span class="str">'ElecGuitar'</span> dur: <span class="num">0.25</span>.</code></pre>
+
+      <p>
+        The difference between <code>trig:</code> and <code>trig:for:</code> matters for sustaining
+        instruments. A percussion model only needs an instant; an ADSR held open by
+        <code>trig:</code> alone will sit in its sustain stage indefinitely.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="sweeps">
+      <h2>6. Sweeps and ramps</h2>
+
+      <p>
+        A parameter can be moved gradually rather than jumped, which is the difference between a
+        filter that clicks and one that sweeps:
+      </p>
+
+      <div class="method-sig"><span class="badge">method</span> sweepToValue: aTarget parameter: aString in: seconds</div>
+
+<pre><code><span class="cmt">"Open the filter over two seconds"</span>
+dsp sweepToValue: <span class="num">8000</span> parameter: <span class="str">'MoogVcfFreq'</span> in: <span class="num">2</span>.</code></pre>
+
+      <p>
+        <code>sweepToMfValue:parameter:in:</code> is the variant for parameters expressed as
+        multiplication factors rather than absolute values.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Or smooth it in the graph</span>
+        For a control that will be moved often, put the smoothing in the DSP instead: append
+        <code>smoo</code> to the widget, or use one of the <code>PhSmoo</code> family. That way
+        every change is smoothed, including ones made by hand in the UI. See
+        <a href="envelopes.html">Envelopes &amp; Modulation</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="batch">
+      <h2>7. Setting many at once</h2>
+
+      <p>
+        Phausto extends <code>Array</code> so a collection of values can be applied to a DSP in one
+        message — convenient when recalling a preset or stepping a sequence:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>anArray setValue: aFloat parameter: aString forDsp: aDsp</td><td>Apply a value across a DSP from an array context</td></tr>
+          <tr><td>anArray trig: aString for: seconds forDsp: aDsp</td><td>Fire a trigger for a duration from an array context</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        For structured state — saving, recalling and interpolating whole parameter sets — Phausto
+        has <code>DSPParameter</code> and <code>DSPParameterStore</code>, described in
+        <a href="dsp-api.html">DSP &amp; Parameter API</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="widgets">
+      <h2>8. Individual widgets</h2>
+
+      <p>
+        <code>displayUI</code> opens everything at once. When you want one control on screen —
+        during a performance, or to keep a specific knob to hand — open it alone:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>displayUI</td><td>The whole generated interface</td></tr>
+          <tr><td>sliderFor:</td><td>A slider presenter for one named parameter</td></tr>
+          <tr><td>buttonFor:</td><td>A button presenter for one named trigger</td></tr>
+          <tr><td>openSliderFor:</td><td>Build and open a slider in one step</td></tr>
+          <tr><td>openButtonFor:</td><td>Build and open a button in one step</td></tr>
+          <tr><td>keyBoardFor:</td><td>A piano keyboard bound to a named instrument</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>s1 := dsp sliderFor: <span class="str">'tempo'</span>.  s1 openInWindow.
+s2 := dsp sliderFor: <span class="str">'freq'</span>.   s2 openInWindow.</code></pre>
+
+      <p>
+        Nested FAUST groups produce path-like names, so a parameter inside a demo module may be
+        addressed as something like <code>'Freeverb/0x00/RoomSize'</code>. Copy the exact string from
+        <code>traceAllParams</code>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="ui-primitives.html">UI Primitives</a></td><td>Sliders, buttons and entries in full, with their metadata.</td></tr>
+          <tr><td><a href="traits.html">Setter Traits</a></td><td>Every setter selector and which family provides it.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>The complete DSP protocol and the parameter store.</td></tr>
+          <tr><td><a href="sequencing.html">Sequencing &amp; Sampling</a></td><td>Driving all of this from patterns.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4><code>setValue:parameter:</code> silently does nothing</h4>
+      <p>
+        Either the name is wrong, or the value was fixed as a number at construction time and is now
+        a compiled constant. Check with <code>traceAllParams</code> — §3 — and see §1.1.
+      </p>
+
+      <h4>The parameter I want is not in <code>traceAllParams</code> at all</h4>
+      <p>
+        It was never exposed. Rebuild the UGen passing a symbol or a UI primitive instead of a
+        number — §1.3.
+      </p>
+
+      <h4>Two UGens respond to the same parameter name</h4>
+      <p>They share a label. Give one its own <code>label:</code> — §2.</p>
+
+      <h4>Changing a value produces an audible click or zipper noise</h4>
+      <p>The jump is instantaneous. Sweep it, or smooth it inside the graph — §6.</p>
+
+      <h4>My envelope triggers but never releases</h4>
+      <p>
+        <code>trig:</code> opens the gate and leaves it open. Use <code>trig:for:</code> with a
+        duration, or <code>playNote:prefix:dur:</code> — §5.
+      </p>
+
+      <h4>A parameter name has slashes and hex digits in it</h4>
+      <p>
+        That is a nested FAUST group path, normal for demo modules and complex instruments. Copy it
+        verbatim — §8.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

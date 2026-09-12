@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — UI Primitives</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="ui-primitives.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Reference › UI Primitives</div>
+    <h1>UI Primitives</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      The widgets that make a value controllable. They describe an interface abstractly — no toolkit,
+      no layout — and Phausto, a plugin host or a Bela board each render them their own way.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">Widgets are signal generators</a></li>
+        <li><a href="#sliders">Sliders and numeric entries</a>
+          <ol>
+            <li><a href="#sliders-construct">The two constructors</a></li>
+            <li><a href="#sliders-classes">PhHSlider, PhVSlider, PhNumEntry</a></li>
+          </ol>
+        </li>
+        <li><a href="#discrete">Buttons and checkboxes</a></li>
+        <li><a href="#bargraphs">Bar graphs</a></li>
+        <li><a href="#shortcuts">Shortcuts from symbols and strings</a></li>
+        <li><a href="#metadata">Metadata and external control</a></li>
+        <li><a href="#control-parameter">PhControlParameter</a></li>
+        <li><a href="#arithmetic">Widgets in expressions</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="what">
+      <h2>1. Widgets are signal generators</h2>
+
+      <p>
+        A FAUST widget is not a control that sends events. It is a <strong>signal</strong>: a button
+        outputs 1 while pressed and 0 otherwise; a slider outputs its current position, continuously.
+        That is why a widget can be used anywhere a UGen can, and why arithmetic on widgets works.
+      </p>
+
+      <p>
+        The description is also abstract. Nothing in a <code>PhHSlider</code> says how wide it is or
+        where it sits — it declares a name, a range and a default, and the host decides the rest.
+        The same declaration becomes a Pharo window under <code>displayUI</code>, a plugin parameter
+        when exported to JUCE, and an analogue input on a Bela board.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">The one exception to audio rate</span>
+        Everything in Phausto runs at audio rate except UI elements, which update at the slower rate
+        a human or a host moves them. This is why stepped controller movement is audible and why
+        <code>smoo</code> exists — see <a href="envelopes.html">Envelopes §5</a>.
+      </div>
+
+      <p>
+        <code>UIPrimitive</code> is the abstract superclass. Do not instantiate it directly; it
+        exists to group the real widgets and give them a common protocol.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="sliders">
+      <h2>2. Sliders and numeric entries</h2>
+
+      <section id="sliders-construct">
+        <h3>2.1 The two constructors</h3>
+
+        <p>
+          <code>PhSlider</code> supplies both constructors to all its subclasses. They express the
+          same thing; pick whichever reads better:
+        </p>
+
+        <div class="method-sig"><span class="badge">method</span> label: aString init: init min: min max: max step: step</div>
+<pre><code>index := <span class="cls">PhNumEntry</span> new
+  label: <span class="str">'Wave'</span> init: <span class="num">0</span> min: <span class="num">0</span> max: <span class="num">3</span> step: <span class="num">1</span>.</code></pre>
+
+        <div class="method-sig"><span class="badge">method</span> label: aString values: anArray</div>
+<pre><code>freq := <span class="cls">PhHSlider</span> new
+  label: <span class="str">'Freq'</span> values: #(<span class="num">100</span> <span class="num">20</span> <span class="num">4000</span> <span class="num">0.1</span>).</code></pre>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Array position</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>1st</td><td>Initial value</td></tr>
+            <tr><td>2nd</td><td>Minimum</td></tr>
+            <tr><td>3rd</td><td>Maximum</td></tr>
+            <tr><td>4th</td><td>Step size</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Init comes first, not the minimum</span>
+          <code>#(100 20 4000 0.1)</code> means "start at 100, range 20–4000". Reading it as
+          min-max-init-step is the commonest cause of a slider that will not move.
+        </div>
+
+        <p>Individual setters exist too: <code>label:</code>, <code>init:</code>, <code>min:</code>, <code>max:</code>, <code>step:</code>.</p>
+      </section>
+
+      <section id="sliders-classes">
+        <h3>2.2 PhHSlider, PhVSlider, PhNumEntry</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>FAUST primitive</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>PhHSlider</td><td><code>hslider</code></td><td>Horizontal slider — the default choice for a continuous value</td></tr>
+            <tr><td>PhVSlider</td><td><code>vslider</code></td><td>Vertical slider; identical behaviour, different orientation hint</td></tr>
+            <tr><td>PhNumEntry</td><td><code>nentry</code></td><td>Numeric entry — best for discrete choices such as a selector index</td></tr>
+            <tr><td>PhSlider</td><td>—</td><td>Abstract superclass of the three</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Entry for integers, slider for continuous values</span>
+          A <code>PhNumEntry</code> with <code>step: 1</code> is the natural control for something
+          like a waveform index, where intermediate values are meaningless. See
+          <a href="synthesis.html">Synthesis §1</a>.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="discrete">
+      <h2>3. Buttons and checkboxes</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>FAUST primitive</th><th>Signal</th></tr></thead>
+        <tbody>
+          <tr><td>PhButton</td><td><code>button</code></td><td>1 while held, 0 otherwise — momentary</td></tr>
+          <tr><td>PhCheckbox</td><td><code>checkbox</code></td><td>1 or 0 — latching</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The difference matters for envelopes: a button is a gate you hold, a checkbox is a switch you
+        leave. Triggering percussion wants the former; enabling an effect wants the latter.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">An implementation detail you may notice</span>
+        FAUST buttons and checkboxes share the same underlying box constructor, so Phausto encodes
+        the widget type in the label, separated by a tilde. If a label appears in
+        <code>traceAllParams</code> with a <code>~</code> in it, that is why — use the name exactly
+        as printed.
+      </div>
+
+      <p>Trigger a button from code with <code>dsp trig:</code>; see <a href="parameters.html">Parameters §5</a>.</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="bargraphs">
+      <h2>4. Bar graphs</h2>
+
+      <p>
+        Bar graphs run the other way: instead of producing a signal, they <em>display</em> one. They
+        are meters.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>PhHBarGraph</td><td>Horizontal meter</td></tr>
+          <tr><td>PhVBarGraph</td><td>Vertical meter</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Both take <code>label:</code>, <code>min:</code>, <code>max:</code> and, crucially,
+        <code>input:</code> — the signal to display. They pass that signal through unchanged, so a
+        meter can be inserted mid-chain without altering the sound.
+      </p>
+
+<pre><code><span class="cmt">"Watch the level going into the reverb"</span>
+meter := <span class="cls">PhVBarGraph</span> new
+  label: <span class="str">'Level'</span>; min: <span class="num">0</span>; max: <span class="num">1</span>; input: voice.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="shortcuts">
+      <h2>5. Shortcuts from symbols and strings</h2>
+
+      <p>
+        For the common case — a named control with default range — Phausto extends
+        <code>Symbol</code> and <code>String</code>:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Expression</th><th>Produces</th></tr></thead>
+        <tbody>
+          <tr><td>#gate asPhButton</td><td>A button named <code>gate</code></td></tr>
+          <tr><td>#cutoff asPhHSlider</td><td>A horizontal slider named <code>cutoff</code></td></tr>
+          <tr><td>'Level' asPhFader</td><td>A fader from a string label</td></tr>
+          <tr><td>'Cutoff' asDSPParameter</td><td>A <code>DSPParameter</code> from a label</td></tr>
+          <tr><td>#freq &lt;- 440</td><td>Assign a value to a symbol-named parameter</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Passing a bare symbol to any setter does the same job implicitly — see
+        <a href="traits.html">Setter Traits §1.1</a>. Use the explicit forms when you need to control
+        the widget type or range.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="metadata">
+      <h2>6. Metadata and external control</h2>
+
+      <p>
+        FAUST lets a widget carry metadata declarations, and those are what bind it to the outside
+        world. Phausto exposes them as ordinary messages:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Binds to</th></tr></thead>
+        <tbody>
+          <tr><td>midiCtrl: aNumber</td><td>A MIDI continuous controller, any channel</td></tr>
+          <tr><td>midiCtrl: aNumber channel: aChannel</td><td>A controller on a specific channel</td></tr>
+          <tr><td>midiKeyon: aPitch</td><td>Note-on for a given pitch</td></tr>
+          <tr><td>midiPitchwheel</td><td>The pitch bend wheel</td></tr>
+          <tr><td>belaPin: aBelaPin</td><td>An analogue pin on a Bela board</td></tr>
+          <tr><td>declare: aKey value: aValue</td><td>Any other FAUST metadata declaration</td></tr>
+          <tr><td>metadata</td><td>Read back what has been declared</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>cutoff := <span class="cls">PhHSlider</span> new
+  label: <span class="str">'Cutoff'</span> values: #(<span class="num">800</span> <span class="num">40</span> <span class="num">12000</span> <span class="num">1</span>);
+  midiCtrl: <span class="num">1</span>.        <span class="cmt">"the modulation wheel"</span></code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Declare once, works everywhere</span>
+        The same declaration is honoured by the FAUST runtime in Pharo, by an exported JUCE plugin,
+        and by a Bela binary. Declaring control bindings on the widget rather than in your own code
+        is what makes a patch portable. See <a href="exporting.html">Exporting</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="control-parameter">
+      <h2>7. PhControlParameter</h2>
+
+      <p>
+        A <code>PhControlParameter</code> describes a UGen parameter that <em>can</em> be made
+        controllable — the metadata layer between a UGen and the widget that might drive it. It is
+        what lets Phausto report a UGen's controllable parameters before any widget has been
+        attached.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Accessor</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>name / name:</td><td>Parameter name</td></tr>
+          <tr><td>label / label:</td><td>Display label</td></tr>
+          <tr><td>description / description:</td><td>Human-readable description</td></tr>
+          <tr><td>initialValue / initialValue:</td><td>Default value</td></tr>
+          <tr><td>min: / max:</td><td>Bounds</td></tr>
+          <tr><td>range</td><td>The span between them</td></tr>
+          <tr><td>step / step:</td><td>Increment</td></tr>
+          <tr><td>value / value:</td><td>Current value</td></tr>
+          <tr><td>widgetType / widgetType:</td><td>Which widget should represent it</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Reach it through <code>aUGen controlParameters</code> and <code>aUGen uiParameters</code>.
+        A widget can be converted into one with <code>asControlParameter</code>, or
+        <code>asControlParameterOfWidgetType:description:</code> when you want to specify both.
+      </p>
+
+      <p>
+        The related <code>DSPParameter</code> and <code>DSPParameterStore</code> describe parameters
+        of a <em>running</em> DSP rather than of a UGen — see
+        <a href="dsp-api.html">DSP &amp; Parameter API §8</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="arithmetic">
+      <h2>8. Widgets in expressions</h2>
+
+      <p>
+        Because a widget is a signal, it takes part in arithmetic directly. This is how one control
+        drives several destinations, or how two controls combine:
+      </p>
+
+<pre><code><span class="cmt">"One frequency control, one ratio control, two oscillators"</span>
+freqKnob  := <span class="cls">PhHSlider</span> new label: <span class="str">'Freq'</span>  values: #(<span class="num">100</span> <span class="num">20</span> <span class="num">4000</span> <span class="num">0.1</span>).
+ratioKnob := <span class="cls">PhHSlider</span> new label: <span class="str">'Ratio'</span> values: #(<span class="num">1</span> <span class="num">0.1</span> <span class="num">32</span> <span class="num">0.1</span>).
+
+modulator := <span class="cls">SineOsc</span> new freq: freqKnob * ratioKnob.
+carrier   := <span class="cls">Dx7Op</span>   new phaseMod: modulator; freq: freqKnob.</code></pre>
+
+      <p>
+        Widgets understand <code>+</code>, <code>*</code>, <code>,</code>, <code>=&gt;</code> and
+        <code>smoo</code>, and can be sent <code>asDsp</code> directly if you want to hear one on its
+        own. See <a href="connecting.html">Connecting Unit Generators</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Driving these widgets from code.</td></tr>
+          <tr><td><a href="midi.html">MIDI &amp; Playing Notes</a></td><td>Mapping hardware controllers to them.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>Opening individual widgets and reading the UI description.</td></tr>
+          <tr><td><a href="exporting.html">Exporting</a></td><td>What these declarations become in a plugin.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4>My slider will not move, or does nothing</h4>
+      <p>
+        The <code>values:</code> array is in the wrong order, or the step is larger than the range.
+        Initial value comes first — §2.1.
+      </p>
+
+      <h4>The widget does not appear in the UI at all</h4>
+      <p>
+        It was never connected to anything. A widget only reaches the DSP if it is used as a setter
+        argument or is part of the signal expression — §8.
+      </p>
+
+      <h4>A parameter name has a tilde in it</h4>
+      <p>That is the button/checkbox type marker. Use the name exactly as printed — §3.</p>
+
+      <h4>Two widgets end up with the same name</h4>
+      <p>
+        Labels must be unique within a DSP. Give them distinct <code>label:</code> values, or
+        relabel the owning UGen — see <a href="basics.html">Unit Generators §2.2</a>.
+      </p>
+
+      <h4>Moving a control produces zipper noise</h4>
+      <p>Widgets update below audio rate. Append <code>smoo</code> — §1.</p>
+
+      <h4>My bar graph changes the sound</h4>
+      <p>
+        It should not — bar graphs pass their input through unchanged. If something changed, the
+        signal is probably being routed into the meter instead of through it. Check
+        <code>input:</code> — §4.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Envelopes &amp; Modulation</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="envelopes.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Envelopes &amp; Modulation</div>
+    <h1>Envelopes &amp; Modulation</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Music is change over time. Envelopes and LFOs are the UGens that produce that change — and in
+      Phausto they are ordinary signals, so they can be routed anywhere.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#no-control-rate">There is no control rate</a></li>
+        <li><a href="#envelopes">Envelope generators</a>
+          <ol>
+            <li><a href="#envelopes-family">The thirteen envelopes</a></li>
+            <li><a href="#envelopes-stages">Stages and their setters</a></li>
+            <li><a href="#envelopes-gate">Gating an envelope</a></li>
+          </ol>
+        </li>
+        <li><a href="#lfos">Low-frequency oscillators</a>
+          <ol>
+            <li><a href="#lfos-family">The LFO family</a></li>
+            <li><a href="#lfos-shaping">Offset, amount and polarity</a></li>
+          </ol>
+        </li>
+        <li><a href="#routing">Routing a modulator</a>
+          <ol>
+            <li><a href="#routing-amplitude">To amplitude</a></li>
+            <li><a href="#routing-pitch">To pitch</a></li>
+            <li><a href="#routing-timbre">To timbre</a></li>
+          </ol>
+        </li>
+        <li><a href="#smoothing">Smoothing</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="no-control-rate">
+      <h2>1. There is no control rate</h2>
+
+      <p>
+        Many audio environments separate <em>audio-rate</em> signals from slower
+        <em>control-rate</em> ones, and will not let you connect the two without a conversion.
+        Phausto, following FAUST, makes no such distinction: every Unit Generator produces a signal
+        at audio rate. The only slower things in the system are
+        <a href="ui-primitives.html">UI primitives</a>, which update when a human moves them.
+      </p>
+
+      <p>
+        The consequence is liberating. An LFO and an oscillator are the same kind of object, so
+        anything that accepts one accepts the other. Raise an LFO's frequency into the audible range
+        and it becomes an audio oscillator; lower an oscillator's frequency to 3 Hz and it becomes a
+        modulator. There is no boundary to cross.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Which means</span>
+        Every setter in Phausto is a modulation input. If a UGen has a <code>cutoff:</code>, you can
+        drive it with an envelope. If it has a <code>gain:</code>, you can drive it with an LFO. No
+        special "modulation matrix" is needed, because the graph is the matrix.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="envelopes">
+      <h2>2. Envelope generators</h2>
+
+      <p>
+        An envelope produces a <em>non-periodic</em> control signal: a shape, triggered by a gate.
+        The envelope generator in this form was developed by Robert Moog in the 1960s with Herbert
+        Deutsch, and its vocabulary — attack, decay, sustain, release — has been standard ever since.
+      </p>
+
+      <p>
+        An envelope is defined by <strong>times</strong> and <strong>levels</strong>: what value is
+        reached, and how long it takes to get there. Each time/level pair is a <em>stage</em>, and
+        the envelopes differ mainly in how many stages they have.
+      </p>
+
+      <section id="envelopes-family">
+        <h3>2.1 The thirteen envelopes</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Stages</th><th>Character</th></tr></thead>
+          <tbody>
+            <tr><td>AREnv</td><td>Attack, Release</td><td>The simplest shape — a swell and a fall</td></tr>
+            <tr><td>ARFExpEnv</td><td>Attack, Release</td><td>AR with exponential segments</td></tr>
+            <tr><td>ASREnv</td><td>Attack, Sustain, Release</td><td>Holds while gated; organ-like</td></tr>
+            <tr><td>ASRExpEnv</td><td>Attack, Sustain, Release</td><td>ASR with exponential segments</td></tr>
+            <tr><td>ADSREnv</td><td>A, D, S, R</td><td>The standard four-stage envelope, linear</td></tr>
+            <tr><td>ADSRExpEnv</td><td>A, D, S, R</td><td>Exponential — closer to how acoustic sounds decay</td></tr>
+            <tr><td>ADSREnvBias</td><td>A, D, S, R</td><td>ADSR with an adjustable curve bias per segment</td></tr>
+            <tr><td>ADSRFEnvBias</td><td>A, D, S, R</td><td>Biased ADSR with a fixed-duration variant</td></tr>
+            <tr><td>AHDSREnvBias</td><td>A, H, D, S, R</td><td>Adds a Hold stage between attack and decay</td></tr>
+            <tr><td>AHDSRExpEnv</td><td>A, H, D, S, R</td><td>Exponential five-stage envelope</td></tr>
+            <tr><td>AHDSRFEnvBias</td><td>A, H, D, S, R</td><td>Biased five-stage envelope</td></tr>
+            <tr><td>SmoothEnv</td><td>—</td><td>A smoothing envelope for taming stepped control values</td></tr>
+            <tr><td>PhEnvelope</td><td>—</td><td>The abstract superclass; do not instantiate directly</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Choosing one</span>
+          Start with <code>ADSREnv</code>. Move to the <code>Exp</code> variants when linear decays
+          sound artificial — which is most of the time for plucked and struck sounds. Reach for the
+          <code>Bias</code> variants when you need to shape the curvature of individual segments,
+          and the <code>AHDSR</code> family when a sound needs to sit at full level briefly before
+          decaying.
+        </div>
+      </section>
+
+      <section id="envelopes-stages">
+        <h3>2.2 Stages and their setters</h3>
+
+        <p>
+          The stage setters come from the <code>PhADSRSetter</code> trait, so they are consistent
+          across the whole family:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Setter</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>attack:</td><td>Time to reach maximum level after the gate opens</td></tr>
+            <tr><td>decay:</td><td>Time to fall from the peak to the sustain level</td></tr>
+            <tr><td>sustain:</td><td>The <em>level</em> held while the gate stays open — not a time</td></tr>
+            <tr><td>release:</td><td>Time to fall to zero after the gate closes</td></tr>
+            <tr><td>ar:</td><td>Attack and release together, for the two-stage envelopes</td></tr>
+            <tr><td>level1: … level4:</td><td>Per-stage target levels on the multi-segment envelopes</td></tr>
+            <tr><td>release1: … release4:</td><td>Per-stage release times</td></tr>
+            <tr><td>biasAttack:, biasDecay:, biasRelease:</td><td>Curvature of each segment, on the Bias variants</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Sustain is a level</span>
+          Three of the four ADSR controls are durations in seconds; sustain is an amplitude. A
+          sustain of 0 makes the envelope behave as an AD envelope regardless of how long the gate
+          is held.
+        </div>
+      </section>
+
+      <section id="envelopes-gate">
+        <h3>2.3 Gating an envelope</h3>
+
+        <p>
+          An envelope outputs zero until gated. The gate can come from the UI, from code, or from
+          inside the graph:
+        </p>
+
+<pre><code><span class="cmt">"From the interface — press the button"</span>
+dsp displayUI.
+
+<span class="cmt">"From code, held for a duration"</span>
+dsp trig: <span class="str">'ADSREnvGate'</span> for: <span class="num">0.25</span>.
+
+<span class="cmt">"From the graph — a pulse every 300 ms, no scheduling code at all"</span>
+env := <span class="cls">ADSREnv</span> new gate: (<span class="cls">Pulse</span> new period: <span class="num">0.3</span>).</code></pre>
+
+        <p>
+          The third form is worth dwelling on: because the gate is just another signal, a rhythm
+          generator wired to it turns the envelope into a self-playing part. See
+          <a href="sequencing.html">Sequencing &amp; Sampling</a>.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="lfos">
+      <h2>3. Low-frequency oscillators</h2>
+
+      <p>
+        An LFO produces a <em>periodic</em> control signal, normally below 20 Hz — under the
+        threshold of hearing, so it is felt as movement rather than heard as pitch.
+      </p>
+
+      <section id="lfos-family">
+        <h3>3.1 The LFO family</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Shape</th><th>Range</th></tr></thead>
+          <tbody>
+            <tr><td>LFO</td><td>Base class</td><td>Bipolar</td></tr>
+            <tr><td>LFOTri</td><td>Triangle</td><td>Bipolar, −1 to 1</td></tr>
+            <tr><td>LFOTriPos</td><td>Triangle</td><td>Unipolar, 0 to 1</td></tr>
+            <tr><td>LFOSaw</td><td>Sawtooth</td><td>Bipolar</td></tr>
+            <tr><td>LFOSawPos</td><td>Sawtooth</td><td>Unipolar</td></tr>
+            <tr><td>LFOSquare</td><td>Square</td><td>Bipolar</td></tr>
+            <tr><td>LFOSquarePos</td><td>Square</td><td>Unipolar</td></tr>
+            <tr><td>LFORandomPos</td><td>Random steps</td><td>Unipolar — a new value each cycle</td></tr>
+            <tr><td>LFOForModulation</td><td>Configurable</td><td>Adds <code>offset</code> and unit clamping</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Pos means positive</span>
+          The <code>Pos</code> suffix marks the unipolar variants, which stay between 0 and 1.
+          Choose bipolar when modulating around a centre value, unipolar when modulating a quantity
+          that must never go negative — an amplitude, a delay time, a filter frequency.
+        </div>
+      </section>
+
+      <section id="lfos-shaping">
+        <h3>3.2 Offset, amount and polarity</h3>
+
+        <p>
+          The two setters you will use constantly are <code>amount:</code>, which scales the LFO's
+          excursion, and <code>offset:</code>, which shifts its centre:
+        </p>
+
+<pre><code><span class="cmt">"A random pitch between 20 and 620 Hz, new value roughly three times a second"</span>
+pitch := <span class="cls">LFORandomPos</span> new offset: <span class="num">20</span>; amount: <span class="num">600</span>; freq: <span class="num">3</span>.</code></pre>
+
+        <p>
+          Read that as: start at <code>offset</code>, and add up to <code>amount</code>. The same
+          shaping can of course be written as arithmetic — <code>lfo * 600 asBox + 20 asBox</code> —
+          and the two are equivalent; the setters simply read better.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="routing">
+      <h2>4. Routing a modulator</h2>
+
+      <p>
+        Envelopes are not only for amplitude, and LFOs are not only for vibrato. The three classical
+        destinations, with the terms for each:
+      </p>
+
+      <section id="routing-amplitude">
+        <h3>4.1 To amplitude</h3>
+
+        <p>Periodic modulation of amplitude is <em>tremolo</em>; a one-shot shape is an envelope.</p>
+
+<pre><code><span class="cmt">"Tremolo — 5 Hz amplitude wobble"</span>
+trem := <span class="cls">SineOsc</span> new uLevel: (<span class="cls">LFOTriPos</span> new freq: <span class="num">5</span>).
+
+<span class="cmt">"Envelope shaping — the chuck operator multiplies the two"</span>
+plucked := <span class="cls">SawOsc</span> new =&gt; <span class="cls">ADSREnv</span> new.</code></pre>
+      </section>
+
+      <section id="routing-pitch">
+        <h3>4.2 To pitch</h3>
+
+        <p>Periodic modulation of pitch is <em>vibrato</em>; a one-shot pitch shape is a pitch envelope.</p>
+
+<pre><code><span class="cmt">"Vibrato — ±10 Hz at 6 Hz"</span>
+vib := <span class="cls">SineOsc</span> new freq: ((<span class="cls">LFOTri</span> new freq: <span class="num">6</span>) * <span class="num">10</span> asBox + <span class="num">440</span> asBox).
+
+<span class="cmt">"Pitch envelope — the drop that makes a kick drum a kick drum"</span>
+pitchEnv := <span class="num">200</span> asBox * <span class="cls">ADSREnv</span> new.
+kick := <span class="cls">TriOsc</span> new freq: (<span class="num">50</span> asBox + pitchEnv).</code></pre>
+      </section>
+
+      <section id="routing-timbre">
+        <h3>4.3 To timbre</h3>
+
+        <p>
+          Modulating a filter's cutoff is the single most characteristic gesture in subtractive
+          synthesis — the "wah" and the classic filter sweep are both this:
+        </p>
+
+<pre><code><span class="cmt">"Filter envelope — brightness follows the same shape as the note"</span>
+cutoff := <span class="num">200</span> asBox + (<span class="num">4000</span> asBox * <span class="cls">ADSREnv</span> new).
+voice  := <span class="cls">SawOsc</span> new =&gt; (<span class="cls">MoogVcf</span> new cutoff: cutoff).</code></pre>
+
+        <p>
+          Note that this envelope is a <em>second</em>, independent one — a filter envelope is
+          usually shorter than the amplitude envelope, which is what gives a sound its initial
+          brightness and subsequent mellowing. See <a href="filters.html">Filters</a>.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="smoothing">
+      <h2>5. Smoothing</h2>
+
+      <p>
+        A control value that jumps produces a click. The <code>PhSmoo</code> family interpolates
+        between values so changes are heard as movement rather than as steps:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>PhSmooth</td><td>General-purpose one-pole smoothing</td></tr>
+          <tr><td>PhSmoothAndH</td><td>Smoothing with a hold stage</td></tr>
+          <tr><td>PhSmoothQ</td><td>Smoothing with an adjustable time constant</td></tr>
+          <tr><td>PhBSmooth</td><td>Block-rate smoothing</td></tr>
+          <tr><td>PhOnePoleSwitching</td><td>Different rise and fall times — fast attack, slow release</td></tr>
+          <tr><td>SmoothEnv</td><td>Envelope-shaped smoothing</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The shorthand <code>smoo</code> applies the standard smoother to any signal, and is the
+        usual way to tame a slider:
+      </p>
+
+<pre><code>cutoff := (<span class="cls">PhHSlider</span> new label: <span class="str">'Cutoff'</span> values: #(<span class="num">800</span> <span class="num">40</span> <span class="num">12000</span> <span class="num">1</span>)) smoo.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Smooth in the graph, not in the loop</span>
+        Smoothing inside the DSP covers every source of change — the UI, your code, an external
+        controller. Sweeping from Pharo with
+        <code>sweepToValue:parameter:in:</code> only covers changes you make yourself.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="filters.html">Filters</a></td><td>The obvious destination for an envelope.</td></tr>
+          <tr><td><a href="synthesis.html">Synthesis Techniques</a></td><td>Envelopes at work in complete patches.</td></tr>
+          <tr><td><a href="sequencing.html">Sequencing &amp; Sampling</a></td><td>Generating the gates that trigger envelopes.</td></tr>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Triggering and sweeping from code.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>My envelope produces no sound</h4>
+      <p>It has not been gated. See §2.3.</p>
+
+      <h4>The envelope triggers but the sound never stops</h4>
+      <p>
+        The gate is still open — <code>trig:</code> holds it. Use <code>trig:for:</code>, or check
+        that <code>sustain:</code> is not doing what you think <code>release:</code> should. §2.2.
+      </p>
+
+      <h4>My vibrato makes the pitch drop to zero and buzz</h4>
+      <p>
+        A bipolar LFO went below the base frequency. Either raise the offset, or use the unipolar
+        <code>Pos</code> variant — §3.1.
+      </p>
+
+      <h4>The filter sweep sounds stepped rather than smooth</h4>
+      <p>
+        The control is jumping between discrete values. Add <code>smoo</code>, or increase the
+        slider's resolution by lowering its step — §5.
+      </p>
+
+      <h4>Everything clicks at the start of each note</h4>
+      <p>
+        The attack is at or near zero, so amplitude jumps from silence instantly. A few milliseconds
+        of attack removes the click without softening the transient audibly.
+      </p>
+
+      <h4>An LFO in a patch sounds like a buzz, not a wobble</h4>
+      <p>
+        Its frequency is above about 20 Hz and it has entered the audible range. That is legitimate —
+        it is now doing amplitude or frequency modulation — but if you wanted movement, lower it. §1.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

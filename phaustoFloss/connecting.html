@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Connecting Unit Generators</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="connecting.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Connecting Unit Generators</div>
+    <h1>Connecting Unit Generators</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      A patch is UGens joined by operators. Phausto gives you a handful, each corresponding to one of
+      FAUST's composition primitives — and once you know them, most patches read like a sentence.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#chuck">Series: the chuck operator</a>
+          <ol>
+            <li><a href="#chuck-receiver">The receiver decides</a></li>
+            <li><a href="#chuck-precedence">Precedence</a></li>
+          </ol>
+        </li>
+        <li><a href="#parallel">Parallel: the comma operator</a></li>
+        <li><a href="#arithmetic">Arithmetic</a>
+          <ol>
+            <li><a href="#arithmetic-numbers">Mixing in plain numbers</a></li>
+          </ol>
+        </li>
+        <li><a href="#recursion">Recursion and feedback</a></li>
+        <li><a href="#routing">Explicit routing</a></li>
+        <li><a href="#collections">Connecting collections</a></li>
+        <li><a href="#channels">Changing the channel count</a></li>
+        <li><a href="#unary">Unary maths on a signal</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="chuck">
+      <h2>1. Series: the chuck operator</h2>
+
+      <p>
+        <code>=&gt;</code> connects two UGens in series: the output of the left becomes the input of
+        the right. The name and the symbol are borrowed, with affection, from
+        <a href="https://chuck.stanford.edu">ChucK</a>.
+      </p>
+
+<pre><code><span class="cmt">"An electric guitar model into a reverb"</span>
+synth := <span class="cls">ElecGuitar</span> new =&gt; <span class="cls">GreyHole</span> new.
+
+dsp := synth asDsp.
+dsp init.
+dsp start.
+dsp displayUI.   <span class="cmt">"press ElecGuitarTrigger to pluck"</span>
+dsp stop.</code></pre>
+
+      <p>
+        The long form is <code>chuckInto:</code>, and the two are interchangeable. Use the operator
+        for chains, the keyword message when the expression is already dense with operators.
+      </p>
+
+      <section id="chuck-receiver">
+        <h3>1.1 The receiver decides</h3>
+
+        <p>
+          <code>=&gt;</code> does not always mean the same thing. What happens depends on the UGen on
+          the right — each class defines how it takes an input. This is what makes the operator
+          concise rather than ambiguous: an envelope has only one sensible way to combine with a
+          signal, and so does a filter.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Expression</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><td>osc =&gt; env</td><td>The oscillator is multiplied by the envelope — amplitude shaping</td></tr>
+            <tr><td>osc =&gt; filter</td><td>The oscillator becomes the filter's input</td></tr>
+            <tr><td>synth =&gt; reverb</td><td>The synth signal feeds the reverb</td></tr>
+            <tr><td>pulse =&gt; PhImpulsify</td><td>A gate becomes a one-sample impulse</td></tr>
+            <tr><td>signal =&gt; saturator</td><td>The signal is waveshaped</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="chuck-precedence">
+        <h3>1.2 Precedence</h3>
+
+        <p>
+          Pharo binary operators all have equal precedence and associate left to right, so a chain
+          needs no parentheses and reads in signal order:
+        </p>
+
+<pre><code>synth := oscillator =&gt; envelope =&gt; filter.
+<span class="cmt">"is exactly ((oscillator => envelope) => filter)"</span></code></pre>
+
+        <div class="callout warning">
+          <span class="callout-title">Where this bites</span>
+          Equal precedence also means <code>a + b * c</code> is <code>(a + b) * c</code>, not what
+          arithmetic convention suggests. When mixing <code>+</code> and <code>*</code> in a signal
+          expression, parenthesise deliberately.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="parallel">
+      <h2>2. Parallel: the comma operator</h2>
+
+      <p>
+        <code>,</code> places UGens side by side as separate channels rather than mixing them. A
+        four-oscillator parallel block has four outputs, not one:
+      </p>
+
+<pre><code>oscillators := sine , tri , sqr , saw.
+<span class="cmt">"four channels, ready for a selector or a multichannel destination"</span></code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Parallel is not mixing</span>
+        <code>a , b</code> gives two channels; <code>a + b</code> gives one channel containing their
+        sum. Feeding a parallel block somewhere that expects a single input is the most common
+        connection error in Phausto.
+      </div>
+
+      <p>
+        Parallel composition is what selectors, multichannel effects and routing primitives consume.
+        See <a href="synthesis.html">Synthesis §1</a> for the waveform selector built this way.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="arithmetic">
+      <h2>3. Arithmetic</h2>
+
+      <p>
+        The arithmetic operators work sample by sample on signals, which makes them the workhorses
+        of modulation.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Operator</th><th>Effect</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td>+</td><td>Sum</td><td>Mixing signals; offsetting a modulator</td></tr>
+          <tr><td>-</td><td>Difference</td><td>Phase cancellation; bipolar offsets</td></tr>
+          <tr><td>*</td><td>Product</td><td>Amplitude modulation; scaling a control signal</td></tr>
+          <tr><td>/</td><td>Quotient</td><td>Normalising; ratio control</td></tr>
+          <tr><td>%</td><td>Modulo</td><td>Wrapping phase or index values</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"Mixing: two instruments into one signal"</span>
+mix := djembe + marimba.
+
+<span class="cmt">"Amplitude modulation: a 5 Hz tremolo"</span>
+trem := <span class="cls">SineOsc</span> new * (<span class="cls">LFOTri</span> new freq: <span class="num">5</span>).
+
+<span class="cmt">"Scaling a control signal into a useful range"</span>
+sweep := <span class="cls">ADSREnv</span> new * <span class="num">2000</span> asBox.</code></pre>
+
+      <p>
+        Comparison operators are available too — <code>&lt;</code>, <code>&lt;=</code>,
+        <code>&gt;</code>, <code>&gt;=</code>, <code>equalTo:</code>, <code>notEqualTo:</code> —
+        each producing a signal that is 1 where the comparison holds and 0 elsewhere. They are how
+        you build gates and conditional logic inside the graph.
+      </p>
+
+      <section id="arithmetic-numbers">
+        <h3>3.1 Mixing in plain numbers</h3>
+
+        <p>
+          FAUST arithmetic needs a signal on both sides. A number has to be promoted first, with
+          <code>asBox</code>:
+        </p>
+
+<pre><code><span class="cmt">"correct — the number becomes a constant signal"</span>
+freq := <span class="num">100</span> asBox + pitchEnv.
+
+<span class="cmt">"wrong — asks a SmallInteger to add a UGen to itself"</span>
+freq := <span class="num">100</span> + pitchEnv.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Setters are the exception</span>
+          Setters promote numbers for you, so <code>SineOsc new freq: 440</code> needs no
+          <code>asBox</code>. You only need it when a bare number is one operand of an arithmetic
+          expression whose other operand is a signal.
+        </div>
+
+        <p>Phausto adds a few other conversions to <code>Number</code>:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>asBox</td><td>A constant signal</td></tr>
+            <tr><td>asConst</td><td>A compile-time constant</td></tr>
+            <tr><td>midiNNToFreq</td><td>MIDI note number converted to hertz</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="recursion">
+      <h2>4. Recursion and feedback</h2>
+
+      <p>
+        <code>~</code> is FAUST's recursive composition: it feeds a UGen's output back into its own
+        input, delayed by one sample. This is the primitive underneath every delay line, comb filter
+        and feedback network.
+      </p>
+
+<pre><code><span class="cmt">"The recursive operator — output fed back as input"</span>
+loop := someUGen ~ someOtherUGen.</code></pre>
+
+      <div class="callout warning">
+        <span class="callout-title">Feedback needs a leash</span>
+        A recursive network with gain at or above 1 will grow without limit. Keep a coefficient
+        below unity inside the loop, or place a limiter after it — see
+        <a href="effects.html">Effects, Reverbs &amp; Dynamics</a>. In practice most people reach
+        for a ready-made comb filter or reverb rather than building the loop by hand.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="routing">
+      <h2>5. Explicit routing</h2>
+
+      <p>
+        When the operators are not enough — usually because channel counts do not line up — there
+        are explicit routing messages.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>connectTo:</td><td>Sequential connection, matching outputs to inputs</td></tr>
+          <tr><td>chuckInto:</td><td>Keyword form of <code>=&gt;</code></td></tr>
+          <tr><td>splitTo:</td><td>Fan one signal out to several inputs</td></tr>
+          <tr><td>mergeWith:</td><td>Fold several channels down into fewer</td></tr>
+          <tr><td>patchedWith:</td><td>Supply an input to a UGen that expects one</td></tr>
+          <tr><td>par:with:</td><td>Explicit parallel composition</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"The FAUST-style routing used by the four-way waveform selector"</span>
+selector := index , oscillators connectTo: <span class="cls">PhSelect4</span> new.</code></pre>
+
+      <p>
+        Corresponding UGens exist for the same jobs — <code>PhSplitOperation</code>,
+        <code>PhMergeOperation</code>, <code>PhCrossnn</code>, <code>PhBus</code> — when you would
+        rather have an object in the graph than an operator between two.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="collections">
+      <h2>6. Connecting collections</h2>
+
+      <p>
+        Phausto extends <code>SequenceableCollection</code>, so an ordinary Pharo array of UGens can
+        be collapsed into a single signal in one message. This is usually clearer than accumulating
+        in a loop:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>asSumOfUGen</td><td>Mix every element into one signal</td></tr>
+          <tr><td>asChainOfUGen</td><td>Connect every element in series, left to right</td></tr>
+          <tr><td>asPhList</td><td>Build a <code>PhList</code> from the values</td></tr>
+          <tr><td>asPhZeroList</td><td>Build a zero-filled <code>PhZeroList</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"Ten detuned oscillators, summed"</span>
+partials := (<span class="num">1</span> to: <span class="num">10</span>) collect: [ :i |
+  <span class="cls">SineOsc</span> new freq: <span class="num">200</span> + (i * <span class="num">14</span>); uLevel: <span class="num">0.05</span>
+].
+voice := partials asSumOfUGen.
+
+<span class="cmt">"A stack of effects, applied one after another"</span>
+chain := { <span class="cls">CubicNl</span> new. <span class="cls">MoogVcf</span> new. <span class="cls">GreyHole</span> new } asChainOfUGen.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="channels">
+      <h2>7. Changing the channel count</h2>
+
+      <p>
+        Two messages handle almost every channel mismatch you will meet:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>stereo</td><td>Duplicate one channel into two</td></tr>
+          <tr><td>mono</td><td>Collapse two channels into one</td></tr>
+          <tr><td>numberOfInputs</td><td>Ask how many channels a UGen consumes</td></tr>
+          <tr><td>numberOfOutputs</td><td>Ask how many it produces</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Order matters: <code>stereo</code> applied before an effect gives the effect two channels to
+        work with; applied after, it duplicates whatever the effect produced. For genuinely stereo
+        reverbs you want the former.
+      </p>
+
+<pre><code><span class="cmt">"true stereo processing"</span>
+dsp := (synth stereo =&gt; <span class="cls">ZitaRevStereo</span> new) asDsp.
+
+<span class="cmt">"mono processing, widened afterwards"</span>
+dsp := (synth =&gt; <span class="cls">FreeverbMono</span> new) stereo asDsp.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="unary">
+      <h2>8. Unary maths on a signal</h2>
+
+      <p>
+        Any signal understands the common mathematical messages, applied sample by sample. They are
+        useful for shaping control signals — rectifying an LFO, converting units, folding a value
+        into a range.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Group</th><th>Messages</th></tr></thead>
+        <tbody>
+          <tr><td>Sign and rounding</td><td><code>abs</code>, <code>absolute</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>rInt</code></td></tr>
+          <tr><td>Powers and logs</td><td><code>sqrt</code>, <code>exp</code>, <code>log</code>, <code>log10</code></td></tr>
+          <tr><td>Trigonometry</td><td><code>sin</code>, <code>cos</code>, <code>aSin</code>, <code>aCos</code>, <code>aTan</code></td></tr>
+          <tr><td>Ranges</td><td><code>min:</code>, <code>max:</code>, <code>fMod:</code></td></tr>
+          <tr><td>Audio units</td><td><code>db2linear</code>, <code>linear2db</code>, <code>midikey2hz</code></td></tr>
+          <tr><td>Smoothing</td><td><code>smoo</code> — a one-pole smoother for jumpy control values</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"smoo takes the zipper noise out of a stepped control"</span>
+cutoff := (<span class="cls">PhHSlider</span> new label: <span class="str">'Cutoff'</span> values: #(<span class="num">800</span> <span class="num">40</span> <span class="num">12000</span> <span class="num">1</span>)) smoo.</code></pre>
+
+      <p>
+        Each of these has an equivalent UGen class as well, catalogued in
+        <a href="math.html">Math &amp; Conversion Tools</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>Naming what you have connected, and driving it at runtime.</td></tr>
+          <tr><td><a href="synthesis.html">Synthesis Techniques</a></td><td>These operators applied to complete patches.</td></tr>
+          <tr><td><a href="faust-box.html">Raw FAUST &amp; the Box API</a></td><td>The FAUST primitives each operator compiles down to.</td></tr>
+          <tr><td><a href="math.html">Math &amp; Conversion Tools</a></td><td>The UGen form of every operation on this page.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4>My expression raises an error about inputs and outputs not matching</h4>
+      <p>
+        A parallel block met something expecting one channel, or a stereo signal met a mono UGen.
+        Check <code>numberOfOutputs</code> on the left and <code>numberOfInputs</code> on the right —
+        §7.
+      </p>
+
+      <h4>Adding two UGens made them quieter, not louder</h4>
+      <p>
+        Two correlated signals of opposite phase partially cancel. If they are the same source,
+        <code>a + a</code> doubles amplitude and may clip; if they are detuned copies, expect
+        beating rather than a clean sum.
+      </p>
+
+      <h4><code>100 + someUGen</code> raises doesNotUnderstand</h4>
+      <p>Promote the number: <code>100 asBox + someUGen</code> — §3.1.</p>
+
+      <h4><code>a + b * c</code> does not do what I expected</h4>
+      <p>
+        Pharo binary operators are all equal precedence, left to right. Write
+        <code>a + (b * c)</code> — §1.2.
+      </p>
+
+      <h4>The comma operator gave me four voices instead of a mix</h4>
+      <p>That is what it does. Use <code>+</code> or <code>asSumOfUGen</code> to mix — §2.</p>
+
+      <h4>A feedback patch got loud very fast</h4>
+      <p>Loop gain is at or above 1. See the warning in §4.</p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

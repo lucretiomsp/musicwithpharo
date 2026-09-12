@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — TurboPhausto</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="turbophausto.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Advanced › TurboPhausto</div>
+    <h1>TurboPhausto</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      A ready-made rack of instruments and effects behind one object, built for playing live rather
+      than for designing sounds — and the bridge between Phausto and Coypu.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">What it is for</a></li>
+        <li><a href="#starting">Starting an engine</a>
+          <ol>
+            <li><a href="#starting-samples">The samples folder</a></li>
+          </ol>
+        </li>
+        <li><a href="#engines">The engines</a></li>
+        <li><a href="#contents">What is in the rack</a>
+          <ol>
+            <li><a href="#contents-synths">TpSynth and its subclasses</a></li>
+            <li><a href="#contents-sampler">TpSampler</a></li>
+            <li><a href="#contents-discovery">Listing what is loaded</a></li>
+          </ol>
+        </li>
+        <li><a href="#performing">Performing</a>
+          <ol>
+            <li><a href="#performing-transport">Transport and tempo</a></li>
+            <li><a href="#performing-mix">Mute, solo and levels</a></li>
+            <li><a href="#performing-fx">Global effects</a></li>
+            <li><a href="#performing-state">Saving and restoring</a></li>
+          </ol>
+        </li>
+        <li><a href="#coypu">Coypu</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="what">
+      <h2>1. What it is for</h2>
+
+      <p>
+        Everything else in this manual is about building a sound. TurboPhausto assumes the sounds
+        already exist and asks a different question: how do you play twelve of them at once, change
+        your mind mid-bar, and not have a silence while you rebuild a DSP?
+      </p>
+
+      <p>
+        The answer is a <strong>rack</strong> — a single large DSP holding many instruments and
+        effects, compiled once and then driven entirely by parameter changes. Nothing is rebuilt
+        during a performance, so nothing ever stops.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">The trade</span>
+        You give up the freedom to patch arbitrarily and get back reliability and immediacy. For
+        sound design, work with UGens directly. For a set, use the rack.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="starting">
+      <h2>2. Starting an engine</h2>
+
+      <p>Two steps: load the rack, then instantiate an engine.</p>
+
+<pre><code><span class="cls">TurboPhausto</span> start.
+
+tp := <span class="cls">TurboPhausto</span> new.
+tp bpm: <span class="num">140</span>.
+tp play.
+
+tp stop.</code></pre>
+
+      <p>
+        <code>start</code> is a class-side message that loads instruments, samplers, effects and
+        filters into the rack. It takes a moment — the whole rack is compiled — and only needs doing
+        once per image.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class-side message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>start</td><td>Load and compile the rack</td></tr>
+          <tr><td>rack</td><td>The rack itself</td></tr>
+          <tr><td>loadRack</td><td>Load the rack contents</td></tr>
+          <tr><td>loadAllSynths</td><td>Load the synth voices</td></tr>
+          <tr><td>loadAllSamplers</td><td>Load the samplers</td></tr>
+          <tr><td>loadEffects</td><td>Load the effects</td></tr>
+          <tr><td>loadFilters</td><td>Load the global filters</td></tr>
+          <tr><td>tpDsp</td><td>The underlying DSP</td></tr>
+          <tr><td>tpPerf</td><td>The performance object</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <section id="starting-samples">
+        <h3>2.1 The samples folder</h3>
+
+        <p>
+          The samplers need audio files. TurboPhausto looks for a <code>TurboSamples</code> folder,
+          which ships in the Phausto repository alongside <code>MoofLodSamples</code> and
+          <code>phDemoSamples</code>.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>TurboPhausto samplesFolderExists</td><td>Whether the folder was found</td></tr>
+            <tr><td>TurboPhausto turboSamplesFolder</td><td>Where it is looking</td></tr>
+            <tr><td>TurboPhausto listOfSamplesFolder</td><td>The sub-folders, one per instrument</td></tr>
+            <tr><td>TurboPhausto listOfSamples</td><td>Every sample found</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Check this first</span>
+          <code>TurboPhausto samplesFolderExists</code> answering <code>false</code> explains most
+          "the drums are silent" problems before you go looking anywhere else.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="engines">
+      <h2>3. The engines</h2>
+
+      <p>
+        <code>PhaustoEngine</code> is the abstract superclass — "an abstract superclass for
+        TurboPhausto engines to be used with Coypu for live coding". Several concrete engines differ
+        in how much they load:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>PhaustoEngine</td><td>Abstract superclass; defines the performance protocol</td></tr>
+          <tr><td>TurboPhausto</td><td>The full rack — every instrument and effect</td></tr>
+          <tr><td>CustomPhausto</td><td>A rack you configure yourself</td></tr>
+          <tr><td>EcoPhausto</td><td>A lighter rack — fewer voices, lower CPU</td></tr>
+          <tr><td>MooPhausto</td><td>An alternative rack configuration</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Start with EcoPhausto on older machines</span>
+        The full rack compiles a great deal of DSP. If <code>TurboPhausto start</code> takes an
+        uncomfortable amount of time or the audio stutters, <code>EcoPhausto</code> gives the same
+        interface with a smaller footprint.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="contents">
+      <h2>4. What is in the rack</h2>
+
+      <section id="contents-synths">
+        <h3>4.1 TpSynth and its subclasses</h3>
+
+        <p>
+          The rack's voices are <code>TpSynth</code> subclasses — instruments designed to be
+          parameter-driven rather than repatched:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Voice</th></tr></thead>
+          <tbody>
+            <tr><td>Acid</td><td>TB-303 style acid bass</td></tr>
+            <tr><td>TpReese</td><td>Reese bass — detuned, phasing low end</td></tr>
+            <tr><td>TpHoover</td><td>Hoover — the rave supersaw</td></tr>
+            <tr><td>TpKick99</td><td>Kick drum</td></tr>
+            <tr><td>Chordy</td><td>Chordal pad</td></tr>
+            <tr><td>Fm2Op</td><td>Two-operator FM voice</td></tr>
+            <tr><td>PsgPlus</td><td>Chiptune-style PSG voice</td></tr>
+            <tr><td>TpKarplus</td><td>Karplus–Strong plucked string</td></tr>
+            <tr><td>TpSampler</td><td>Multisample player</td></tr>
+            <tr><td>TpSamplerReverb</td><td>Sampler with built-in reverb</td></tr>
+            <tr><td>PhLoop</td><td>Loop player, sample-rate aware</td></tr>
+            <tr><td>GreyHoleDW</td><td>Greyhole reverb with dry/wet control</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="contents-sampler">
+        <h3>4.2 TpSampler</h3>
+
+        <p>
+          <code>TpSampler</code> is useful well beyond the rack and is documented in full in
+          <a href="sequencing.html">Sequencing &amp; Sampling §4</a>. In short: point it at a folder,
+          select with <code>tpSamplerIndex</code>, fire with <code>tpSamplerTrigger</code>, and play
+          it chromatically with <code>playNote:prefix:dur:</code> where MIDI note 60 is the file's
+          original speed.
+        </p>
+
+        <div class="callout warning">
+          <span class="callout-title">Always mono</span>
+          <code>TpSampler</code> outputs mono even when the files are stereo. Send it
+          <code>stereo</code> if you want two channels.
+        </div>
+      </section>
+
+      <section id="contents-discovery">
+        <h3>4.3 Listing what is loaded</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr><td>TurboPhausto listAllInstruments</td><td>Print every instrument in the rack</td></tr>
+            <tr><td>TurboPhausto listOfInstruments</td><td>The instruments as a collection</td></tr>
+            <tr><td>TurboPhausto listOfSynths</td><td>Just the synth voices</td></tr>
+            <tr><td>PhaustoEngine allInstruments</td><td>Every instrument</td></tr>
+            <tr><td>PhaustoEngine allSynths</td><td>Every synth</td></tr>
+            <tr><td>PhaustoEngine allSamplers</td><td>Every sampler</td></tr>
+            <tr><td>PhaustoEngine allEffects</td><td>Every effect</td></tr>
+            <tr><td>tp traceAllSamples</td><td>Print the loaded samples</td></tr>
+            <tr><td>tp traceAllParams</td><td>Print every rack parameter</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The rack is large, so <code>traceAllParams</code> produces a great deal of output — but it
+          remains the authoritative list of what can be changed.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="performing">
+      <h2>5. Performing</h2>
+
+      <section id="performing-transport">
+        <h3>5.1 Transport and tempo</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>bpm:</td><td>Set the tempo</td></tr>
+            <tr><td>play</td><td>Start the performance</td></tr>
+            <tr><td>stop</td><td>Stop it</td></tr>
+            <tr><td>playFor: aNumberOfBars</td><td>Play a fixed number of bars</td></tr>
+            <tr><td>playCyclicFor: aNumberOfBars</td><td>Play a repeating cycle of that length</td></tr>
+            <tr><td>loop: anInteger / unloop</td><td>Loop a section, and release it</td></tr>
+            <tr><td>rhythm:</td><td>Set the global rhythm</td></tr>
+            <tr><td>trig: aString</td><td>Fire a trigger directly</td></tr>
+            <tr><td>playNote:prefix:dur:</td><td>Play a note on a rack instrument</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="cls">TurboPhausto</span> start.
+tp := <span class="cls">TurboPhausto</span> new.
+tp bpm: <span class="num">140</span>.
+<span class="num">16</span> downbeats to: #snare.
+tp playFor: <span class="num">8</span> bars.</code></pre>
+
+        <p>
+          The <code>16 downbeats to: #snare</code> and <code>8 bars</code> constructions come from
+          Coypu, which supplies the pattern vocabulary — see §6.
+        </p>
+      </section>
+
+      <section id="performing-mix">
+        <h3>5.2 Mute, solo and levels</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>mute: aSymbol / unmute:</td><td>Silence one instrument, and restore it</td></tr>
+            <tr><td>muteAll</td><td>Silence everything</td></tr>
+            <tr><td>solo: aSymbol / unsolo:</td><td>Isolate one instrument, and release it</td></tr>
+            <tr><td>displayUIForLevels</td><td>Open a mixer for the rack levels</td></tr>
+            <tr><td>displayUI</td><td>Open the full rack interface</td></tr>
+            <tr><td>setValue:parameter:</td><td>Set any rack parameter</td></tr>
+            <tr><td>sweepToValue:parameter:in:</td><td>Sweep one gradually</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Mute and solo are the core performance gestures: because the whole rack is one running DSP,
+          they take effect instantly and without a gap.
+        </p>
+      </section>
+
+      <section id="performing-fx">
+        <h3>5.3 Global effects</h3>
+
+        <p>
+          The rack has a global filter and reverb section, addressable without touching individual
+          instruments — the classic live-electronics filter sweep:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>lowPassFreq: / lowPassQ:</td><td>Global low-pass cutoff and resonance</td></tr>
+            <tr><td>highPassFreq: / highPassQ:</td><td>Global high-pass cutoff and resonance</td></tr>
+            <tr><td>lowPassSweep:</td><td>Sweep the low pass — takes a frequency and a time</td></tr>
+            <tr><td>highPassSweep:</td><td>Sweep the high pass</td></tr>
+            <tr><td>reverb: anAmount</td><td>Global reverb amount</td></tr>
+            <tr><td>transpose: anInteger</td><td>Transpose the whole rack in semitones</td></tr>
+            <tr><td>size: aSize</td><td>Rack size parameter</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="cmt">"Close the filter down over four seconds, then open it again"</span>
+tp lowPassSweep: #(<span class="num">200</span> <span class="num">4</span>).
+tp lowPassSweep: #(<span class="num">12000</span> <span class="num">2</span>).</code></pre>
+      </section>
+
+      <section id="performing-state">
+        <h3>5.4 Saving and restoring</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>temporarySave</td><td>Snapshot the current state</td></tr>
+            <tr><td>restore</td><td>Return to the snapshot</td></tr>
+            <tr><td>destroy / destroyDsp</td><td>Tear the rack down</td></tr>
+            <tr><td>stopDsp</td><td>Stop the underlying DSP</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">Snapshot before you experiment</span>
+          <code>temporarySave</code> then <code>restore</code> is the safety net for live work: take
+          a snapshot when a section sounds right, and you can always get back to it without
+          remembering what you changed.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="coypu">
+      <h2>6. Coypu</h2>
+
+      <p>
+        TurboPhausto is designed to be driven by <strong>Coypu</strong>, the live-coding client from
+        the same author. Coypu supplies the pattern language — rhythms, note sequences, Euclidean
+        patterns — and TurboPhausto supplies the sound.
+      </p>
+
+      <p>
+        Coypu can also drive SuperCollider/SuperDirt, Kyma, Pure Data and MIDI hardware, so a rack is
+        one of several available voices. The division is clean: Coypu decides <em>when</em> and
+        <em>what</em>, Phausto decides <em>how it sounds</em>.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Package</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Coypu</td><td>Patterns, sequencing, live-coding syntax</td></tr>
+          <tr><td>TurboPhausto</td><td>The instrument rack Coypu plays</td></tr>
+          <tr><td>Phausto</td><td>The synthesis underneath</td></tr>
+          <tr><td>Pharo-Sound</td><td>MIDI in and out, for hardware</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Coypu is documented separately — see the
+        <a href="../coypuFloss/index.html">Coypu manual</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="sequencing.html">Sequencing &amp; Sampling</a></td><td>TpSampler in detail, and sequencing without the rack.</td></tr>
+          <tr><td><a href="parameters.html">Parameters &amp; Control</a></td><td>The parameter messages the rack is driven by.</td></tr>
+          <tr><td><a href="effects.html">Effects, Reverbs &amp; Dynamics</a></td><td>What the global effect section contains.</td></tr>
+          <tr><td><a href="midi.html">MIDI &amp; Playing Notes</a></td><td>Playing rack instruments from a keyboard.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4>The samplers are silent but the synths work</h4>
+      <p>
+        The samples folder was not found. Check
+        <code>TurboPhausto samplesFolderExists</code> and
+        <code>TurboPhausto turboSamplesFolder</code> — §2.1.
+      </p>
+
+      <h4><code>TurboPhausto new</code> fails or produces nothing</h4>
+      <p><code>TurboPhausto start</code> must run first to build the rack — §2.</p>
+
+      <h4>Loading the rack takes a long time, or audio stutters</h4>
+      <p>The full rack is a lot of DSP. Try <code>EcoPhausto</code> — §3.</p>
+
+      <h4>An instrument will not unmute</h4>
+      <p>
+        Something else is soloed, which mutes everything else implicitly. Send
+        <code>unsolo:</code> — §5.2.
+      </p>
+
+      <h4>The whole rack has gone quiet and I do not know why</h4>
+      <p>
+        Check for a global filter left in an extreme position — a low pass at 200 Hz removes almost
+        everything. <code>restore</code> returns to your last snapshot — §5.3, §5.4.
+      </p>
+
+      <h4>Coypu patterns do not reach the rack</h4>
+      <p>
+        Coypu must be loaded and pointed at the Phausto engine. See the
+        <a href="../coypuFloss/index.html">Coypu manual</a> — §6.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

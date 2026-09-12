@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Changelog</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="changelog.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Project › Changelog</div>
+    <h1>Changelog</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      How Phausto is versioned, where to find what actually changed, and the themes of recent
+      development.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#versioning">How Phausto is versioned</a>
+          <ol>
+            <li><a href="#versioning-pinning">Pinning a version</a></li>
+          </ol>
+        </li>
+        <li><a href="#recent">Recent development</a></li>
+        <li><a href="#breaking">Renamed and removed</a></li>
+        <li><a href="#manual">This manual</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="versioning">
+      <h2>1. How Phausto is versioned</h2>
+
+      <p>
+        Phausto is developed in the open on a rolling basis rather than in numbered releases. At the
+        time of writing the repository carries a single tag, <code>v0.1</code>, and the working
+        branch is <code>main</code>. Installing with the Metacello snippet in
+        <a href="setup.html">Installation</a> gives you the current state of that branch.
+      </p>
+
+      <p>
+        That means the authoritative changelog is the commit history itself:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Where</th><th>What it tells you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/commits/main">Commit history</a></td><td>Every change, with a conventional <code>feature:</code> / <code>fix:</code> prefix</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/releases">Releases</a></td><td>Tagged points, when they exist</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/wiki">Wiki</a></td><td>Installation notes, kept current with the code</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/phausto/issues">Issues</a></td><td>Known problems and what is being worked on</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">A moving target, deliberately</span>
+        Phausto is research software under active development by a single author. The benefit is that
+        fixes arrive quickly; the cost is that a patch written today may need a small adjustment
+        after a future update. The FAUST layer underneath is far more stable than the Pharo API on
+        top of it.
+      </div>
+
+      <section id="versioning-pinning">
+        <h3>1.1 Pinning a version</h3>
+
+        <p>
+          For work that must keep running unchanged — a piece you will perform, a paper with code
+          listings — pin to a specific commit rather than tracking the branch:
+        </p>
+
+<pre><code><span class="cls">Metacello</span> new
+  baseline: <span class="str">'Phausto'</span>;
+  repository: <span class="str">'github://lucretiomsp/phausto:&lt;commit-sha&gt;'</span>;
+  load.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Record the commit with the piece</span>
+          Note the commit you used alongside the patch itself. It costs one line and is the
+          difference between a piece that still runs in two years and one that does not.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="recent">
+      <h2>2. Recent development</h2>
+
+      <p>
+        Rather than a version-by-version list, here are the themes the recent history shows. Consult
+        the commit log for detail.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Theme</th><th>What changed</th></tr></thead>
+        <tbody>
+          <tr><td>JUCE export</td><td>An APVTS exporter was implemented, so exported plugins carry a full automatable parameter tree. See <a href="exporting.html">Exporting §4.2</a>.</td></tr>
+          <tr><td>CMake export</td><td>A CMake file generator was added alongside the Projucer route, with tests.</td></tr>
+          <tr><td>MIDI and Bela metadata</td><td>Widget-level declarations — <code>midiCtrl:</code>, <code>midiKeyon:</code>, <code>midiPitchwheel</code>, <code>belaPin:</code> — were implemented. See <a href="ui-primitives.html">UI Primitives §6</a>.</td></tr>
+          <tr><td>Test coverage</td><td>A sustained push to get the suite green across effects, synths and physical models. The package now carries 45 test classes.</td></tr>
+          <tr><td>Physical models</td><td>Cleaning and reclassification across the family; all physical model tests passing.</td></tr>
+          <tr><td>Effects</td><td>Reclassification and cleanup; parameter setters moved to more appropriate classes.</td></tr>
+          <tr><td>Resources</td><td>The baseline gained a step to copy resources from the companion resources repository.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="breaking">
+      <h2>3. Renamed and removed</h2>
+
+      <p>
+        Changes most likely to break existing code. If a patch that used to work no longer does,
+        check here first.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Was</th><th>Now</th></tr></thead>
+        <tbody>
+          <tr><td><code>DelayMonoFb</code></td><td>Removed — use <code>PhEcho</code> instead</td></tr>
+          <tr><td>Eight-channel reverb</td><td>Removed for the time being</td></tr>
+          <tr><td><code>Impulsify</code></td><td>The class is <code>PhImpulsify</code></td></tr>
+          <tr><td><code>ModeFilter</code></td><td>The class is <code>PhModeFilter</code></td></tr>
+          <tr><td><code>FlangerMono</code></td><td>The class is <code>PhFlangerMono</code></td></tr>
+          <tr><td>Reverb damping setter</td><td>Moved to the <code>Reverbs</code> class</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">The Ph prefix</span>
+        Most, though not all, Phausto classes carry a <code>Ph</code> prefix. Older tutorial material
+        — including some lessons in <a href="masterlu.html">MasterLu</a> — occasionally omits it. When
+        a class is not understood, try adding the prefix before anything else.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="manual">
+      <h2>4. This manual</h2>
+
+      <p>
+        The manual is part of the
+        <a href="https://github.com/lucretiomsp/musicwithpharo">musicwithpharo</a> site and versioned
+        with it. Every page carries an "Edit this page on GitHub" link at the foot, which is the
+        fastest way to send a correction.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Revision</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Current</td><td>Restructured into five categories with a single navigation source, per-page numbered contents, stable anchors, linear reading order, search and a dark theme. Twenty-seven pages.</td></tr>
+          <tr><td>Current</td><td>Added the <a href="ugen-library.html">UGen Library</a>, generated directly from the package source so every class, superclass and description matches the code.</td></tr>
+          <tr><td>Current</td><td>Added reference coverage for the setter traits, the DSP API, UI primitives, maths and conversions, and the demo gallery.</td></tr>
+          <tr><td>Current</td><td>Added guides for connecting UGens, parameters and control, envelopes and modulation, filters, effects, physical modelling and MIDI.</td></tr>
+          <tr><td>Current</td><td>Added <a href="masterlu.html">MasterLu</a>, <a href="faust-box.html">raw FAUST</a>, <a href="turbophausto.html">TurboPhausto</a>, <a href="exporting.html">exporting</a> and <a href="internals.html">internals</a>.</td></tr>
+          <tr><td>Earlier</td><td>Five pages: overview, installation, getting started, synthesis techniques, sequencing and sampling.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>5. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="community.html">Community</a></td><td>Where to report a problem or ask a question.</td></tr>
+          <tr><td><a href="faq.html">FAQ</a></td><td>Short answers to common questions.</td></tr>
+          <tr><td><a href="setup.html">Installation</a></td><td>Getting the current version, or a pinned one.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>What exists in the package right now.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>6. Troubleshooting</h2>
+
+      <h4>Code from a tutorial or paper no longer runs</h4>
+      <p>Check §3 first — a class was probably renamed. Then check the commit history.</p>
+
+      <h4>Metacello keeps giving me an old version</h4>
+      <p>
+        The repository is cached under <code>pharo-local/iceberg</code>. Delete the cached checkout,
+        or pull <code>main</code> directly through Iceberg.
+      </p>
+
+      <h4>I need the exact version I used last month</h4>
+      <p>Pin to the commit — §1.1.</p>
+
+      <h4>A feature described in this manual is missing from my image</h4>
+      <p>
+        Your copy predates it. Update, or check the commit history to see when it landed — §1.
+      </p>
+
+      <h4>Something that worked yesterday broke after I updated</h4>
+      <p>
+        Open an issue with the snippet and the commit you updated to. That is genuinely useful to the
+        project — see <a href="community.html">Community</a>.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

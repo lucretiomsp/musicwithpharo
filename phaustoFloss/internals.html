@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Architecture &amp; Internals</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="internals.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Advanced › Architecture &amp; Internals</div>
+    <h1>Architecture &amp; Internals</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      What happens between <code>SineOsc new</code> and a sound leaving your speakers — the FFI
+      bridge, the dynamic engine, and the design decisions that shape how Phausto behaves.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#pipeline">The pipeline</a></li>
+        <li><a href="#ffi">The FFI layer</a>
+          <ol>
+            <li><a href="#ffi-libraries">The three libraries</a></li>
+            <li><a href="#ffi-opaque">Opaque objects</a></li>
+          </ol>
+        </li>
+        <li><a href="#engine">PhaustoDynamicEngine</a>
+          <ol>
+            <li><a href="#engine-create">Creating a DSP</a></li>
+            <li><a href="#engine-init">Initialising and rendering</a></li>
+            <li><a href="#engine-errors">Errors</a></li>
+          </ol>
+        </li>
+        <li><a href="#renderer">Renderers and buffer size</a></li>
+        <li><a href="#threads">Two threads</a></li>
+        <li><a href="#instances">Instance tracking</a></li>
+        <li><a href="#memory">Memory and the image</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="pipeline">
+      <h2>1. The pipeline</h2>
+
+      <p>
+        Six stages separate the object you write from the sound you hear. Most of Phausto's
+        behaviour — including its surprises — follows from where the boundaries fall.
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>1 · Unit Generators</strong> — Pharo objects describing a signal. Pure Smalltalk, no native code involved.</div>
+        <div class="step"><strong>2 · Boxes</strong> — <code>asBox</code> converts each UGen into a FAUST box. The box lives in the FAUST compiler's memory, not in the Pharo heap.</div>
+        <div class="step"><strong>3 · Box API</strong> — <code>BoxAPI</code> makes FFI calls into <code>libfaust</code> to assemble and combine boxes.</div>
+        <div class="step"><strong>4 · Compilation</strong> — <code>dsp init</code> asks the FAUST compiler to turn the box graph into native machine code, right there in the running image.</div>
+        <div class="step"><strong>5 · Renderer</strong> — the compiled DSP is handed to a platform audio renderer with a buffer size.</div>
+        <div class="step"><strong>6 · Audio thread</strong> — <code>dsp start</code> begins rendering on a separate real-time thread, independent of Pharo's.</div>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Compilation happens at runtime</span>
+        This is the unusual part. <code>init</code> invokes a real optimising compiler and produces
+        machine code while your image is running — which is why <code>init</code> is not instant, why
+        it must happen before <code>start</code>, and why a value passed as a literal number becomes
+        a compile-time constant that can never be changed afterwards.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="ffi">
+      <h2>2. The FFI layer</h2>
+
+      <section id="ffi-libraries">
+        <h3>2.1 The three libraries</h3>
+
+        <p>
+          Phausto binds to native code through Pharo's uFFI. Three <code>FFILibrary</code> subclasses
+          define what it talks to:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Binds to</th></tr></thead>
+          <tbody>
+            <tr><td>LibFaust</td><td>The FAUST compiler itself</td></tr>
+            <tr><td>BoxAPI</td><td>The box API compiled into <code>libfaust</code></td></tr>
+            <tr><td>PhaustoDynamicEngine</td><td>The dynamic engine: compile, initialise, render</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Each declares its library name per platform —
+          <code>macLibraryName</code>, <code>win32LibraryName</code>,
+          <code>unix64LibraryName</code> — which is how one package supports macOS, Windows and
+          Linux. The binaries themselves are the <code>librariesBundle</code> you placed next to your
+          image; see <a href="setup.html">Installation §3</a>.
+        </p>
+      </section>
+
+      <section id="ffi-opaque">
+        <h3>2.2 Opaque objects</h3>
+
+        <p>
+          <code>DSP</code> and <code>PhBox</code> are <code>FFIOpaqueObject</code> subclasses. They
+          are handles on memory the FAUST engine owns — Pharo can pass them back and forth but cannot
+          look inside them.
+        </p>
+
+        <div class="callout warning">
+          <span class="callout-title">Consequences worth internalising</span>
+          Opaque objects are not garbage collected in the usual way: <code>destroy</code> is what
+          frees them. They do not survive an image save and restart, because the pointers they hold
+          are meaningless in a new process. And they cannot be inspected — the Inspector will show
+          you a handle, not a signal graph. Use <code>generatedCode</code> instead.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="engine">
+      <h2>3. PhaustoDynamicEngine</h2>
+
+      <p>
+        The engine is the bridge to the FAUST dynamic runtime — the object that actually compiles and
+        runs your patch.
+      </p>
+
+      <section id="engine-create">
+        <h3>3.1 Creating a DSP</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Creates a DSP from</th></tr></thead>
+          <tbody>
+            <tr><td>createDsp: aFaustCode</td><td>FAUST source</td></tr>
+            <tr><td>createDsp: aFaustCode withName: aName</td><td>FAUST source, named</td></tr>
+            <tr><td>createDsp: aFaustCode arguments: argv</td><td>FAUST source with compiler arguments</td></tr>
+            <tr><td>createDsp: aFaustCode arguments: argv name: anAppName</td><td>The same, named</td></tr>
+            <tr><td>createDspFromBoxes: aFaustBox</td><td>A box graph</td></tr>
+            <tr><td>createDspFromBoxes: aFaustBox withName: aString</td><td>A box graph, named</td></tr>
+            <tr><td>createDspMIDIFromBoxes: aFaustBox withName: aString</td><td>A box graph, MIDI-enabled</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          <code>asDsp</code> on a UGen ends up in <code>createDspFromBoxes:</code>;
+          <code>DSP create:</code> ends up in <code>createDsp:</code>. The two routes converge
+          immediately after.
+        </p>
+      </section>
+
+      <section id="engine-init">
+        <h3>3.2 Initialising and rendering</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>initializeDSP: aDsp</td><td>Initialise with platform defaults</td></tr>
+            <tr><td>initializeDSP: aDsp withRenderer: aType</td><td>Initialise with a chosen renderer</td></tr>
+            <tr><td>initializeDSP: aDsp withRenderer: aType bufferSize: aSize</td><td>Renderer and buffer size</td></tr>
+            <tr><td>destroyDSP: aDsp</td><td>Release the DSP</td></tr>
+            <tr><td>getBuffer / getBuffer: aDsp</td><td>Access the audio buffer</td></tr>
+            <tr><td>getNumInputsDsp: aDsp</td><td>Input channel count</td></tr>
+            <tr><td>PhaustoDynamicEngine bufferSize</td><td>The configured buffer size</td></tr>
+            <tr><td>PhaustoDynamicEngine dspPlaying</td><td>The DSP currently playing</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="engine-errors">
+        <h3>3.3 Errors</h3>
+
+        <div class="method-sig"><span class="badge">method</span> getLastError</div>
+
+<pre><code><span class="cls">PhaustoDynamicEngine</span> new getLastError.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">The most useful debugging message in Phausto</span>
+          When a patch fails to build, the Pharo-side exception often says only that something was
+          nil. <code>getLastError</code> returns the FAUST compiler's own diagnostic, which usually
+          names the exact problem. Reach for it before anything else.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="renderer">
+      <h2>4. Renderers and buffer size</h2>
+
+      <p>
+        <code>RendererType</code> is an <code>FFIEnumeration</code> naming the available audio
+        backends. Which one is used depends on the platform — CoreAudio on macOS, and the
+        appropriate native backend elsewhere. <code>DSP rendererType</code> reports the current
+        choice.
+      </p>
+
+      <p>
+        Buffer size is the latency-versus-stability trade, and is set on the engine rather than per
+        patch. Typical values are 64, 256 and 512 samples.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Buffer</th><th>Latency at 48 kHz</th><th>Suits</th></tr></thead>
+        <tbody>
+          <tr><td>64</td><td>~1.3 ms</td><td>Live playing, where responsiveness matters most</td></tr>
+          <tr><td>256</td><td>~5.3 ms</td><td>General use — a reasonable default</td></tr>
+          <tr><td>512</td><td>~10.7 ms</td><td>Heavy patches, or an older machine</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">If audio crackles, raise it</span>
+        Clicks and dropouts almost always mean the audio thread is not finishing a buffer in time.
+        A larger buffer gives it more room, at the cost of latency you will only notice when playing
+        an instrument by hand.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="threads">
+      <h2>5. Two threads</h2>
+
+      <p>
+        Audio runs on its own real-time thread; your code runs on Pharo's. Almost every timing
+        question in Phausto comes back to this split.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Runs on the audio thread</th><th>Runs on the Pharo thread</th></tr></thead>
+        <tbody>
+          <tr><td>Everything in the signal graph</td><td><code>setValue:parameter:</code> and friends</td></tr>
+          <tr><td><code>Pulse</code>, counters, envelopes</td><td>Forked pattern loops</td></tr>
+          <tr><td>Sample-accurate, never drifts</td><td>Scheduled, and subject to whatever else the image is doing</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">They do not lock together</span>
+        A rhythm generated by <code>Pulse</code> inside the DSP and one generated by a forked loop
+        are driven by different clocks and will drift apart. Pick one source of time per rhythmic
+        layer — see <a href="sequencing.html">Sequencing §1</a>.
+      </div>
+
+      <p>
+        The upside is robustness: a long computation, a debugger, even a garbage collection pause in
+        Pharo does not interrupt the audio. A patch keeps playing while you work on it, which is what
+        makes live coding viable at all.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="instances">
+      <h2>6. Instance tracking</h2>
+
+      <p>
+        Phausto tracks UGen instances as a DSP is assembled, so that repeated instances of the same
+        class get distinct parameter names rather than colliding.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class-side message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>UnitGenerator activeInstances</td><td>The instances currently tracked</td></tr>
+          <tr><td>UnitGenerator instancesInDSPContext</td><td>Instances within the DSP being built</td></tr>
+          <tr><td>UnitGenerator resetInstancesInDSPContext</td><td>Reset the counter</td></tr>
+          <tr><td>UnitGenerator resetSelfAndAllSubClasses</td><td>Reset across the whole hierarchy</td></tr>
+          <tr><td>UnitGenerator removePlaygroundBindings</td><td>Clear Playground variable bindings</td></tr>
+          <tr><td>UnitGenerator startUp:</td><td>Behaviour at image start-up</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Why your parameter names sometimes gain a suffix</span>
+        Two <code>SineOsc</code> instances in one DSP cannot both own <code>SineOscFreq</code>, so
+        the counter distinguishes them. If the names you see in <code>traceAllParams</code> are not
+        the ones you expected, this is usually why — and the fix is to give each UGen an explicit
+        <code>label:</code>. See <a href="basics.html">Unit Generators §2.2</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="memory">
+      <h2>7. Memory and the image</h2>
+
+      <p>
+        A DSP holds memory outside the Pharo heap. The garbage collector cannot reclaim it, so the
+        rules are manual and simple:
+      </p>
+
+      <div class="steps">
+        <div class="step"><strong>Every DSP you create should eventually be destroyed.</strong> <code>stop</code> silences; only <code>destroy</code> frees.</div>
+        <div class="step"><strong>Rebuilding a patch creates a new DSP.</strong> The old one is still alive and still consuming CPU until destroyed.</div>
+        <div class="step"><strong>Nothing survives an image restart.</strong> DSPs, boxes and the library context all point into a process that no longer exists — rebuild after reopening.</div>
+        <div class="step"><strong>The registry is your safety net.</strong> <code>DSP initializedDSPs</code> finds everything still live, including DSPs you have lost the variable for.</div>
+      </div>
+
+<pre><code><span class="cmt">"Silence everything, whatever it is"</span>
+<span class="cls">DSP</span> initializedDSPs do: [ :each | each stop ].</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="faust-box.html">Raw FAUST &amp; the Box API</a></td><td>Working directly at the box and source layers.</td></tr>
+          <tr><td><a href="dsp-api.html">DSP &amp; Parameter API</a></td><td>The protocol these internals implement.</td></tr>
+          <tr><td><a href="setup.html">Installation</a></td><td>Placing the native libraries this page depends on.</td></tr>
+          <tr><td><a href="exporting.html">Exporting</a></td><td>Taking the compiled result out of Pharo.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4>Audio crackles or drops out</h4>
+      <p>The audio thread is missing its deadline. Raise the buffer size — §4.</p>
+
+      <h4>A build failure with an unhelpful Pharo exception</h4>
+      <p><code>PhaustoDynamicEngine new getLastError</code> gives the compiler's own message — §3.3.</p>
+
+      <h4>Everything broke after saving and reopening the image</h4>
+      <p>
+        DSPs and boxes hold pointers into a dead process. Rebuild your patches; nothing is recoverable
+        — §2.2, §7.
+      </p>
+
+      <h4>The image gets slower the longer I work</h4>
+      <p>Undestroyed DSPs are accumulating — §7.</p>
+
+      <h4>Parameter names have unexpected numeric suffixes</h4>
+      <p>Instance tracking is disambiguating duplicate UGens. Set explicit labels — §6.</p>
+
+      <h4>The Inspector shows nothing useful for a DSP or a box</h4>
+      <p>
+        They are opaque FFI handles with no inspectable contents. Use
+        <code>generatedCode</code> or <code>asFaustCode</code> — §2.2.
+      </p>
+
+      <h4><code>init</code> is noticeably slow</h4>
+      <p>
+        It is invoking an optimising compiler. That is expected, it happens once per DSP, and it is
+        the reason the resulting audio is native-speed — §1.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

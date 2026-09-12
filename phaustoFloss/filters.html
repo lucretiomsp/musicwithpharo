@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phausto — Filters</title>
+  <link rel="stylesheet" href="phausto-shared.css">
+  <script>if (localStorage.getItem('phausto-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+</head>
+<body data-page="filters.html">
+
+<nav class="sidebar" id="phausto-sidebar"><!-- injected by phausto-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Phausto</a> › Guides › Filters</div>
+    <h1>Filters</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Sixty filter classes, from a one-pole smoother to full virtual-analogue ladder models. This
+      page is a map: which family to reach for, and what each one is actually good at.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#basics">Using a filter</a>
+          <ol>
+            <li><a href="#basics-setters">The shared setters</a></li>
+          </ol>
+        </li>
+        <li><a href="#ladders">Virtual analogue: the MKO family</a></li>
+        <li><a href="#svf">State-variable filters</a></li>
+        <li><a href="#resonators">Resonators</a></li>
+        <li><a href="#butterworth">Butterworth low and high pass</a></li>
+        <li><a href="#eq">Shelves and parametric EQ</a></li>
+        <li><a href="#comb">Comb and allpass filters</a></li>
+        <li><a href="#primitives">One-pole, one-zero and building blocks</a></li>
+        <li><a href="#utility">Utility filters</a></li>
+        <li><a href="#choosing">Choosing a filter</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="basics">
+      <h2>1. Using a filter</h2>
+
+      <p>
+        Every filter is a UGen that takes an input signal and returns a modified one, so the chuck
+        operator is all you need:
+      </p>
+
+<pre><code><span class="cmt">"A sawtooth through a Moog-style low-pass filter"</span>
+voice := <span class="cls">SawOsc</span> new =&gt; <span class="cls">MoogVcf</span> new.
+
+dsp := voice stereo asDsp.
+dsp init.
+dsp start.
+dsp displayUI.
+dsp stop.</code></pre>
+
+      <p>
+        Because a filter's cutoff is an ordinary setter, it accepts a number, another UGen or a
+        symbol — which is how filter envelopes and auto-wah effects are built. See
+        <a href="envelopes.html">Envelopes &amp; Modulation §4.3</a>.
+      </p>
+
+      <section id="basics-setters">
+        <h3>1.1 The shared setters</h3>
+
+        <p>
+          Filter controls come from the <code>PhFilterSetter</code> trait, so they are consistent
+          across the family. Several are synonyms, present because different FAUST modules name the
+          same thing differently:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Setter</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>freq: / frequency: / fr:</td><td>Corner or centre frequency, in hertz</td></tr>
+            <tr><td>cutoff: / cutoffFreq:</td><td>Cutoff frequency — the same idea, different naming</td></tr>
+            <tr><td>q:</td><td>Quality factor: resonance sharpness</td></tr>
+            <tr><td>res:</td><td>Resonance, where the module expresses it as an amount rather than a Q</td></tr>
+            <tr><td>gain:</td><td>Output gain, or band gain on the EQ sections</td></tr>
+            <tr><td>aN:</td><td>Filter coefficient, on the primitive sections</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout tip">
+          <span class="callout-title">If a setter is not understood</span>
+          Not every filter composes the whole trait. Instantiate it, call
+          <code>traceAllParams</code> after <code>init</code>, and read off the names it actually
+          exposes — see <a href="parameters.html">Parameters &amp; Control §3</a>.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="ladders">
+      <h2>2. Virtual analogue: the MKO family</h2>
+
+      <p>
+        <code>MKOFilter</code> and its eleven subclasses are digital models of famous analogue filter
+        circuits — the "MKO" being Moog, Korg and Oberheim. These are the filters to reach for when
+        you want character rather than neutrality: they distort pleasantly when driven, and their
+        resonance behaves the way players expect.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Models</th><th>Character</th></tr></thead>
+        <tbody>
+          <tr><td>MoogVcf</td><td>Moog transistor ladder</td><td>The classic warm low pass; the default choice</td></tr>
+          <tr><td>MoogLadder</td><td>Moog ladder, four pole</td><td>24 dB/octave, strong resonance</td></tr>
+          <tr><td>MoogHalfLadder</td><td>Moog ladder, two pole</td><td>12 dB/octave, gentler slope</td></tr>
+          <tr><td>DiodeLadder</td><td>Diode ladder (TB-303 lineage)</td><td>Acidic, squelchy at high resonance</td></tr>
+          <tr><td>Korg35LPF</td><td>Korg MS-10/MS-20 low pass</td><td>Aggressive, screams when resonant</td></tr>
+          <tr><td>Korg35HPF</td><td>Korg MS-10/MS-20 high pass</td><td>Thin and biting</td></tr>
+          <tr><td>Oberheim</td><td>Oberheim SEM, multimode</td><td>Smooth, all outputs at once</td></tr>
+          <tr><td>OberheimLPF</td><td>SEM low pass</td><td>Creamy, less resonant bite than Moog</td></tr>
+          <tr><td>OberheimHPF</td><td>SEM high pass</td><td>Clean high pass</td></tr>
+          <tr><td>OberheimBPF</td><td>SEM band pass</td><td>Vocal, useful for formant-like sweeps</td></tr>
+          <tr><td>OberheimBSF</td><td>SEM band stop</td><td>Notch; phaser-like when swept</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"An acid line wants the diode ladder and a lot of resonance"</span>
+acid := <span class="cls">SawOsc</span> new =&gt; (<span class="cls">DiodeLadder</span> new cutoff: <span class="num">600</span>; q: <span class="num">0.9</span>).</code></pre>
+
+      <div class="callout warning">
+        <span class="callout-title">Resonance and level</span>
+        These models add gain at the resonant peak. High <code>q:</code> values can push a signal
+        well past full scale even when the input was quiet. Lower the input, or put a limiter after
+        the filter — see <a href="effects.html">Effects, Reverbs &amp; Dynamics</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="svf">
+      <h2>3. State-variable filters</h2>
+
+      <p>
+        <code>PhStateVariableFilter</code> and its five subclasses are clean, well-behaved and
+        efficient. Where the MKO family gives colour, these give control: predictable slopes, stable
+        behaviour under fast modulation, and every response from the same topology.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Response</th></tr></thead>
+        <tbody>
+          <tr><td>PhSvfLp</td><td>Low pass</td></tr>
+          <tr><td>PhSvfHp</td><td>High pass</td></tr>
+          <tr><td>PhSvfBp</td><td>Band pass</td></tr>
+          <tr><td>PhSvfNotch</td><td>Notch / band reject</td></tr>
+          <tr><td>PhSvfPeak</td><td>Peaking</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">The right default for modulation</span>
+        If a filter's cutoff is being swept quickly — by an envelope, an LFO or an audio-rate signal
+        — start with the state-variable family. It stays stable where the analogue models can
+        misbehave.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="resonators">
+      <h2>4. Resonators</h2>
+
+      <p>
+        <code>ResonatorFilter</code> and its subclasses are tuned, narrow filters — closer to a
+        struck bar than to a tone control. At high resonance they ring at their centre frequency,
+        which makes them the basis of modal synthesis.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Response</th></tr></thead>
+        <tbody>
+          <tr><td>PhResonLp</td><td>Resonant low pass</td></tr>
+          <tr><td>PhResonHp</td><td>Resonant high pass</td></tr>
+          <tr><td>PhResonBp</td><td>Resonant band pass — the classic ringing filter</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The closely related <code>PhModeFilter</code> — filed under physical models rather than
+        filters — is a resonator parameterised by decay time (<code>t60:</code>) instead of Q, which
+        is far more musical when you are modelling a physical object. See
+        <a href="synthesis.html">Synthesis §4</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="butterworth">
+      <h2>5. Butterworth low and high pass</h2>
+
+      <p>
+        <code>ButterworthLPHP</code> provides <code>Lowpass</code> and <code>HighPass</code>: flat in
+        the passband, no resonance, no colour. These are the filters you use when you want to
+        <em>remove</em> something rather than shape it — cleaning up rumble below an instrument, or
+        taking hiss off the top.
+      </p>
+
+<pre><code><span class="cmt">"Remove everything below 80 Hz before it reaches the mix"</span>
+cleaned := source =&gt; (<span class="cls">HighPass</span> new freq: <span class="num">80</span>).</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="eq">
+      <h2>6. Shelves and parametric EQ</h2>
+
+      <p>
+        Equalisation sections boost or cut a region without removing it entirely — the tool for
+        balance rather than for sound design.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>PhLowShelf</td><td>Boost or cut everything below a corner frequency</td></tr>
+          <tr><td>PhHighShelf</td><td>Boost or cut everything above a corner frequency</td></tr>
+          <tr><td>PhPeakEq</td><td>Parametric peaking band</td></tr>
+          <tr><td>PhPeakEqCq</td><td>Constant-Q peaking band — bandwidth stays proportional as you sweep</td></tr>
+          <tr><td>PhPeakEqRm</td><td>Peaking band specified by frequency limits rather than Q</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Constant Q, and why it matters</span>
+        With a plain peaking filter, sweeping the centre frequency also changes how wide the affected
+        region sounds. <code>PhPeakEqCq</code> keeps the bandwidth proportional to the frequency, so
+        a sweep sounds even across the spectrum.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="comb">
+      <h2>7. Comb and allpass filters</h2>
+
+      <p>
+        <code>CombFilters</code> and its eleven subclasses delay a signal and mix it back with
+        itself, producing a comb-shaped response — regularly spaced peaks and notches. They are the
+        building blocks of reverbs, flangers, choruses and Karplus–Strong strings.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr><td>Ff_Comb, FfCombFilter, Ff_FComb</td><td>Feed-forward comb — notches, no ringing</td></tr>
+          <tr><td>Fb_Comb, FbCombFilter, Fb_FComb</td><td>Feedback comb — resonant peaks, rings</td></tr>
+          <tr><td>FfbCombFilter</td><td>Combined feed-forward and feedback</td></tr>
+          <tr><td>Allpass_Comb</td><td>Allpass comb — flat magnitude, altered phase</td></tr>
+          <tr><td>Allpass_FComb, Allpass_FComb1a, Allpass_FComb5</td><td>Fractional-delay allpass variants</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The setters come from <code>PhCombFilterSetter</code>: <code>del:</code> and
+        <code>intDel:</code> for delay length, <code>b0:</code>, <code>b:</code> and
+        <code>bM:</code> for the coefficients.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Allpass filters are for phase</span>
+        An allpass leaves the magnitude spectrum untouched and changes only phase, which sounds like
+        nothing on its own. Their purpose is to diffuse a signal inside a larger network — which is
+        why every reverb is full of them.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="primitives">
+      <h2>8. One-pole, one-zero and building blocks</h2>
+
+      <p>
+        Beneath the named filters are the primitive sections, useful when you are building a filter
+        rather than using one:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>PhPole</td><td>One-pole section — the simplest low pass</td></tr>
+          <tr><td>PhZero</td><td>One-zero section</td></tr>
+          <tr><td>PhOneZero</td><td>One-zero with a settable coefficient</td></tr>
+          <tr><td>PhIIR</td><td>General infinite impulse response filter</td></tr>
+          <tr><td>PhLpTau, PhLpT19, PhLpT60</td><td>Low pass specified by time constant rather than frequency</td></tr>
+          <tr><td>PhLptN</td><td>Nth-order low pass</td></tr>
+          <tr><td>PhAvgRect, PhAvgTau, PhAvgT19, PhAvgT60</td><td>Averaging filters — envelope following and level detection</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Time constants, not frequencies</span>
+        The <code>Tau</code>, <code>T19</code> and <code>T60</code> variants are specified by how
+        long they take to settle rather than by a corner frequency. That is the natural way to think
+        about a smoother or an envelope follower, and it is why the same naming appears on the
+        <a href="effects.html">compressors</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="utility">
+      <h2>9. Utility filters</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>DcBlocker, DcBlockerAt, PhDcBlockerAt</td><td>Remove DC offset — worth adding after any waveshaper or asymmetric process</td></tr>
+          <tr><td>Integrator, PhIntegrator</td><td>Integrate a signal over time</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">A habit worth having</span>
+        Saturation, rectification and many physical models introduce DC offset, which wastes headroom
+        and can thump when a patch starts. A <code>DcBlocker</code> at the end of the chain costs
+        almost nothing and prevents the problem.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="choosing">
+      <h2>10. Choosing a filter</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>You want</th><th>Reach for</th></tr></thead>
+        <tbody>
+          <tr><td>A classic synth sweep</td><td><code>MoogVcf</code>, or <code>DiodeLadder</code> for acid</td></tr>
+          <tr><td>Fast modulation without artefacts</td><td>The <code>PhSvf</code> family</td></tr>
+          <tr><td>To remove rumble or hiss</td><td><code>HighPass</code>, <code>Lowpass</code></td></tr>
+          <tr><td>To rebalance a mix</td><td><code>PhPeakEqCq</code>, <code>PhLowShelf</code>, <code>PhHighShelf</code></td></tr>
+          <tr><td>Something that rings like an object</td><td><code>PhResonBp</code>, <code>PhModeFilter</code></td></tr>
+          <tr><td>Flanging, chorus, reverb ingredients</td><td>The comb and allpass family</td></tr>
+          <tr><td>Level detection or smoothing</td><td><code>PhAvgT60</code>, <code>PhLpT60</code>, <code>smoo</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>11. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="envelopes.html">Envelopes &amp; Modulation</a></td><td>Driving a cutoff with an envelope or LFO.</td></tr>
+          <tr><td><a href="effects.html">Effects, Reverbs &amp; Dynamics</a></td><td>What comb filters become when you build them up.</td></tr>
+          <tr><td><a href="synthesis.html">Synthesis Techniques</a></td><td>Filters in the context of complete patches.</td></tr>
+          <tr><td><a href="ugen-library.html">UGen Library</a></td><td>The full class list, including everything not named here.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>12. Troubleshooting</h2>
+
+      <h4>The filter distorts as soon as I raise resonance</h4>
+      <p>Resonant gain is pushing the signal past full scale. Lower the input level — §2.</p>
+
+      <h4><code>cutoff:</code> is not understood by my filter</h4>
+      <p>
+        That module names it differently. Try <code>freq:</code> or <code>fr:</code>, and confirm
+        with <code>traceAllParams</code> — §1.1.
+      </p>
+
+      <h4>Sweeping the cutoff produces zipper noise</h4>
+      <p>
+        The control is stepping. Add <code>smoo</code> to the control signal — see
+        <a href="envelopes.html">Envelopes §5</a>.
+      </p>
+
+      <h4>A fast envelope on the cutoff makes the filter squeal or blow up</h4>
+      <p>
+        Some analogue models are unstable under very fast modulation. Move to the state-variable
+        family — §3.
+      </p>
+
+      <h4>My patch thumps when it starts, and the meters sit off-centre</h4>
+      <p>DC offset. Add a <code>DcBlocker</code> at the end of the chain — §9.</p>
+
+      <h4>The comb filter does nothing audible</h4>
+      <p>
+        If it is an allpass, that is expected — allpass filters change phase, not magnitude. §7.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="phausto-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="phausto-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

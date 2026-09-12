@@ -2,10 +2,10 @@
 layout: docuMain
 title: "Phausto: fast and accesible DSP programming"
 ---
+Welcome to the Phausto wiki! For the full documentation, visit the [Phausto Documentation Site]({{ site.baseurl }}/phaustoFloss/index.html).
+
 Phausto is a Pharo package and API crafted to enable fast and accessible Digital Signal Processor (DSP) design. It is powered by an embedded [Faust](https://faustdoc.grame.fr/) engine, granting users direct access to cutting-edge algorithms that researchers worldwide have implemented into the Faust standard libraries.
 Thanks to its exporter methods, Phausto allows synthesisers and effect built within Pharo in a [CMajor](https://cmajor.dev/) patch or on a [Bela](https://bela.io/) board.
-
-For the full interactive documentation, visit the [Phausto Documentation Site]({{ site.baseurl }}/phaustoFloss/index.html).
 
 ## Installation
 
