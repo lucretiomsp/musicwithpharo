@@ -19,10 +19,11 @@ No Gemfile or package.json — GitHub Pages handles Jekyll and the minima theme 
 
 ## Architecture
 
-**Content** lives in three places:
+**Content** lives in four places:
 - `_posts/` — blog posts (YYYY-MM-DD-title.md, Jekyll front matter required)
 - `documentation/` — per-package reference pages (coypu.md, phausto.md, pharosound.md)
 - `index.md` — landing page (uses `home2` layout)
+- `phaustoFloss/`, `coypuFloss/` — the two FLOSS manuals (see below)
 
 **Layouts** (`_layouts/`) control page structure:
 - `home2.html` — landing page with navigation and blog roll
@@ -34,6 +35,45 @@ No Gemfile or package.json — GitHub Pages handles Jekyll and the minima theme 
 **Interactive element**: `sketch.js` (p5.js waveform animation on the homepage — purely decorative)
 
 **Site config**: `_config.yml` (title, theme, author metadata, markdown processor)
+
+## The FLOSS Manuals
+
+`phaustoFloss/` and `coypuFloss/` are standalone HTML manuals — **not** Jekyll pages. No front
+matter, no layout; they link their own stylesheet and are served as-is. `documentation/phausto.md`
+and `documentation/coypu.md` link into them.
+
+**`phaustoFloss/` is the reference implementation** (27 pages). Its conventions:
+
+- **`phausto-nav.js` is the single source of truth.** One ordered `PHAUSTO_PAGES` array drives the
+  sidebar, quick links, prev/next footer, ⌘K search index and the index card grid. Adding a page is
+  a one-line edit there. **Never hand-write navigation into a page** — it is injected into
+  `#phausto-sidebar`, `#phausto-page-nav` and `.edit-link`.
+- **Page skeleton**: `<body data-page="<filename>.html">`, a `.lede` sentence, a `.page-toc`
+  numbered contents block (max two levels), numbered `<section>`s whose `id`s are **semantic slugs,
+  not numbers**, so sections can be renumbered without breaking links. Cross-references use `§`.
+- Every page ends with a `.next-steps` table and a `.troubleshooting` section whose `<h4>`s are
+  phrased as the *symptom* the reader is experiencing.
+- `sidebar-toggle.js` injects the mobile hamburger and overlay; it must load **after**
+  `phausto-nav.js`, which builds the sidebar it operates on.
+- `phausto-shared.css` holds the palette as custom properties. The dark theme (`html.dark`, stored
+  under `phausto-theme`) is a pure custom-property swap — add new rules, do not restructure old ones.
+
+**`phaustoFloss/ugen-library.html` is generated, not hand-written.** Regenerate it after any Phausto
+package change:
+
+```bash
+node _tools/generate-ugen-library.cjs <path-to-Phausto-source-dir>
+# e.g. .../pharo-local/iceberg/lucretiomsp/phausto/Phausto
+```
+
+It reads the Tonel `*.class.st` files and emits every class with its superclass and the first
+sentence of its class comment. Tests, the Cmajor exporters and the FFI layer are excluded by design.
+
+**Accuracy rule**: verify class and selector names against the Phausto source before documenting
+them. Invented UGens and hallucinated selectors have been a recurring failure. Two traps worth
+knowing: most classes carry a `Ph` prefix (`PhImpulsify`, `PhModeFilter`, `PhFlangerMono`), and the
+fluid setter API lives in **22 traits**, not on the classes — `SineOsc` defines only `initialize`,
+so browsing a class reveals nothing. `dsp traceAllParams` is the ground truth.
 
 ## The Three Packages Documented
 
@@ -51,3 +91,6 @@ All three require Pharo 11–13 and are installed via Metacello.
 - **Update docs**: edit the relevant file in `documentation/`
 - **New nav link**: update `_layouts/home2.html`
 - **Assets** (PDFs, slides): place in `assets/`
+- **New manual page**: add one line to `PHAUSTO_PAGES` in `phaustoFloss/phausto-nav.js`, then copy
+  the skeleton from an existing page. Navigation follows automatically.
+- **Phausto package changed**: rerun `_tools/generate-ugen-library.cjs` (see above)
