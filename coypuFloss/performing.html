@@ -1,297 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Performance Control — Coypu Docs</title>
-<link rel="stylesheet" href="coypu-shared.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coypu — Performing</title>
+  <link rel="stylesheet" href="coypu-shared.css">
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
-<body>
+<body data-page="performing.html">
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
-    <p>Live Coding Music in Pharo</p>
-  </div>
-  <nav>
-    <div class="nav-section">
-      <div class="nav-label">Getting Started</div>
-      <a href="setup.html">Setup &amp; Installation</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Rhythm Reference</div>
-      <a href="rhythms-basics.html">Rhythm Basics</a>
-      <a href="rhythm-library.html">Rhythm Library</a>
-      <a href="rhythms-advanced.html">Advanced Patterns</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Performing</div>
-      <a href="performing.html" class="active">Performance Control</a>
-    </div>
-  </nav>
-  <div class="sidebar-footer">
-    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
-  </div>
-</aside>
+<nav class="sidebar" id="coypu-sidebar"><!-- injected by coypu-nav.js --></nav>
 
 <div class="main">
-
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Docs</a> › Performing</div>
-    <h1>🎛️ Performance Control</h1>
-    <p class="subtitle">Start, stop, mute, solo, loop, BPM — everything you need on stage.</p>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Performance › Performing</div>
+    <h1>Performing</h1>
   </div>
 
-  <div class="content-wrap">
-    <article class="content">
+  <div class="content">
+
+    <p class="lede">
+      Transport, tempo, mute and solo, looping and global transforms — the moves you make while the
+      music is already running, and the handful of behaviours that will surprise you on stage if you
+      meet them for the first time there.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#layers">Two objects you can drive</a></li>
+        <li><a href="#transport">Transport</a>
+          <ol>
+            <li><a href="#transport-cyclic">Cyclic playback</a></li>
+          </ol>
+        </li>
+        <li><a href="#tempo">Tempo</a></li>
+        <li><a href="#mute">Mute and solo</a>
+          <ol>
+            <li><a href="#mute-restore">How restore really works</a></li>
+          </ol>
+        </li>
+        <li><a href="#loop">Looping</a></li>
+        <li><a href="#global">Global transforms</a></li>
+        <li><a href="#editing">Editing while it plays</a></li>
+        <li><a href="#set">Shaping a set</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="layers">
+      <h2>1. Two objects you can drive</h2>
 
       <p>
-        All live performance actions are sent to the <strong>Performance object</strong> — typically
-        stored in a variable named <code>ep</code>. Think of it as the mixing desk for your session:
-        it holds all active Sequencers and exposes controls that take effect immediately on the next bar.
+        Depending on your backend you will be sending performance messages to one of two objects,
+        and confusing them is the most common source of “that method does not exist”.
       </p>
 
-      <!-- START / STOP -->
-      <h2 id="start-stop">Start &amp; Stop</h2>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Object</th><th>What it is</th><th>Get it with</th></tr></thead>
+        <tbody>
+          <tr><td><code>Performance</code></td><td>Coypu's singleton. Holds every running Sequencer, keyed by instrument name. Always present</td><td><code>Performance uniqueInstance</code></td></tr>
+          <tr><td>A Phausto engine</td><td><code>EcoPhausto</code>, <code>TurboPhausto</code> and friends — a Phausto rack that <em>fronts</em> a Performance with the same vocabulary</td><td><code>EcoPhausto new</code></td></tr>
+        </tbody>
+      </table>
+      </div>
 
-      <h3 id="start">Start</h3>
-      <div class="method-sig">EcoPhausto start.
-ep := EcoPhausto new.
-ep playFor: N bars.</div>
+<pre><code><span class="cmt">"driving Coypu directly — works with any backend"</span>
+p := <span class="cls">Performance</span> uniqueInstance.
+p freq: <span class="num">132</span> bpm.
+p play.
 
-      <div class="param-table-wrap"><table class="param-table">
+<span class="cmt">"driving a Phausto rack, which forwards to the same Performance"</span>
+<span class="cls">EcoPhausto</span> start.
+ep := <span class="cls">EcoPhausto</span> new.
+ep bpm: <span class="num">132</span>.
+ep playFor: <span class="num">128</span> bars.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">An engine is not a Performance</span>
+        <code>EcoPhausto new</code> answers a Phausto engine, not a <code>Performance</code>. It
+        happens to understand <code>bpm:</code>, <code>play</code>, <code>mute:</code> and the rest
+        because it forwards them. Reach the real Performance underneath with
+        <code>ep tpPerf</code>, and the DSP with <code>ep tpDsp</code>, when you need something the
+        facade does not expose.
+      </div>
+
+      <p>
+        Everything below works on either object unless stated. Examples use <code>p</code> for the
+        Performance and <code>ep</code> for an engine.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="transport">
+      <h2>2. Transport</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
         <thead><tr><th>Message</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td>EcoPhausto start</td><td>Initialises the audio engine. Must be called once per session before anything else.</td></tr>
-          <tr><td>EcoPhausto new</td><td>Creates a new Performance object. Assign it to a variable so you can control it.</td></tr>
-          <tr><td>ep playFor: N bars</td><td>Starts the clock running for N bars. Sequencers added at any point during the run will join immediately.</td></tr>
+          <tr><td>play</td><td>Start the transport. Runs for about four days at 120 BPM — effectively indefinitely</td></tr>
+          <tr><td>playFor: n</td><td>Run for <em>n</em> steps, then stop</td></tr>
+          <tr><td>playCyclicFor: n</td><td>Run for <em>n</em> cycles, resolving Mondo alternations each time round</td></tr>
+          <tr><td>stop</td><td>Halt immediately</td></tr>
+          <tr><td>resetAllSequencers</td><td>Return every Sequencer to its first note</td></tr>
         </tbody>
-      </table></div>
+      </table>
+      </div>
 
-<pre><code>EcoPhausto start.
-ep := EcoPhausto new.
-ep playFor: <span class="num">128</span> bars.   <span class="cmt">"Runs for 128 bars then stops automatically"</span></code></pre>
+<pre><code>p play.
+p stop.
 
-      <h3 id="stop">Stop</h3>
-      <div class="method-sig">ep stop.</div>
+<span class="cmt">"or a fixed length — `bars` converts, so this is 128 bars"</span>
+ep playFor: <span class="num">128</span> bars.</code></pre>
 
-<pre><code>ep stop.   <span class="cmt">"Stops all sequencers and the internal clock immediately"</span></code></pre>
+      <p>
+        <code>play</code> resets every Sequencer first, so a performance always begins from the top
+        of each pattern. It also refuses to start a second transport if one is already running,
+        which prevents the doubled-tempo effect you get from two clocks on the same Performance.
+      </p>
 
       <div class="callout warning">
-        <span class="callout-icon">⚠️</span>
-        <span><code>ep stop</code> is immediate — no fade. For a live context consider muting first, then stopping after a bar.</span>
+        <span class="callout-title"><code>stop</code> is immediate</span>
+        There is no fade and no wait for the end of the bar. In a live context, mute first, let the
+        bar finish, then stop — §4.
       </div>
 
-      <!-- BPM -->
-      <h2 id="bpm">Tempo — <code>bpm:</code></h2>
-      <p>Change the tempo of the running performance at any time. The change takes effect from the next beat.</p>
+      <section id="transport-cyclic">
+        <h3>2.1 Cyclic playback</h3>
 
-      <div class="method-sig">ep bpm: value.</div>
+        <p>
+          <code>playCyclicFor:</code> is the transport for <a href="rhythms-advanced.html">Mondo
+          patterns</a>. Instead of advancing one step at a time it asks each Sequencer for the events
+          falling inside each cycle, which is what allows alternations and subdivisions to resolve.
+        </p>
 
-      <div class="param-table-wrap"><table class="param-table">
-        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td>value</td><td>Number</td><td>Beats per minute. No practical limit, but 60–200 is typical.</td></tr>
-        </tbody>
-      </table></div>
+<pre><code><span class="str">'bd &lt;sd cp&gt; bd sd'</span> asMondoSounds to: #drums.
+p playCyclicFor: <span class="num">64</span>.</code></pre>
 
-<pre><code>ep bpm: <span class="num">120</span>.
-ep bpm: <span class="num">90</span>.    <span class="cmt">"Slow down mid-performance"</span>
-ep bpm: <span class="num">140</span>.   <span class="cmt">"Ramp up the energy"</span></code></pre>
+        <p>
+          Step-based patterns still work under cyclic playback, so you can mix the two notations in
+          one Performance.
+        </p>
+      </section>
+    </section>
 
-      <!-- MUTE -->
-      <h2 id="mute">Mute &amp; Unmute</h2>
+    <!-- ======================================================= -->
+    <section id="tempo">
+      <h2>3. Tempo</h2>
+
       <p>
-        Silence one or more instruments without removing them from the performance.
-        The sequencers keep running — un-muting brings them back at the right phase.
+        Coypu's clock is expressed as the duration of one step, not as BPM — but you rarely have to
+        think in those terms, because <code>bpm</code> converts for you:
       </p>
 
-      <div class="method-sig">ep mute: #( #instA #instB ... ).
-ep unmute: #( #instA #instB ... ).</div>
+<pre><code>p freq: <span class="num">132</span> bpm.   <span class="cmt">"the idiomatic form"</span>
+p bpm: <span class="num">132</span>.       <span class="cmt">"equivalent"</span>
+ep bpm: <span class="num">132</span>.      <span class="cmt">"on a Phausto engine"</span></code></pre>
 
-      <div class="param-table-wrap"><table class="param-table">
-        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td>#( symbols )</td><td>Array of Symbols</td><td>The instrument names to mute or unmute</td></tr>
-        </tbody>
-      </table></div>
-
-<pre><code><span class="cmt">"Mute kick, snare and bleep together"</span>
-ep mute: #(<span class="sym">#kick</span> <span class="sym">#snare</span> <span class="sym">#bleep</span>).
-
-<span class="cmt">"Bring kick and snare back in"</span>
-ep unmute: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
-
-<span class="cmt">"Un-mute everything at once"</span>
-ep unmute: ep allInstrumentNames.</code></pre>
-
-      <div class="callout info">
-        <span class="callout-icon">ℹ️</span>
-        <span>Muted instruments are <em>still sequencing internally</em> — their step counter advances. When unmuted they re-enter on the correct beat, never out of phase.</span>
-      </div>
-
-      <!-- SOLO -->
-      <h2 id="solo">Solo &amp; Unsolo</h2>
       <p>
-        Solo focuses the output to only the named instruments; everything else is silenced.
-        Multiple instruments can be soloed together — they all play, the rest are muted.
+        A step is a sixteenth note, so <code>132 bpm</code> answers <code>(60/132)/4</code> seconds.
+        Tempo changes take effect on the next step — the transport re-reads the value every time
+        round rather than caching it, which is what makes smooth live tempo changes possible.
       </p>
 
-      <div class="method-sig">ep solo: #( #instA #instB ... ).
-ep unsolo: #( #instA #instB ... ).</div>
-
-<pre><code><span class="cmt">"Solo the synth and cowbell — hear only those two"</span>
-ep solo: #(<span class="sym">#psg</span> <span class="sym">#cowbell</span>).
-
-<span class="cmt">"Release the solo — all instruments return to their prior mute state"</span>
-ep unsolo: #(<span class="sym">#psg</span> <span class="sym">#cowbell</span>).</code></pre>
+<pre><code>p freq: <span class="num">90</span>  bpm.   <span class="cmt">"drop it"</span>
+p freq: <span class="num">140</span> bpm.   <span class="cmt">"lift it"</span></code></pre>
 
       <div class="callout tip">
-        <span class="callout-icon">💡</span>
-        <span>Use solo to build up a performance piece by piece: start soloed on the kick, add hi-hat, unsolo, add melody… great for club contexts where the build matters.</span>
+        <span class="callout-title">Ramping by hand</span>
+        Because the transport re-reads the tempo each step, a forked loop that nudges
+        <code>freq:</code> repeatedly gives you an accelerando with no special support needed.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="mute">
+      <h2>4. Mute and solo</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>mute: aKey</td><td>Silence one instrument</td></tr>
+          <tr><td>mute: anArrayOfKeys</td><td>Silence several at once</td></tr>
+          <tr><td>muteAll</td><td>Silence everything</td></tr>
+          <tr><td>solo: aKey</td><td>Silence everything <em>except</em> this one</td></tr>
+          <tr><td>solo: anArrayOfKeys</td><td>Isolate several</td></tr>
+          <tr><td>unmute: / unsolo:</td><td>Restore — but read §4.1 first</td></tr>
+          <tr><td>restore</td><td>Return to the last snapshot</td></tr>
+          <tr><td>temporarySave</td><td>Take a snapshot without changing anything</td></tr>
+        </tbody>
+      </table>
       </div>
 
-      <!-- LOOP -->
-      <h2 id="loop">Loop &amp; Unloop</h2>
+<pre><code>p mute: #kick.
+p mute: #( #kick #snare #bleep ).
+p solo: #bass.
+
+<span class="cmt">"the symbol shorthands read better live"</span>
+#kick mute.
+#bass solo.
+#bass unsolo.</code></pre>
+
+      <section id="mute-restore">
+        <h3>4.1 How restore really works</h3>
+
+        <div class="callout warning">
+          <span class="callout-title"><code>unmute:</code> ignores the key you give it</span>
+          Both <code>unmute:</code> and <code>unsolo:</code> discard their argument and call
+          <code>restore</code>, which reinstates the <em>entire</em> snapshot taken when you last
+          muted or soloed. <code>p unmute: #kick</code> therefore brings back every muted part, not
+          just the kick. This is the single most surprising behaviour in Coypu.
+        </div>
+
+        <p>
+          The mechanism is a single backup slot. <code>mute:</code>, <code>muteAll</code> and
+          <code>solo:</code> each snapshot the Performance before changing it; <code>restore</code>
+          puts that snapshot back. There is no per-key memory and no stack of states.
+        </p>
+
+        <p>To bring back one part and leave the others silent, re-send it instead of unmuting:</p>
+
+<pre><code><span class="cmt">"restores everything — probably not what you meant mid-set"</span>
+p unmute: #kick.
+
+<span class="cmt">"brings back only the kick"</span>
+<span class="num">16</span> downbeats to: #kick.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Snapshot deliberately</span>
+          <code>p temporarySave</code> takes a snapshot without muting anything, so you can set up a
+          state you like, experiment freely, and <code>p restore</code> back to it.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="loop">
+      <h2>5. Looping</h2>
+
       <p>
-        Lock the performance into a repeating section of a given number of steps.
-        Useful for drilling into a moment while you re-code other parts.
+        <code>loop:</code> caps the transport's step counter, so the whole Performance wraps after a
+        fixed number of steps instead of running on:
       </p>
 
-      <div class="method-sig">ep loop: N.
-ep unloop.</div>
+<pre><code>p loop: <span class="num">64</span>.    <span class="cmt">"everything wraps every 64 steps"</span>
+p unloop.     <span class="cmt">"release it"</span></code></pre>
 
-      <div class="param-table-wrap"><table class="param-table">
-        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+      <p>
+        This is a global constraint, not a per-part one — every Sequencer still wraps at its own
+        length as well, but the transport itself returns to zero at the loop point. Use it to pin a
+        phrase while you rebuild something over the top.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Unlooped is not infinite</span>
+        <code>unloop</code> sets the maximum to <code>SmallInteger maxVal</code> rather than
+        removing the limit, and a plain <code>play</code> runs for roughly four days at 120 BPM.
+        Neither is a constraint you will meet in a set.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="global">
+      <h2>6. Global transforms</h2>
+
+      <p>These act on every Sequencer in the Performance at once — large, dramatic gestures.</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td>N</td><td>Integer</td><td>Number of steps to loop</td></tr>
+          <tr><td>transpose: n</td><td>Shift every part by <em>n</em> semitones</td></tr>
+          <tr><td>rhythm: aRhythmOrSeq</td><td>Give <em>every</em> part the same gates, keeping its own notes and sounds</td></tr>
+          <tr><td>swap: keyA with: keyB</td><td>Exchange two parts' Sequencers</td></tr>
+          <tr><td>remove: aKey</td><td>Take a part out entirely</td></tr>
         </tbody>
-      </table></div>
+      </table>
+      </div>
 
-<pre><code><span class="cmt">"Loop the next 5 steps forever"</span>
-ep loop: <span class="num">5</span>.
+<pre><code>p transpose: <span class="num">3</span>.              <span class="cmt">"everything up a minor third"</span>
+p rhythm: <span class="num">16</span> tresillo.      <span class="cmt">"every part onto the tresillo"</span>
+p swap: #kick with: #snare.  <span class="cmt">"exchange two parts"</span>
 
-<span class="cmt">"Return to normal playback"</span>
-ep unloop.</code></pre>
-
-      <!-- SAVE / RESTORE -->
-      <h2 id="save-restore">Save &amp; Restore</h2>
-      <p>
-        Take a snapshot of the current performance state — all sequencers, levels, mute statuses —
-        and restore it later. Essential for recovering a working state after an experiment goes wrong.
-      </p>
-
-      <div class="method-sig">ep temporarySave.
-ep restore.</div>
-
-<pre><code><span class="cmt">"Capture the current state"</span>
-ep temporarySave.
-
-<span class="cmt">"Experiment — change rhythms, BPM, anything"</span>
-ep bpm: <span class="num">200</span>.
-<span class="str">'FFFF'</span> hexBeat to: #kick.
-
-<span class="cmt">"Something went wrong — go back to saved state"</span>
-ep restore.</code></pre>
+<span class="cmt">"the symbol form of swap"</span>
+#kick swapWith: #snare.</code></pre>
 
       <div class="callout tip">
-        <span class="callout-icon">💡</span>
-        <span>Call <code>temporarySave</code> before every risky live edit. It costs nothing and saves your performance from a wrong evaluation.</span>
+        <span class="callout-title"><code>rhythm:</code> is the big one</span>
+        Putting an entire arrangement onto one rhythm — every drum, bass and lead hitting together —
+        is an enormous gesture, and a very easy way to mark a section change. Follow it by
+        re-sending individual parts to peel them back off.
       </div>
+    </section>
 
-      <!-- GLOBAL RHYTHM -->
-      <h2 id="global-rhythm">Global rhythm assignment</h2>
+    <!-- ======================================================= -->
+    <section id="editing">
+      <h2>7. Editing while it plays</h2>
+
       <p>
-        Apply the same rhythm pattern to all active sequencers in the performance at once.
-        A blunt, high-energy tool for sudden shifts.
+        This is the point of the whole system. The transport reads the Performance dictionary on
+        every step, so replacing an entry takes effect at the next step with no rebuild and no gap:
       </p>
 
-      <div class="method-sig">ep rhythm: aPattern.</div>
+<pre><code><span class="cmt">"evaluate this line while the transport is running"</span>
+<span class="num">16</span> claveSon to: #conga.
 
-<pre><code><span class="cmt">"Force all sequencers to a hex pattern simultaneously"</span>
-ep rhythm: <span class="str">'1312'</span> hexBeat.
+<span class="cmt">"then this one — the part changes at the next step"</span>
+<span class="num">16</span> rumba to: #conga.</code></pre>
 
-<span class="cmt">"Assign the same named rhythm to an array of specific instruments"</span>
-#(<span class="sym">#kick</span> <span class="sym">#ch</span> <span class="sym">#cowbell</span>) rhythm: #banda.</code></pre>
-
-      <!-- LEVEL -->
-      <h2 id="level-control">Level control</h2>
       <p>
-        Set the per-step amplitude for a specific instrument already in the performance.
-        The message can be sent to the instrument symbol directly.
+        The same is true of the tempo, the notes, the sample indices and the effect parameters.
+        Nothing in Coypu requires stopping.
       </p>
 
-      <div class="method-sig">#instrumentName level: 'v1 v2 v3 ...'.</div>
-
-<pre><code>#clap level: <span class="str">'0.3 0.1 0.4'</span>.
-#kick level: <span class="str">'1.0'</span>.     <span class="cmt">"All steps at full volume"</span>
-#psg  level: <span class="str">'0.6 0.2 0.8 0.4'</span>.</code></pre>
-
-      <hr class="section-divider">
-
-      <!-- WORKFLOW -->
-      <h2 id="workflow">Typical performance workflow</h2>
-      <p>A structured example of a full set, from soundcheck to closure:</p>
-
-<pre><code><span class="cmt">"──── SOUNDCHECK ────"</span>
-EcoPhausto start.
-ep := EcoPhausto new.
-ep bpm: <span class="num">110</span>.
-ep playFor: <span class="num">512</span> bars.
-
-<span class="cmt">"──── BUILD UP ────"</span>
-#(<span class="num">1</span> <span class="num">0</span> <span class="num">0</span> <span class="num">0</span>) asSeq to: #kick.
-
-ep temporarySave.   <span class="cmt">"save clean starting point"</span>
-
-#cumbiaClave asRhythm to: #conga.
-#plena to: #snare.
-<span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.9 0.4 0.6 0.3'</span>.
-
-<span class="cmt">"──── SOLO FOR TENSION ────"</span>
-ep solo: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
-
-<span class="cmt">"──── FULL DROP ────"</span>
-ep unsolo: #(<span class="sym">#kick</span> <span class="sym">#snare</span>).
-<span class="num">64</span> randomTrigs
-    notes: (<span class="num">32</span> randomWalksOn: Scale pentatonicMajor octaves: <span class="num">2</span> root: <span class="num">60</span>)
-    to: #psg; level: <span class="str">'0.6'</span>.
-
-<span class="cmt">"──── COOL DOWN ────"</span>
-ep mute: #(<span class="sym">#psg</span> <span class="sym">#ch</span>).
-ep bpm: <span class="num">90</span>.
-
-<span class="cmt">"──── END ────"</span>
-ep stop.</code></pre>
-
-      <div class="page-nav">
-        <a href="rhythms-advanced.html">
-          <span class="nav-dir">← Previous</span>
-          <span class="nav-title">Advanced Patterns</span>
-        </a>
-        <span></span>
+      <div class="callout note">
+        <span class="callout-title">One Sequencer per key</span>
+        Sending to an occupied key replaces what was there. To layer two patterns on one sound,
+        either join them with <code>,</code> or use two instrument names pointed at the same sound —
+        see <a href="rhythms-basics.html">Rhythms: Basics §6</a>.
       </div>
+    </section>
 
-    </article>
+    <!-- ======================================================= -->
+    <section id="set">
+      <h2>8. Shaping a set</h2>
 
-    <aside class="toc">
-      <div class="toc-label">On this page</div>
-      <ul>
-        <li><a href="#start-stop">Start &amp; Stop</a></li>
-        <li><a href="#bpm">Tempo — bpm:</a></li>
-        <li><a href="#mute">Mute &amp; Unmute</a></li>
-        <li><a href="#solo">Solo &amp; Unsolo</a></li>
-        <li><a href="#loop">Loop &amp; Unloop</a></li>
-        <li><a href="#save-restore">Save &amp; Restore</a></li>
-        <li><a href="#global-rhythm">Global rhythm</a></li>
-        <li><a href="#level-control">Level control</a></li>
-        <li><a href="#workflow">Typical workflow</a></li>
-      </ul>
-    </aside>
+      <p>A skeleton for a live session, using nothing not already covered:</p>
+
+<pre><code><span class="cmt">"--- soundcheck -------------------------------------------"</span>
+p := <span class="cls">Performance</span> uniqueInstance.
+p performer: <span class="cls">PerformerSuperDirt</span> new.
+p freq: <span class="num">128</span> bpm.
+<span class="num">16</span> downbeats to: #bd.
+p play.
+
+<span class="cmt">"--- build ------------------------------------------------"</span>
+<span class="num">16</span> claveSon to: #cp.
+<span class="num">16</span> quavers  to: #hh.
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 43 36 41</span> )) to: #bass.
+p temporarySave.                      <span class="cmt">"snapshot the groove"</span>
+
+<span class="cmt">"--- breakdown --------------------------------------------"</span>
+p solo: #bass.
+p freq: <span class="num">124</span> bpm.
+
+<span class="cmt">"--- drop -------------------------------------------------"</span>
+p restore.                            <span class="cmt">"everything back"</span>
+p transpose: <span class="num">5</span>.
+<span class="num">32</span> jungleKick to: #bd.
+
+<span class="cmt">"--- out --------------------------------------------------"</span>
+p mute: #( #cp #hh ).
+p stop.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Keep the snapshot honest</span>
+        <code>temporarySave</code> overwrites the one backup slot, and so does every
+        <code>mute:</code> and <code>solo:</code>. If you want to return to a groove later, take the
+        snapshot immediately before the move you intend to undo — §4.1.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>Complete patterns to start a set from.</td></tr>
+          <tr><td><a href="api.html">Player &amp; Message API</a></td><td>Everything Performance, Performer and Sequencer answer.</td></tr>
+          <tr><td><a href="effects.html">Effects &amp; Mixing</a></td><td>Levels, panning and effect parameters per part.</td></tr>
+          <tr><td><a href="phausto-midi.html">Phausto &amp; MIDI</a></td><td>Backend-specific performance controls.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4><code>unmute:</code> brought back parts I wanted to stay silent</h4>
+      <p>
+        It restores the whole snapshot and ignores the key. Re-send the one part you want instead —
+        §4.1.
+      </p>
+
+      <h4>The tempo sounds doubled</h4>
+      <p>
+        Two transports are running on one Performance. <code>play</code> guards against this, but a
+        forked loop started by hand will not. <code>p stop</code> and start once.
+      </p>
+
+      <h4>A Phausto engine does not understand a Performance message</h4>
+      <p>
+        The facade exposes a subset. Reach the Performance itself with <code>ep tpPerf</code> — §1.
+      </p>
+
+      <h4>Mondo alternations never advance</h4>
+      <p>
+        You are on <code>play</code> or <code>playFor:</code>, which step rather than cycle. Use
+        <code>playCyclicFor:</code> — §2.1.
+      </p>
+
+      <h4>Everything stopped when I changed the Performer</h4>
+      <p>
+        <code>performer:</code> mutes the Performance on the way in and out. Choose the backend
+        before building patterns — see <a href="setup.html">Setup §4</a>.
+      </p>
+
+      <h4>My parts drifted out of alignment and never came back</h4>
+      <p>
+        Their lengths have no common multiple worth waiting for. Either match the lengths or use
+        <code>loop:</code> to force a shared wrap point — §5.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
   </div>
 </div>
 
-
+<script src="coypu-nav.js"></script>
 <script src="sidebar-toggle.js"></script>
 </body>
 </html>

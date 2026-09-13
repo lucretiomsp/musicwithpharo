@@ -1,286 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Patterns — Coypu Docs</title>
-<link rel="stylesheet" href="coypu-shared.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coypu — Rhythms: Advanced</title>
+  <link rel="stylesheet" href="coypu-shared.css">
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
-<body>
+<body data-page="rhythms-advanced.html">
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
-    <p>Live Coding Music in Pharo</p>
-  </div>
-  <nav>
-    <div class="nav-section">
-      <div class="nav-label">Getting Started</div>
-      <a href="setup.html">Setup &amp; Installation</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Rhythm Reference</div>
-      <a href="rhythms-basics.html">Rhythm Basics</a>
-      <a href="rhythm-library.html">Rhythm Library</a>
-      <a href="rhythms-advanced.html" class="active">Advanced Patterns</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Performing</div>
-      <a href="performing.html">Performance Control</a>
-    </div>
-  </nav>
-  <div class="sidebar-footer">
-    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
-  </div>
-</aside>
+<nav class="sidebar" id="coypu-sidebar"><!-- injected by coypu-nav.js --></nav>
 
 <div class="main">
-
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Docs</a> › Rhythm Reference</div>
-    <h1>🔁 Advanced Patterns</h1>
-    <p class="subtitle">Euclidean rhythms, note sequences, dirt patterns, arpeggios, and random walks.</p>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Rhythms: Advanced</div>
+    <h1>Rhythms: Advanced</h1>
   </div>
 
-  <div class="content-wrap">
-    <article class="content">
+  <div class="content">
 
-      <!-- EUCLIDEAN -->
-      <h2 id="euclidean">Euclidean rhythms</h2>
+    <p class="lede">
+      Rhythms you generate rather than recall: Euclidean distribution, phase offsets, the Mondo
+      mini-notation with its cycle-level alternation, and scale-coherent random walks.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#euclidean">Euclidean rhythms</a>
+          <ol>
+            <li><a href="#euclidean-which">Which named rhythms are Euclidean</a></li>
+          </ol>
+        </li>
+        <li><a href="#offset">Offset and phase</a></li>
+        <li><a href="#transform">Transforming a Sequencer</a></li>
+        <li><a href="#mondo">Mondo mini-notation</a>
+          <ol>
+            <li><a href="#mondo-grouping">Grouping and subdivision</a></li>
+            <li><a href="#mondo-alternation">Alternation across cycles</a></li>
+            <li><a href="#mondo-divisors">Playing every Nth cycle</a></li>
+            <li><a href="#mondo-sounds">Sounds and indices</a></li>
+          </ol>
+        </li>
+        <li><a href="#dirt">SuperDirt note strings</a></li>
+        <li><a href="#random">Randomness and walks</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="euclidean">
+      <h2>1. Euclidean rhythms</h2>
+
       <p>
-        Euclidean rhythms distribute <em>n</em> pulses as evenly as possible across <em>k</em> steps.
-        Many traditional rhythms (clave, tresillo, bossa nova) are Euclidean patterns.
-        Pass an array <code>#(pulses steps)</code> and send <code>euclidean</code>.
+        A Euclidean rhythm distributes <em>n</em> triggers as evenly as possible across <em>k</em>
+        steps. Godfried Toussaint's observation was that a surprising number of traditional
+        timelines turn out to be exactly this — the even distribution is not an abstraction but
+        something musicians arrive at independently.
       </p>
 
-      <div class="method-sig">#( pulses steps ) euclidean to: #instrumentName.</div>
+      <p>Pass an array of <code>#( onsets steps )</code> and send <code>euclidean</code>:</p>
 
-      <div class="param-table-wrap"><table class="param-table">
-        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+<pre><code>#( <span class="num">3 8</span> ) euclidean to: #conga.
+<span class="cmt">"3 triggers across 8 steps → 1 0 0 1 0 0 1 0, the tresillo"</span>
+
+#( <span class="num">6 16</span> ) euclidean to: #bell.
+<span class="cmt">"6 across 16 → exactly the bembé pattern"</span></code></pre>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Position</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>pulses</td><td>Integer</td><td>Number of triggers to distribute</td></tr>
-          <tr><td>steps</td><td>Integer</td><td>Total number of steps in the pattern</td></tr>
+          <tr><td>1st</td><td>Number of triggers to distribute</td></tr>
+          <tr><td>2nd</td><td>Total number of steps</td></tr>
         </tbody>
-      </table></div>
-
-<pre><code><span class="cmt">"Classic tresillo — 3 pulses in 8 steps"</span>
-#(<span class="num">3</span> <span class="num">8</span>) euclidean to: #conga.
-
-<span class="cmt">"Cinquillo — 5 pulses in 16 steps (a Cuban staple)"</span>
-#(<span class="num">5</span> <span class="num">16</span>) euclidean to: #bongo.
-
-<span class="cmt">"With a custom sample index on each trigger"</span>
-#(<span class="num">5</span> <span class="num">16</span>) euclidean index: <span class="str">' 1 3 5 2'</span>; to: #bongo.</code></pre>
-
-      <h3 id="euclidean-offset">Offset</h3>
-      <p>
-        Rotate the Euclidean pattern forward (positive) or backward to shift the phase of the rhythm.
-        Cascade <code>offset:</code> before <code>to:</code>.
-      </p>
-
-      <div class="method-sig">#( pulses steps ) euclidean offset: N; to: #instrumentName.</div>
-
-<pre><code><span class="cmt">"Offset by 1 step forward — useful to stagger layered Euclidean patterns"</span>
-#(<span class="num">5</span> <span class="num">16</span>) euclidean offset: <span class="num">1</span>; to: #cowbell.
-
-<span class="cmt">"Same rhythm, different phase"</span>
-#(<span class="num">5</span> <span class="num">16</span>) euclidean offset: <span class="num">3</span>; to: #bongo.</code></pre>
-
-      <div class="callout tip">
-        <span class="callout-icon">💡</span>
-        <span>Layer two Euclidean patterns on the same instrument with different offsets for polyrhythmic textures without any external tools.</span>
+      </table>
       </div>
 
-      <!-- DIRT NOTES -->
-      <h2 id="asDirtNotes">Dirt notes — <code>asDirtNotes</code></h2>
+      <section id="euclidean-which">
+        <h3>1.1 Which named rhythms are Euclidean</h3>
+
+        <p>
+          Coypu's implementation uses a Bresenham line-drawing approach rather than Bjorklund's
+          algorithm. The two agree on some patterns and produce rotations of each other on others,
+          so it is worth knowing which of Coypu's own named rhythms you can reproduce exactly:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Expression</th><th>Produces</th><th>Same as</th></tr></thead>
+          <tbody>
+            <tr><td>#( 3 8 ) euclidean</td><td><code>10010010</code></td><td>exactly <code>tresillo</code></td></tr>
+            <tr><td>#( 6 16 ) euclidean</td><td><code>1001001010010010</code></td><td>exactly <code>bembe</code></td></tr>
+            <tr><td>#( 4 16 ) euclidean</td><td><code>1000100010001000</code></td><td>exactly <code>downbeats</code></td></tr>
+            <tr><td>#( 5 16 ) euclidean</td><td><code>1000100100100100</code></td><td>a rotation of <code>bossa</code>, not <code>bossa</code> itself</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Two things that are <em>not</em> true</span>
+          <code>#( 5 16 ) euclidean</code> is sometimes described as the cinquillo. It is not —
+          cinquillo is a five-stroke pattern in <strong>eight</strong> steps, and Coypu already has
+          it under the name <code>banda</code>, whose own source comment notes the Cuban name. Nor
+          is <code>#( 5 16 ) euclidean</code> the bossa clave; use <code>16 bossa</code> for that.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="offset">
+      <h2>2. Offset and phase</h2>
+
       <p>
-        Route a melodic pattern to a SuperDirt instrument using a compact string notation.
-        Each token is a MIDI note number; <code>-</code> is a rest; <code>/N</code> sets duration in beats;
-        <code>*N</code> repeats the previous note N times.
+        <code>offset:</code> rotates a pattern, wrapping it round its own length. The triggers stay
+        the same; where they land changes.
       </p>
 
-      <div class="method-sig">'pattern-string' asDirtNotes to: #instrumentName.</div>
+<pre><code><span class="cmt">"stagger two copies of one Euclidean pattern"</span>
+#( <span class="num">5 16</span> ) euclidean offset: <span class="num">1</span>; to: #cowbell.
+#( <span class="num">5 16</span> ) euclidean offset: <span class="num">3</span>; to: #bongo.</code></pre>
 
-<pre><code><span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span> asDirtNotes to: #acid; envMod: <span class="str">'0.8 0.2 0.3'</span>.
+      <p>
+        <code>offsetRight</code> and <code>offsetLeft</code> are the one-step shorthands — the same
+        as <code>offset: 1</code> and <code>offset: -1</code>.
+      </p>
 
-<span class="cmt">"Tokens: rest(8 beats) → note 38 → note 56 twice → rest(4 beats) → 41 → 66"</span></code></pre>
+      <div class="callout tip">
+        <span class="callout-title">Why offset is the most useful transform</span>
+        Layering the same pattern at two phases gives polyrhythmic interlock with nothing else
+        involved. It is also how you move a clave between its 3–2 and 2–3 orientations without
+        rewriting it.
+      </div>
 
-      <div class="param-table-wrap"><table class="param-table">
+      <div class="callout note">
+        <span class="callout-title"><code>offset:</code> mutates in place</span>
+        It changes the Sequencer's own gates rather than answering a new Sequencer, which is why the
+        examples above cascade it with <code>;</code> before <code>to:</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="transform">
+      <h2>3. Transforming a Sequencer</h2>
+
+      <p>Several messages reshape an existing pattern rather than building a new one:</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>offset:</td><td>Rotate the gates, wrapping round</td></tr>
+          <tr><td>offsetRight / offsetLeft</td><td>Rotate by one step</td></tr>
+          <tr><td>flip</td><td>Swap triggers and rests — the photographic negative of the rhythm</td></tr>
+          <tr><td>reverse</td><td>Play the pattern backwards, notes and durations with it</td></tr>
+          <tr><td>palindrome</td><td>Append the reverse to the original, doubling the length</td></tr>
+          <tr><td>transpose:</td><td>Shift every note by a number of semitones</td></tr>
+          <tr><td>times: / *</td><td>Repeat the whole Sequencer</td></tr>
+          <tr><td>progression:</td><td>Repeat it once per interval, transposed each time</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"a hat part that is the negative of the kick"</span>
+#kick flip to: #ch.
+
+<span class="cmt">"a four-chord progression from one bass figure"</span>
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 43</span> )) progression: #( <span class="num">0 5 7 3</span> ); to: #bass.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title"><code>flip</code> on a symbol works on what is playing</span>
+        <code>#kick flip</code> reads the Sequencer currently at <code>#kick</code> in the
+        Performance, inverts it, and puts it back. It is a live-performance move rather than a
+        construction one.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="mondo">
+      <h2>4. Mondo mini-notation</h2>
+
+      <p>
+        Mondo is Coypu's string mini-notation, in the TidalCycles tradition: a whole pattern written
+        as one string, where <em>position within the string</em> determines timing. Unlike the
+        step-based notations elsewhere in Coypu, a Mondo pattern is <strong>cycle-based</strong> —
+        the string always fills exactly one cycle, however many events you put in it.
+      </p>
+
+<pre><code><span class="str">'c4 e4 g4 c5'</span> asMondoNotes to: #piano.
+<span class="cmt">"four notes, evenly spaced across one cycle"</span></code></pre>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
         <thead><tr><th>Token</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>38</td><td>MIDI note 38 (one step)</td></tr>
-          <tr><td>-</td><td>Rest (one step)</td></tr>
-          <tr><td>-/8</td><td>Rest lasting 8 steps</td></tr>
-          <tr><td>56*2</td><td>Note 56 repeated 2 times</td></tr>
-          <tr><td>,</td><td>Separator between tokens</td></tr>
+          <tr><td><code>c4</code> <code>f#3</code> <code>bb2</code></td><td>A note by name. <code>c4</code> is MIDI 60</td></tr>
+          <tr><td><code>60</code></td><td>A note by MIDI number</td></tr>
+          <tr><td><code>~</code> or <code>-</code></td><td>A rest</td></tr>
+          <tr><td><code>[a b]</code></td><td>A group — subdivides its slot between the contents</td></tr>
+          <tr><td><code>&lt;a b&gt;</code></td><td>Alternation — a different one each cycle</td></tr>
+          <tr><td><code>x*N</code></td><td>Repeat N times within the slot</td></tr>
+          <tr><td><code>x/N</code></td><td>Play only every Nth cycle</td></tr>
         </tbody>
-      </table></div>
-
-      <h3 id="asDirtIndex">Dirt index — <code>asDirtIndex</code></h3>
-      <p>
-        Like <code>asDirtNotes</code> but selects sample <em>indices</em> within a SuperDirt folder
-        rather than MIDI note pitches. Combine with <code>notes:</code> to add a pitch layer.
-      </p>
-
-      <div class="method-sig">'index-string' asDirtIndex notes: 'note-string' to: #instrumentName.</div>
-
-<pre><code><span class="str">'1 , -/16 . 7 , -/9 , 12 , -/12, 18'</span> asDirtIndex
-    notes: <span class="str">'38 45 78 62 81'</span>
-    to: #speakspell.</code></pre>
-
-      <!-- NOTES ON SEQUENCERS -->
-      <h2 id="notes">Adding notes — <code>notes:</code></h2>
-      <p>
-        Any Sequencer can have MIDI note values assigned to its triggers. By default all steps play
-        note <code>60</code> (C3). Pass a space-separated string to <code>notes:</code> — values cycle
-        across triggers.
-      </p>
-
-      <div class="method-sig">sequencer notes: 'n1 n2 n3 ...' to: #instrumentName.</div>
-
-<pre><code><span class="num">16</span> quavers notes: <span class="str">'60 64 67 72'</span> to: #piano.
-<span class="cmt">"Plays a C major arpeggio across 16 steps"</span>
-
-#plena asRhythm notes: <span class="str">'36 48 60'</span> to: #bass.</code></pre>
-
-      <!-- ARPEGGIATE -->
-      <h2 id="arpeggiate">Arpeggiation — <code>arpeggiate:</code></h2>
-      <p>
-        Walk through a chord voicing across the triggers of a sequencer.
-        Pass chord names as a space-separated string; Coypu resolves them to MIDI note sets.
-      </p>
-
-      <div class="method-sig">sequencer arpeggiate: 'chord1 chord2 ...'; to: #instrumentName.</div>
-
-<pre><code>#cumbiaClave asRhythm arpeggiate: <span class="str">'12-sus4 0-min'</span>; to: #psg; level: <span class="str">'0.4'</span>.
-<span class="cmt">"Alternates between a sus4 arpeggio and a minor arpeggio"</span></code></pre>
-
-      <div class="callout info">
-        <span class="callout-icon">ℹ️</span>
-        <span>Chord names follow the pattern <code>root-quality</code>, e.g. <code>0-maj</code>, <code>7-min</code>, <code>12-sus4</code>, <code>4-dim</code>. The root is a semitone offset from the base note.</span>
+      </table>
       </div>
 
-      <!-- RANDOM WALK -->
-      <h2 id="randomWalk">Random melodic walk — <code>randomWalksOn:octaves:root:</code></h2>
+      <section id="mondo-grouping">
+        <h3>4.1 Grouping and subdivision</h3>
+
+        <p>
+          Square brackets subdivide. Whatever is inside shares the time that one slot would have
+          taken, which is how you get triplets and unequal divisions without changing the grid:
+        </p>
+
+<pre><code><span class="str">'c4 e4 [g4 b4] c5'</span> asMondoNotes to: #piano.
+<span class="cmt">"four slots; the third holds two notes at double speed"</span>
+
+<span class="str">'bd [sd sd] bd sd'</span> asMondoSounds to: #drums.</code></pre>
+
+        <p><code>*N</code> multiplies a slot, giving the same result more compactly:</p>
+
+<pre><code><span class="str">'c4 e4*3 g4'</span> asMondoNotes to: #piano.
+<span class="cmt">"the middle slot fires three times"</span></code></pre>
+      </section>
+
+      <section id="mondo-alternation">
+        <h3>4.2 Alternation across cycles</h3>
+
+        <p>
+          Angle brackets pick <em>one</em> of their contents per cycle, advancing each time round.
+          This is where Mondo earns its place: a pattern that varies over time without any
+          scheduling code.
+        </p>
+
+<pre><code><span class="str">'c4 &lt;e4 g4&gt; c5'</span> asMondoNotes to: #piano.
+<span class="cmt">"cycle 1 plays e4 in the middle, cycle 2 plays g4, then it repeats"</span>
+
+<span class="str">'bd &lt;sd cp hh&gt;'</span> asMondoSounds to: #drums.
+<span class="cmt">"a three-cycle rotation on the second beat"</span></code></pre>
+
+        <p>
+          Coypu precomputes every cycle the alternations can produce and cycles through them, so the
+          pattern is deterministic and repeats with a period equal to the least common multiple of
+          the alternation lengths.
+        </p>
+      </section>
+
+      <section id="mondo-divisors">
+        <h3>4.3 Playing every Nth cycle</h3>
+
+        <p>
+          A slash makes an event conditional on the cycle number — <code>x/4</code> fires only on
+          cycles divisible by 4. It is the cleanest way to write a fill or an accent that arrives
+          once a phrase:
+        </p>
+
+<pre><code><span class="str">'bd sd bd sd/4'</span> asMondoSounds to: #drums.
+<span class="cmt">"the last snare lands only every fourth cycle"</span></code></pre>
+      </section>
+
+      <section id="mondo-sounds">
+        <h3>4.4 Sounds and indices</h3>
+
+        <p>Three entry points, depending on what the tokens mean:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Tokens are</th></tr></thead>
+          <tbody>
+            <tr><td>asMondoNotes</td><td>Pitches — note names or MIDI numbers</td></tr>
+            <tr><td>asMondoSounds</td><td>Sound names, optionally <code>name:index</code></td></tr>
+            <tr><td>asMondoIndex</td><td>Sample indices within one folder</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="str">'bd:3 ~ sd:1 [hh hh:2]'</span> asMondoSounds to: #drums.</code></pre>
+
+        <p>
+          With <code>PerformerSuperDirt</code>, the part after the colon becomes SuperDirt's
+          <code>n</code> — the sample index inside the folder. With other Performers it is ignored
+          and the default note is used instead.
+        </p>
+
+        <div class="callout note">
+          <span class="callout-title">Mondo patterns use a different player</span>
+          A Mondo string builds a Sequencer driven by <code>SequencerPlayerCyclic</code> rather than
+          the default linear player: it queries the pattern for the events falling in each slice of
+          the cycle, instead of advancing one step at a time. That is what makes subdivision and
+          alternation possible, and it means Mondo patterns and step patterns can run side by side
+          in the same Performance.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="dirt">
+      <h2>5. SuperDirt note strings</h2>
+
       <p>
-        Generate a list of MIDI notes by randomly walking up and down a scale over a specified octave
-        range from a root note. This produces organic, scale-coherent melodies that evolve differently
-        on each evaluation.
+        The older string notations, predating Mondo and still the most direct route to SuperDirt.
+        Tokens are separated by commas and map one-to-one onto steps.
       </p>
 
-      <div class="method-sig">N randomWalksOn: Scale &lt;scale&gt; octaves: octaves root: rootMidi.</div>
+<pre><code><span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span> asDirtNotes to: #acid.</code></pre>
 
-      <div class="param-table-wrap"><table class="param-table">
-        <thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Token</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>N</td><td>Integer</td><td>Number of steps to generate</td></tr>
-          <tr><td>scale</td><td>Scale constant</td><td>e.g. <code>Scale pentatonicMajor</code>, <code>Scale sakura</code></td></tr>
-          <tr><td>octaves</td><td>Integer</td><td>Octave range to walk within</td></tr>
-          <tr><td>rootMidi</td><td>Integer</td><td>Root note as MIDI number (e.g. 48 = C3)</td></tr>
+          <tr><td><code>38</code></td><td>MIDI note 38, one step</td></tr>
+          <tr><td><code>c4</code></td><td>A note name — <code>asDirtNotes</code> accepts both</td></tr>
+          <tr><td><code>-</code> or <code>~</code></td><td>A rest, one step</td></tr>
+          <tr><td><code>-/8</code></td><td>A rest lasting 8 steps</td></tr>
+          <tr><td><code>56*2</code></td><td>Note 56, twice</td></tr>
+          <tr><td><code>,</code></td><td>Token separator</td></tr>
         </tbody>
-      </table></div>
+      </table>
+      </div>
 
-<pre><code><span class="cmt">"64-step random walk on Sakura scale, 2 octaves from C3"</span>
-<span class="num">64</span> randomTrigs
-    notes: (<span class="num">32</span> randomWalksOn: Scale sakura octaves: <span class="num">2</span> root: <span class="num">48</span>)
-    to: #psg.
+      <p>
+        <code>asDirtIndex</code> is the same notation but selects sample indices rather than
+        pitches, and can be combined with <code>notes:</code> to layer a pitch on top:
+      </p>
 
-<span class="cmt">"Minor pentatonic walk, 3 octaves"</span>
-<span class="num">16</span> quavers
-    notes: (<span class="num">16</span> randomWalksOn: Scale minorPentatonic octaves: <span class="num">3</span> root: <span class="num">36</span>)
-    to: #piano.</code></pre>
+<pre><code>(<span class="str">'1 , -/16 , 7 , -/9 , 12'</span> asDirtIndex
+   notes: <span class="str">'38 45 78 62 81'</span>) to: #speakspell.</code></pre>
 
       <div class="callout tip">
-        <span class="callout-icon">💡</span>
-        <span>Re-evaluate this line during a performance to generate a fresh melodic variation on the fly — no two evaluations produce the same walk.</span>
+        <span class="callout-title">Mondo or Dirt strings?</span>
+        Use <code>asDirtNotes</code> when you are thinking in steps and want explicit durations. Use
+        Mondo when you are thinking in cycles and want subdivision or per-cycle variation. They
+        coexist, and nothing stops you using both in one Performance.
       </div>
+    </section>
 
-      <!-- LEVEL -->
-      <h2 id="level">Dynamics — <code>level:</code></h2>
+    <!-- ======================================================= -->
+    <section id="random">
+      <h2>6. Randomness and walks</h2>
+
+      <p>Two kinds of randomness: in the rhythm, and in the pitch.</p>
+
+<pre><code><span class="cmt">"random gates — a new pattern on every evaluation"</span>
+<span class="num">16</span> randomTrigs to: #ch.
+
+<span class="cmt">"sparser: roughly 30% of steps"</span>
+(<span class="num">16</span> randomTrigsWithProbability: <span class="num">30</span>) to: #ch.</code></pre>
+
       <p>
-        Set per-trigger amplitude values by cascading <code>level:</code> on any sequencer.
-        Values are floats (0.0 – 1.0) and cycle across triggers.
+        For pitch, a <strong>random walk</strong> moves by one scale degree at a time rather than
+        jumping freely, which keeps a melody coherent instead of scattered:
       </p>
 
-      <div class="method-sig">sequencer to: #instrumentName; level: 'v1 v2 v3 ...'.</div>
+<pre><code>(<span class="num">16</span> randomWalksOn: <span class="cls">Scale</span> sakura octaves: <span class="num">2</span> root: <span class="num">60</span>)</code></pre>
 
-<pre><code><span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.8 0.4 0.3'</span>.
-
-#(<span class="num">1</span> <span class="num">0</span> <span class="num">1</span> <span class="num">0</span>) asSeq to: #snare; level: <span class="str">'1.0 0.5'</span>.
-<span class="cmt">"Alternates full and half velocity"</span>
-
-<span class="cmt">"Set level directly on a named instrument after routing"</span>
-#clap level: <span class="str">'0.3 0.1 0.4'</span>.</code></pre>
-
-      <!-- envMod -->
-      <h2 id="envMod">Envelope modulation — <code>envMod:</code></h2>
-      <p>
-        Available for SuperDirt instruments. Controls envelope modulation depth per step.
-        Cascades in the same way as <code>level:</code>.
-      </p>
-
-<pre><code><span class="str">'-/8 , 38 , 56*2 , -/4 , 41 , 66'</span>
-    asDirtNotes
-    to: #acid;
-    envMod: <span class="str">'0.8 0.2 0.3'</span>.</code></pre>
-
-      <hr class="section-divider">
-
-      <h2 id="chaining">Chaining all together</h2>
-      <p>Here is a complete performance sketch combining multiple advanced pattern techniques:</p>
-
-<pre><code>ep := EcoPhausto new.
-ep playFor: <span class="num">128</span> bars.
-
-<span class="cmt">"Kick: Euclidean 3-in-8"</span>
-#(<span class="num">3</span> <span class="num">8</span>) euclidean to: #kick.
-
-<span class="cmt">"Snare: hex pattern"</span>
-<span class="str">'020F'</span> hexBeat to: #snare.
-
-<span class="cmt">"Hi-hat: random triggers with swing dynamics"</span>
-<span class="num">16</span> randomTrigs to: #ch; level: <span class="str">'0.9 0.4 0.7 0.3'</span>.
-
-<span class="cmt">"Bass: notes on a named rhythm"</span>
-#cumbiaClave asRhythm notes: <span class="str">'36 36 43 36'</span> to: #bass.
-
-<span class="cmt">"Lead: random walk on pentatonic over 2 octaves"</span>
-<span class="num">16</span> randomTrigs
-    notes: (<span class="num">16</span> randomWalksOn: Scale pentatonicMajor octaves: <span class="num">2</span> root: <span class="num">60</span>)
-    to: #psg; level: <span class="str">'0.6'</span>.</code></pre>
-
-      <div class="page-nav">
-        <a href="rhythms-basics.html">
-          <span class="nav-dir">← Previous</span>
-          <span class="nav-title">Rhythm Basics</span>
-        </a>
-        <a href="performing.html" class="next">
-          <span class="nav-dir">Next →</span>
-          <span class="nav-title">Performance Control</span>
-        </a>
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Argument</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>receiver</td><td>How many notes to generate</td></tr>
+          <tr><td>randomWalksOn:</td><td>The scale to walk within, as an array of intervals</td></tr>
+          <tr><td>octaves:</td><td>How many octaves the walk may span</td></tr>
+          <tr><td>root:</td><td>The MIDI note the scale starts from</td></tr>
+        </tbody>
+      </table>
       </div>
 
-    </article>
+      <p>
+        The walk starts in the middle of the range and steps up or down on each note. Shorter forms
+        exist — <code>randomWalksOn:</code> alone, and <code>randomWalksOn:octaves:</code> — and the
+        whole family, along with the available scales, is covered in
+        <a href="melody.html">Melody &amp; Scales</a>.
+      </p>
 
-    <aside class="toc">
-      <div class="toc-label">On this page</div>
-      <ul>
-        <li><a href="#euclidean">Euclidean rhythms</a></li>
-        <li><a href="#euclidean-offset">— Offset</a></li>
-        <li><a href="#asDirtNotes">Dirt notes</a></li>
-        <li><a href="#asDirtIndex">Dirt index</a></li>
-        <li><a href="#notes">Adding notes</a></li>
-        <li><a href="#arpeggiate">Arpeggiation</a></li>
-        <li><a href="#randomWalk">Random walk</a></li>
-        <li><a href="#level">Dynamics — level:</a></li>
-        <li><a href="#envMod">Envelope modulation</a></li>
-        <li><a href="#chaining">Chaining all together</a></li>
-      </ul>
-    </aside>
+      <div class="callout warning">
+        <span class="callout-title">Random means random each evaluation, not each cycle</span>
+        <code>16 randomTrigs</code> produces one pattern when you evaluate the line, and that pattern
+        then loops unchanged. To keep it moving, re-evaluate the line — which, in a live set, is
+        exactly the gesture you want.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="melody.html">Melody &amp; Scales</a></td><td>Scales, chords and the generative melody tools.</td></tr>
+          <tr><td><a href="operators.html">Pattern Operators</a></td><td>Every conversion message, and what each notation compiles to.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>The named patterns these techniques transform.</td></tr>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>Complete patterns using all of this together.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4><code>#( 5 16 ) euclidean</code> does not sound like the bossa clave</h4>
+      <p>It is not meant to — Coypu's Bresenham variant gives a rotation. Use <code>16 bossa</code> — §1.1.</p>
+
+      <h4>A Mondo string raises an error about unbalanced brackets</h4>
+      <p>
+        Every <code>[</code> needs a <code>]</code> and every <code>&lt;</code> a <code>&gt;</code>;
+        Coypu checks this explicitly and reports the offending string. Count them — nesting is easy
+        to get wrong in a long pattern.
+      </p>
+
+      <h4>My Mondo alternation never changes</h4>
+      <p>
+        Alternations advance per <em>cycle</em>, not per step. If the transport has not completed a
+        cycle you will not hear it move — §4.2.
+      </p>
+
+      <h4>A Mondo pattern plays faster than my step patterns</h4>
+      <p>
+        Mondo fits its contents into one cycle, so more tokens means faster events, whereas a step
+        pattern's length sets its own duration. That is the fundamental difference between the two —
+        §4.
+      </p>
+
+      <h4><code>offset:</code> seemed to affect a pattern I had already routed</h4>
+      <p>It mutates the Sequencer in place rather than answering a copy — §2.</p>
+
+      <h4>My random pattern is not changing</h4>
+      <p>It is fixed at evaluation time and then loops. Re-evaluate the line — §6.</p>
+    </section>
+
+    <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
   </div>
 </div>
 
-
+<script src="coypu-nav.js"></script>
 <script src="sidebar-toggle.js"></script>
 </body>
 </html>

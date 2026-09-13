@@ -1,132 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coypu — Live Coding Music in Pharo</title>
-<link rel="stylesheet" href="coypu-shared.css">
-<style>
-  /* index-specific overrides */
-  .hero {
-    background: var(--ink);
-    color: var(--white);
-    padding: 4rem 3rem 3rem;
-    border-bottom: 2px solid var(--sage);
-  }
-  .hero h1 {
-    font-size: 2.6rem;
-    font-weight: 700;
-    letter-spacing: -.04em;
-    color: var(--white);
-    line-height: 1.1;
-    margin-bottom: .7rem;
-  }
-  .hero h1 span { color: var(--sage-light); }
-  .hero p {
-    color: #b8cbbf;
-    font-size: 1.05rem;
-    max-width: 540px;
-    margin-bottom: 1.6rem;
-  }
-  .hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
-  .btn {
-    display: inline-block;
-    padding: .6rem 1.3rem;
-    border-radius: var(--radius);
-    font-size: .9rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: opacity .15s, background .15s;
-  }
-  .btn-primary { background: var(--sage); color: var(--white); }
-  .btn-primary:hover { background: var(--sage-light); }
-  .btn-ghost { border: 1px solid rgba(255,255,255,.25); color: var(--cream); }
-  .btn-ghost:hover { background: rgba(255,255,255,.07); }
-
-  .index-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.2rem;
-    padding: 2.4rem 3rem;
-  }
-  .doc-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.3rem 1.4rem;
-    text-decoration: none;
-    color: var(--text);
-    transition: border-color .15s, box-shadow .15s;
-    display: block;
-  }
-  .doc-card:hover { border-color: var(--sage); box-shadow: 0 2px 12px rgba(78,124,95,.1); }
-  .doc-card .card-icon { font-size: 1.5rem; margin-bottom: .6rem; }
-  .doc-card .card-title { font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: .3rem; }
-  .doc-card .card-desc { font-size: .85rem; color: var(--muted); line-height: 1.5; }
-
-  .section-heading {
-    padding: 1.6rem 3rem .4rem;
-    font-size: .7rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 500;
-  }
-
-  .install-banner {
-    margin: 0 3rem 0;
-    background: var(--code-bg);
-    border-radius: var(--radius);
-    padding: 1rem 1.3rem;
-    border-left: 3px solid var(--sage);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .install-banner span { color: var(--muted); font-size: .8rem; }
-  .install-banner pre { margin: 0; padding: 0; background: none; border: none; flex: 1; }
-  .install-banner code { font-size: .82rem; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coypu — Live Coding Music in Pharo</title>
+  <link rel="stylesheet" href="coypu-shared.css">
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
-<body>
+<body data-page="index.html">
 
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <a href="index.html" class="logo-mark">🦫 <span>Coypu</span></a>
-    <p>Live Coding Music in Pharo</p>
-  </div>
-  <nav>
-    <div class="nav-section">
-      <div class="nav-label">Getting Started</div>
-      <a href="setup.html">Setup &amp; Installation</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Rhythm Reference</div>
-      <a href="rhythms-basics.html">Rhythm Basics</a>
-      <a href="rhythm-library.html">Rhythm Library</a>
-      <a href="rhythms-advanced.html">Advanced Patterns</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Performing</div>
-      <a href="performing.html">Performance Control</a>
-    </div>
-  </nav>
-  <div class="sidebar-footer">
-    <a href="https://github.com/lucretiomsp/Coypu" target="_blank">GitHub ↗</a>
-  </div>
-</aside>
+<nav class="sidebar" id="coypu-sidebar"><!-- injected by coypu-nav.js --></nav>
 
 <div class="main">
 
   <div class="hero">
     <h1>🦫 <span>Coypu</span><br>Live Coding Music in Pharo</h1>
     <p>
-      A compact, iconic syntax for programming music on the fly — send OSC to SuperDirt, Kyma, MIDI hardware,
-      or the built-in EcoPhausto engine. All from a Pharo Playground.
+      A compact, iconic syntax for programming music on the fly. Write a rhythm as one line, hear it
+      immediately, change it while it plays — and send it to SuperDirt, Kyma, Pure Data, MIDI
+      hardware or the built-in Phausto DSP engine, all from a Pharo Playground.
     </p>
     <div class="hero-actions">
-      <a href="setup.html" class="btn btn-primary">Get Started →</a>
-      <a href="https://github.com/lucretiomsp/Coypu" target="_blank" class="btn btn-ghost">GitHub ↗</a>
+      <a href="setup.html" class="btn btn-primary">Get started →</a>
+      <a href="rhythm-library.html" class="btn btn-ghost">Browse the rhythms</a>
+      <a href="https://github.com/lucretiomsp/coypu" target="_blank" rel="noopener" class="btn btn-ghost">GitHub ↗</a>
     </div>
   </div>
 
@@ -135,34 +32,56 @@
     <pre><code>Metacello new baseline: 'Coypu'; repository: 'github://lucretiomsp/coypu:master'; load</code></pre>
   </div>
 
-  <div class="section-heading">Documentation</div>
+  <div class="content index-body">
 
-  <div class="index-grid">
-    <a href="setup.html" class="doc-card">
-      <div class="card-icon">🚀</div>
-      <div class="card-title">Setup &amp; Installation</div>
-      <div class="card-desc">Install Coypu via Metacello, choose your audio backend, and make your first sound in minutes.</div>
-    </a>
-    <a href="rhythms-basics.html" class="doc-card">
-      <div class="card-icon">🥁</div>
-      <div class="card-title">Rhythm Basics</div>
-      <div class="card-desc">Create sequencers from binary arrays, named rhythms, hex patterns, and random triggers.</div>
-    </a>
-    <a href="rhythms-advanced.html" class="doc-card">
-      <div class="card-icon">🔁</div>
-      <div class="card-title">Advanced Patterns</div>
-      <div class="card-desc">Euclidean rhythms, SuperDirt note strings, scale-based random walks, and arpeggiation.</div>
-    </a>
-    <a href="performing.html" class="doc-card">
-      <div class="card-icon">🎛️</div>
-      <div class="card-title">Performance Control</div>
-      <div class="card-desc">Mute, solo, loop, save/restore, BPM, and global rhythm — live control on stage.</div>
-    </a>
+    <h2 id="what-is-coypu">What Coypu is</h2>
+    <p>
+      Coypu is a live-coding client: you describe patterns as Pharo expressions and it plays them,
+      continuously, while you keep editing. It does not make sound itself. It decides <em>when</em>
+      and <em>what</em> — a sound engine decides how that sounds.
+    </p>
+    <p>
+      That separation is the design. One pattern can drive a SuperCollider sampler, a Kyma
+      Paca(rana), a hardware synthesiser over MIDI, or a
+      <a href="../phaustoFloss/index.html">Phausto</a> instrument compiled inside your own image,
+      without being rewritten.
+    </p>
+
+    <h2 id="a-first-taste">A first taste</h2>
+    <p>Four lines: set a tempo, put a kick and a clave on two instruments, start the transport.</p>
+
+<pre><code><span class="cmt">"the Performance is the singleton holding every running pattern"</span>
+p := <span class="cls">Performance</span> uniqueInstance.
+p freq: <span class="num">132</span> bpm.
+
+<span class="cmt">"four-to-the-floor on the kick, Cuban son clave on the conga"</span>
+<span class="num">16</span> downbeats to: #kick.
+<span class="num">16</span> claveSon  to: #conga.
+
+p play.</code></pre>
+
+    <p>
+      Edit any of those lines and re-evaluate it while the transport runs. The change takes effect at
+      the next step; nothing is rebuilt and nothing stops.
+    </p>
+
+    <div class="callout tip">
+      <span class="callout-title">New here?</span>
+      Read <a href="setup.html">Setup &amp; Installation</a>, then
+      <a href="first-sounds.html">First Sounds</a>. If you would rather start from the rhythms
+      themselves, the <a href="rhythm-library.html">Rhythm Library</a> documents all 31 of them with
+      step patterns taken straight from the source.
+    </div>
+
+    <div id="coypu-index-grid"><!-- injected by coypu-nav.js --></div>
+
+    <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
   </div>
-
 </div>
 
-
+<script src="coypu-nav.js"></script>
 <script src="sidebar-toggle.js"></script>
 </body>
 </html>
