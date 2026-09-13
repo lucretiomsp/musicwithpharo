@@ -363,6 +363,13 @@ ${toc}        <li><a href="#reading">How to read these patterns</a></li>
       </ol>
     </nav>
 
+    <div class="callout tip">
+      <span class="callout-title">Looking for the long version?</span>
+      This page is the quick reference. <a href="rhythms-explained.html">The Rhythms Explained</a>
+      covers the same patterns at length — where each one comes from, how the clave family derives
+      from a single cell, and how to combine them.
+    </div>
+
     <div class="callout note">
       <span class="callout-title">Patterns are generated, not transcribed</span>
       Every step visualisation, onset list and grouping on this page is computed from the Coypu
@@ -409,9 +416,9 @@ ${body}
       <table>
         <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
         <tbody>
+          <tr><td><a href="rhythms-explained.html">The Rhythms Explained</a></td><td>The long version: origins, structure, and how to combine them.</td></tr>
           <tr><td><a href="rhythms-basics.html">Rhythms: Basics</a></td><td>How to build and route a rhythm in the first place.</td></tr>
           <tr><td><a href="rhythms-advanced.html">Rhythms: Advanced</a></td><td>Euclidean patterns, offsets and polymetre — generating rhythms rather than recalling them.</td></tr>
-          <tr><td><a href="melody.html">Melody &amp; Scales</a></td><td>Giving these patterns pitches.</td></tr>
           <tr><td><a href="performing.html">Performing</a></td><td>Running several of them at once, and changing them live.</td></tr>
         </tbody>
       </table>

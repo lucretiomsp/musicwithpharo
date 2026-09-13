@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coypu — The Rhythms Explained</title>
+  <link rel="stylesheet" href="coypu-shared.css">
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
+  <style>
+    .grouping { font-family: var(--mono); font-size: .8rem; color: var(--sage);
+                background: var(--sage-pale); padding: .1em .45em; border-radius: 3px; }
+    .rhythm-head { display: flex; justify-content: space-between; align-items: baseline;
+                   gap: .8rem; flex-wrap: wrap; margin: 1.8rem 0 .2rem; }
+    .rhythm-head h3 { margin: 0; }
+    .rhythm-head .meta { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
+                         color: var(--muted); white-space: nowrap; }
+  </style>
+</head>
+<body data-page="rhythms-explained.html">
+
+<nav class="sidebar" id="coypu-sidebar"><!-- injected by coypu-nav.js --></nav>
+
+<div class="main">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › The Rhythms Explained</div>
+    <h1>The Rhythms Explained</h1>
+  </div>
+
+  <div class="content">
+
+    <p class="lede">
+      Coypu's named rhythms are not decorative presets. Nearly all of them are <em>timelines</em>
+      from living traditions, and most are related to one another. This page explains where each one
+      comes from, how it is built, and what to do with it.
+    </p>
+
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#timelines">What a timeline is</a>
+          <ol>
+            <li><a href="#timelines-grouping">Reading a grouping</a></li>
+          </ol>
+        </li>
+        <li><a href="#clave">The clave family</a>
+          <ol>
+            <li><a href="#clave-tresillo">Tresillo — the seed</a></li>
+            <li><a href="#clave-cinquillo">Cinquillo, or banda</a></li>
+            <li><a href="#clave-son">Son clave</a></li>
+            <li><a href="#clave-rumba">Rumba clave</a></li>
+            <li><a href="#clave-tumbao">Habanera and tumbao</a></li>
+          </ol>
+        </li>
+        <li><a href="#puertorico">Puerto Rico</a></li>
+        <li><a href="#southamerica">South America</a></li>
+        <li><a href="#africa">West &amp; Central Africa</a>
+          <ol>
+            <li><a href="#africa-shiko">Shiko</a></li>
+            <li><a href="#africa-gahu">Gahu</a></li>
+            <li><a href="#africa-bembe">Bembé</a></li>
+            <li><a href="#africa-soukous">Soukous</a></li>
+            <li><a href="#africa-ashanti">Adowa and sikyi</a></li>
+          </ol>
+        </li>
+        <li><a href="#balkans">Balkans &amp; Anatolia</a></li>
+        <li><a href="#jungle">Jungle</a></li>
+        <li><a href="#metric">The metric family</a></li>
+        <li><a href="#together">Playing them together</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <div class="callout note">
+      <span class="callout-title">Patterns live in the Library</span>
+      This page explains; the <a href="rhythm-library.html">Rhythm Library</a> holds the data. Step
+      visualisations, onsets and groupings there are computed from the Coypu source, so they cannot
+      drift. The groupings quoted below are the same numbers, repeated for readability.
+    </div>
+
+    <!-- ======================================================= -->
+    <section id="timelines">
+      <h2>1. What a timeline is</h2>
+
+      <p>
+        Most of these rhythms are <strong>timelines</strong>, and the concept does not have a good
+        European equivalent. A timeline is a short, asymmetric pattern, usually struck on a bell or
+        two sticks, that repeats without variation for the entire duration of a piece. Everyone else
+        — drummers, dancers, singers — orients to it.
+      </p>
+
+      <p>
+        It is not a rhythm section keeping time in the Western sense, because it does not mark the
+        beat evenly. It is closer to a shared coordinate system. Its asymmetry is the point: because
+        the pattern is uneven, every position within it is distinguishable, so a player always knows
+        exactly where they are in the cycle. An even pattern could not do that.
+      </p>
+
+      <p>
+        This is why a timeline never develops, never fills, and never drops out. In Coypu terms it is
+        the part you set once and leave alone while everything else changes around it.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Practical consequence</span>
+        Put a timeline on a sound that cuts through — a clave, a rim, a bell, a cowbell — and keep
+        it quiet but audible. Then build everything else against it. Patterns that feel
+        directionless usually have no timeline, or have it buried.
+      </div>
+
+      <section id="timelines-grouping">
+        <h3>1.1 Reading a grouping</h3>
+
+        <p>
+          Throughout this page each rhythm is given by its <em>grouping</em>: the gaps between
+          successive strokes, wrapping round the cycle. Tresillo is
+          <span class="grouping">3+3+2</span> — a stroke, three steps later another, three later
+          another, and two steps back to the start.
+        </p>
+
+        <p>
+          The grouping tells you far more than the step count does. Two patterns of the same length
+          with different groupings are entirely different rhythms; two with the same grouping in a
+          different rotation are recognisably the same one. When you want to know what a rhythm
+          <em>feels</em> like, read its grouping.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="clave">
+      <h2>2. The clave family</h2>
+
+      <p>
+        Five of Coypu's rhythms belong to a single family, and they can be derived from one another.
+        Understanding the chain is worth more than memorising the five patterns, because it explains
+        why they sound related and when to substitute one for another.
+      </p>
+
+      <p>
+        <em>Clave</em> is Spanish for key or keystone — the piece that holds an arch together. In
+        Afro-Cuban practice it names both the pattern and the pair of hardwood sticks that play it.
+      </p>
+
+      <section id="clave-tresillo">
+        <div class="rhythm-head">
+          <h3>2.1 Tresillo — the seed</h3>
+          <span class="meta">8 steps · <span class="grouping">3+3+2</span></span>
+        </div>
+
+        <p>
+          Three strokes across eight pulses. Almost every other rhythm in this section can be read as
+          an elaboration of it, and it is probably the single most widespread rhythmic cell in the
+          Atlantic world: Cuban son, Puerto Rican bomba, Brazilian maxixe, the New Orleans second
+          line, and — essentially unchanged — modern reggaeton.
+        </p>
+
+        <p>
+          Its power is that 3+3+2 does not divide eight evenly. Two groups of three push against a
+          four-square pulse and the final two snap back into place, which produces tension and
+          resolution inside a single bar with no harmony involved at all.
+        </p>
+
+<pre><code><span class="num">8</span> tresillo to: #cp.</code></pre>
+      </section>
+
+      <section id="clave-cinquillo">
+        <div class="rhythm-head">
+          <h3>2.2 Cinquillo, or banda</h3>
+          <span class="meta">8 steps · <span class="grouping">2+1+2+1+2</span></span>
+        </div>
+
+        <p>
+          Take tresillo and fill the two gaps — add a stroke immediately after the first and the
+          second — and you have cinquillo: five strokes in eight. The relationship is exact:
+          cinquillo's strokes are tresillo's, plus two more.
+        </p>
+
+        <p>
+          Coypu calls it <code>banda</code>, and the name is worth dwelling on. The same pattern is
+          <em>cinquillo</em> in Cuba, <em>banda</em> in Haitian Vodou drumming, and part of
+          <em>moribayasa</em> among the Malinke of Guinea. Three names, three countries, one rhythm —
+          about as direct a trace of Atlantic circulation as a pattern can be.
+        </p>
+
+        <p>
+          Musically it is denser and more insistent than tresillo, and it swings where tresillo
+          drives. Substituting one for the other is the easiest way to change the character of a
+          groove without changing anything else.
+        </p>
+
+<pre><code><span class="num">8</span> banda to: #cp.</code></pre>
+      </section>
+
+      <section id="clave-son">
+        <div class="rhythm-head">
+          <h3>2.3 Son clave</h3>
+          <span class="meta">16 steps · <span class="grouping">3+3+4+2+4</span></span>
+        </div>
+
+        <p>
+          Now stretch to sixteen steps. The son clave's first half is <strong>exactly tresillo</strong>
+          — the same three strokes in the same places — and its second half answers with two.
+          That is the 3–2 orientation: three strokes then two.
+        </p>
+
+        <p>
+          This is the key pattern of Cuban son, and through son of salsa and most Afro-Cuban popular
+          music. Every part in an ensemble is described as being "in clave", meaning aligned to it,
+          and playing a phrase against the wrong orientation is a real error with a name — being
+          <em>cruzado</em>, crossed.
+        </p>
+
+        <p>
+          Reverse the halves and you get 2–3 clave, which is the same pattern rotated by eight steps.
+          In Coypu that is <code>offset:</code>:
+        </p>
+
+<pre><code><span class="num">16</span> claveSon to: #cp.              <span class="cmt">"3–2"</span>
+<span class="num">16</span> claveSon offset: <span class="num">8</span>; to: #cp.   <span class="cmt">"2–3"</span></code></pre>
+      </section>
+
+      <section id="clave-rumba">
+        <div class="rhythm-head">
+          <h3>2.4 Rumba clave</h3>
+          <span class="meta">16 steps · <span class="grouping">3+4+3+2+4</span></span>
+        </div>
+
+        <p>
+          One stroke different from the son clave. The third stroke moves from step 7 to step 8 — a
+          single pulse later — and that is the entire distinction.
+        </p>
+
+        <p>
+          The effect is out of all proportion to the change. Landing a half-pulse later puts that
+          stroke against the grain of the four-square pulse instead of just before it, which is what
+          gives rumba its harder, more forward-leaning feel. Son clave relaxes; rumba clave pushes.
+        </p>
+
+        <p>
+          Rumba clave belongs to the secular Afro-Cuban drumming complex — guaguancó, yambú,
+          columbia — which took shape in the solares, the tenement courtyards of Havana and Matanzas,
+          in the nineteenth century. Note that its first half is <em>not</em> tresillo, unlike the
+          son clave's.
+        </p>
+
+<pre><code><span class="num">16</span> rumba to: #cp.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Hear the difference</span>
+          Put one on a clave sound, run a kick underneath, and alternate the two lines while it
+          plays. One stroke is all that changes and the groove reorganises around it. This is the
+          single best listening exercise in the library.
+        </div>
+      </section>
+
+      <section id="clave-tumbao">
+        <div class="rhythm-head">
+          <h3>2.5 Habanera and tumbao</h3>
+          <span class="meta">8 steps · <span class="grouping">3+1+2+2</span></span>
+        </div>
+
+        <p>
+          The habanera cell: tresillo with the second stroke doubled. It is tresillo's 3+3+2 with the
+          middle three split into 1+2, which is why it sounds like a decorated version of the same
+          idea rather than a new one.
+        </p>
+
+        <p>
+          It travelled unusually far. From Cuban contradanza it went into Mexican danzón and
+          Argentine tango, and reached early jazz by way of New Orleans — Jelly Roll Morton's
+          "Spanish tinge" is this figure. Coypu names it <code>tumbao</code> after its later life as
+          the bass pattern of son and salsa, where the bass characteristically avoids the downbeat
+          and anticipates the next bar.
+        </p>
+
+        <p>It works better as a bass line than as a percussion timeline, which is what its name suggests:</p>
+
+<pre><code>(<span class="num">16</span> tumbao notes: #( <span class="num">36 36 43 41</span> )) to: #bass.</code></pre>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="puertorico">
+      <h2>3. Puerto Rico</h2>
+
+      <div class="rhythm-head">
+        <h3>Bomba</h3>
+        <span class="meta">8 steps · <span class="grouping">3+1+1+1+2</span></span>
+      </div>
+
+      <p>
+        One of the oldest African-derived genres in the Caribbean, developed by enslaved people on
+        Puerto Rico's sugar plantations. The grouping shows its character immediately: an opening gap
+        of three, then a cluster of single-step strokes, then two. Dense in the middle, open at the
+        edges.
+      </p>
+
+      <p>
+        What makes bomba unusual is that it inverts the normal hierarchy. The lead drum — the
+        <em>subidor</em> — follows the dancer rather than the dancer following the drum. The dancer
+        issues challenges with their movements and the drummer answers. It is a conversation with the
+        percussion in the responding role.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>Plena</h3>
+        <span class="meta">16 steps · <span class="grouping">3+2+3+3+2+3</span></span>
+      </div>
+
+      <p>
+        Plena is younger and urban — early twentieth-century Ponce — and was known as the
+        <em>periódico cantado</em>, the sung newspaper. Its songs carried news, gossip and political
+        commentary through neighbourhoods, which made it both popular entertainment and a genuine
+        medium of communication.
+      </p>
+
+      <p>
+        It is played on <em>panderos</em>, hand-held frame drums of different sizes. The grouping is
+        palindromic — 3+2+3 then 3+2+3 — which gives it a rocking, balanced quality quite unlike the
+        clave patterns' asymmetry.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title"><code>16 bomba:</code> raises an error</span>
+        The note-taking variant of <code>bomba</code> is broken in the Coypu source — it never
+        assigns its pattern. Plain <code>16 bomba</code> is fine; add notes with
+        <code>notes:</code> instead.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="southamerica">
+      <h2>4. South America</h2>
+
+      <div class="rhythm-head">
+        <h3>Bossa nova clave</h3>
+        <span class="meta">16 steps · <span class="grouping">3+3+3+3+4</span></span>
+      </div>
+
+      <p>
+        The most evenly spread pattern in the library: four gaps of three and one of four, which is
+        as close to equal as five strokes can get in sixteen steps. That even-ness is exactly what
+        makes it the textbook example of a Euclidean rhythm.
+      </p>
+
+      <p>
+        It comes from Rio de Janeiro in the late 1950s, and is essentially João Gilberto's reduction
+        of samba to a guitar part — samba's density stripped back to its skeleton. The restraint is
+        the style: bossa nova is samba played quietly.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Not the same as <code>#(5 16) euclidean</code></span>
+        Bossa <em>is</em> E(5,16) in the standard Bjorklund sense, but Coypu's <code>euclidean</code>
+        uses a Bresenham variant that produces a rotation of it. For the clave itself use
+        <code>16 bossa</code> — see <a href="rhythms-advanced.html">Rhythms: Advanced §1.1</a>.
+      </div>
+
+      <div class="rhythm-head">
+        <h3>Cumbia clave</h3>
+        <span class="meta">16 steps · <span class="grouping">4+2+2+4+2+2</span></span>
+      </div>
+
+      <p>
+        From Colombia's Caribbean coast, and a genuine three-way fusion: Indigenous gaita flutes,
+        African drumming, and European song forms. Its grouping repeats — 4+2+2, twice — so it is
+        really an eight-step idea stated twice rather than a sixteen-step pattern, which gives it a
+        steadier, more circular feel than the claves.
+      </p>
+
+      <p>
+        Cumbia became the most widely exported rhythm in Latin America, taking root across the
+        continent and generating regional variants everywhere it landed.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="africa">
+      <h2>5. West &amp; Central Africa</h2>
+
+      <p>
+        These are the traditions the Caribbean patterns descend from. The bell timelines here do the
+        same job the claves do, and several are structurally close to them.
+      </p>
+
+      <section id="africa-shiko">
+        <div class="rhythm-head">
+          <h3>5.1 Shiko</h3>
+          <span class="meta">16 steps · <span class="grouping">4+2+4+2+4</span></span>
+        </div>
+
+        <p>
+          Perfectly palindromic: four, two, four, two, four. Of all the sixteen-step patterns here it
+          is the most regular, and the easiest to hold onto — which is precisely what you want from a
+          timeline that has to stay audible under a dense ensemble.
+        </p>
+
+        <p>
+          It is widespread in West African practice and travelled into Caribbean music alongside the
+          clave family. Because it alternates long and short gaps rather than pushing against the
+          pulse, it drives less than a clave and anchors more. Use it when a groove needs a
+          foundation rather than tension.
+        </p>
+      </section>
+
+      <section id="africa-gahu">
+        <div class="rhythm-head">
+          <h3>5.2 Gahu</h3>
+          <span class="meta">16 steps · <span class="grouping">3+3+4+4+2</span></span>
+        </div>
+
+        <p>
+          From the Ewe people of Ghana, Togo and Benin. Gahu is a twentieth-century recreational
+          dance, said to have been brought home by Ewe traders returning from Nigeria — a reminder
+          that these traditions are living and still absorbing material, not frozen survivals.
+        </p>
+
+        <p>
+          Its first two gaps are threes, like the son clave, but it then opens into two fours before
+          a short two closes the cycle. The effect is of a pattern that starts urgently and relaxes,
+          the opposite shape to most claves.
+        </p>
+      </section>
+
+      <section id="africa-bembe">
+        <div class="rhythm-head">
+          <h3>5.3 Bembé</h3>
+          <span class="meta">16 steps · <span class="grouping">3+3+2+3+3+2</span></span>
+        </div>
+
+        <p>
+          This one needs a caveat, and it is an interesting one. In Afro-Cuban practice
+          <em>bembé</em> names a Yoruba-derived ceremonial music, and its bell pattern is normally a
+          seven-stroke timeline in <strong>twelve</strong> pulses — a ternary feel, grouped in
+          threes.
+        </p>
+
+        <p>
+          What Coypu implements is Godfried Toussaint's sixteen-pulse reinterpretation: six strokes
+          distributed as evenly as possible across sixteen steps. The grouping shows it clearly —
+          3+3+2, twice. It keeps the syncopation of the traditional pattern while fitting a binary
+          grid.
+        </p>
+
+        <p>
+          It is an adaptation rather than the original, and worth knowing as such. It is also the one
+          rhythm here you can reproduce exactly with Coypu's Euclidean generator:
+        </p>
+
+<pre><code><span class="num">16</span> bembe to: #bell.
+#( <span class="num">6 16</span> ) euclidean to: #bell.   <span class="cmt">"identical"</span></code></pre>
+      </section>
+
+      <section id="africa-soukous">
+        <div class="rhythm-head">
+          <h3>5.4 Soukous</h3>
+          <span class="meta">16 steps · <span class="grouping">3+3+4+1+5</span></span>
+        </div>
+
+        <p>
+          The odd one out, and deliberately so: a single-step gap followed by a five-step gap, right
+          at the end of the cycle. Those two adjacent strokes are what give soukous its forward
+          lurch — the pattern trips and then has to wait.
+        </p>
+
+        <p>
+          Soukous itself is a story of round trips. Cuban records were imported into Kinshasa and
+          Brazzaville in the 1940s and 50s; Congolese musicians took the son they heard, played it on
+          electric guitars, and sent back a style that swept the whole continent. The Cuban material
+          was itself Congolese in origin, several centuries earlier.
+        </p>
+      </section>
+
+      <section id="africa-ashanti">
+        <div class="rhythm-head">
+          <h3>5.5 Adowa and sikyi</h3>
+          <span class="meta">8 steps · <span class="grouping">2+2+4</span></span>
+        </div>
+
+        <p>
+          Two Ashanti dances from Ghana. <strong>Adowa</strong> is funeral and ceremonial music,
+          played on <em>atumpan</em> talking drums with a bell; <strong>sikyi</strong> is a
+          recreational dance, lighter in function and social in setting.
+        </p>
+
+        <p>
+          The pattern is back-weighted — its strokes fall in the second half of the cycle, leaving
+          the first half empty, so it pulls toward the downbeat that follows rather than marking the
+          one it starts on. Against a kick on the downbeat that produces a strong
+          question-and-answer feel.
+        </p>
+
+        <div class="callout note">
+          <span class="callout-title">They are the same pattern</span>
+          In the current Coypu source <code>adowa</code> and <code>sikyi</code> carry identical
+          arrays, so the two selectors sound the same. The distinction is documentary — what the
+          music is <em>for</em> — rather than rhythmic.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="balkans">
+      <h2>6. Balkans &amp; Anatolia</h2>
+
+      <p>
+        These two work on a different principle from everything above. Instead of subdividing a bar
+        evenly and placing strokes within it, they build the bar by <em>adding</em> unequal groups —
+        a two, a two, a three. This is additive metre, and it is the norm across the Balkans, Turkey,
+        Greece and much of the Middle East.
+      </p>
+
+      <p>
+        <em>Aksak</em> is Turkish for "limping", which describes the feel exactly: a cycle that never
+        settles into evenness because it is not made of equal parts.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>Aksak</h3>
+        <span class="meta">10 steps · <span class="grouping">2+4+4</span></span>
+      </div>
+
+      <p>
+        Coypu's source calls this a <em>pseudo</em> aksak, and the description is fair — three
+        strokes across ten pulses captures the unevenness without reproducing any specific
+        traditional metre. Ten steps means it will not line up with anything on a sixteen-step grid,
+        which is itself useful.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>True aksak</h3>
+        <span class="meta">13 steps · <span class="grouping">2+2+2+3+2+2</span></span>
+      </div>
+
+      <p>
+        This one is the real thing: thirteen pulses grouped 2+2+2+3+2+2. Five groups of two and a
+        single three, and that lone three is where the limp is. You feel the cycle proceeding evenly
+        and then stretching, once, before it comes round.
+      </p>
+
+      <p>
+        Thirteen is prime, so it shares no factor with any power-of-two grid. Running it against a
+        sixteen-step part gives you a relationship that takes 208 steps to repeat.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Give them their own lengths</span>
+        <code>16 trueAksak</code> truncates a thirteen-step pattern mid-cycle every time round, which
+        destroys exactly the quality you wanted. Use <code>13</code>, <code>26</code>,
+        <code>39</code> — and <code>10</code> or <code>20</code> for <code>aksak</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="jungle">
+      <h2>7. Jungle</h2>
+
+      <p>
+        Three parts of one kit, all thirty-two steps long. Jungle emerged in London in the early
+        1990s out of hardcore rave, and its method was distinctive: take a handful of funk
+        breakbeats — above all the Amen break, six seconds of drumming from a 1969 B-side — chop them
+        into fragments, and resequence them at very high tempo over slow, dub-derived basslines.
+      </p>
+
+      <p>
+        The result runs at two speeds at once. The drums are frantic; the bass and the harmonic
+        rhythm move at half time or slower. That doubling is the genre's signature, and it is why
+        these patterns are 32 steps rather than 16.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>jungleKick</h3>
+        <span class="meta">32 steps · <span class="grouping">4+28</span></span>
+      </div>
+
+      <p>
+        Two strokes in thirty-two, right at the start, and then nothing. The kick is this sparse
+        because in jungle the breakbeat carries the motion — the kick marks the top of the cycle and
+        gets out of the way.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>jungleSnare</h3>
+        <span class="meta">32 steps · <span class="grouping">6+6+6+14</span></span>
+      </div>
+
+      <p>
+        Three evenly spaced strokes and then a long gap. Against a 32-step cycle those snares land
+        well away from where a backbeat would sit, which is what produces the lurching, displaced
+        feel — the ear keeps trying to hear them as beats two and four and cannot.
+      </p>
+
+      <div class="rhythm-head">
+        <h3>jungleRim</h3>
+        <span class="meta">32 steps · <span class="grouping">2+4+2+4+2+4+2+12</span></span>
+      </div>
+
+      <p>
+        The busiest of the three: eight strokes in alternating twos and fours, clustered in the
+        second half. This is the ghost-note layer, the chopped-break detail that fills the space the
+        kick and snare leave.
+      </p>
+
+<pre><code>p freq: <span class="num">170</span> bpm.
+<span class="num">32</span> jungleKick  to: #bd.
+<span class="num">32</span> jungleSnare to: #sn.
+<span class="num">32</span> jungleRim   to: #rim.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Run all three, at speed</span>
+        Individually they sound sparse and odd. Together at 160–175 BPM they become a kit. Jungle
+        is a genre of relationships between parts, not of individually interesting patterns.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="metric">
+      <h2>8. The metric family</h2>
+
+      <p>
+        Nine of Coypu's rhythms are not world rhythms at all — they are note values and grid
+        divisions. They need less explanation, but they are the ones you will use most.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Rhythm</th><th>What it is</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td>downbeats</td><td>Every fourth step</td><td>Four-to-the-floor. House, techno, disco</td></tr>
+          <tr><td>upbeats</td><td>The third of each group of four</td><td>Offbeat hats against a kick</td></tr>
+          <tr><td>quavers</td><td>Eighth notes</td><td>A hat bed with room left in it</td></tr>
+          <tr><td>semiquavers</td><td>Every step</td><td>Dense sixteenth-note parts</td></tr>
+          <tr><td>trigs</td><td>Every step — same output as semiquavers</td><td>When you mean "fire constantly" rather than a note value</td></tr>
+          <tr><td>rests</td><td>Nothing</td><td>Holding a slot silently, or a blank to fill in</td></tr>
+          <tr><td>wholes</td><td>One trigger per bar, 16-step duration</td><td>Pads and sustained notes</td></tr>
+          <tr><td>semibreves</td><td>One per bar, 32-step duration</td><td>Longer sustains</td></tr>
+          <tr><td>breves</td><td>One per 32 steps</td><td>Very long notes</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        <code>downbeats</code> and <code>upbeats</code> are complements, which makes them the
+        obvious pair: kick on one, hat on the other, and you have the basic dance-music skeleton in
+        two lines.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Two things that surprise people</span>
+        The receiver is a <strong>step count, not a trigger count</strong> — <code>8 quavers</code>
+        gives four triggers, not eight. And <code>semibreves</code> and <code>wholes</code> name the
+        same note value but are not identical in Coypu: both fire once per sixteen steps, yet
+        <code>semibreves</code> sets a 32-step duration. For a note that lasts exactly its bar, use
+        <code>wholes</code>.
+      </div>
+
+      <p>
+        The remaining two, <code>randomTrigs</code> and
+        <code>randomTrigsWithProbability:</code>, generate a fresh pattern on every evaluation. They
+        are the quickest way to get something moving, and re-evaluating the line is itself a
+        performance gesture.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="together">
+      <h2>9. Playing them together</h2>
+
+      <p>Four principles that follow from everything above.</p>
+
+      <div class="steps">
+        <div class="step"><strong>One timeline, and leave it alone.</strong> These patterns were designed to be the invariant reference. Two competing claves fight; one clave with everything else moving around it works.</div>
+        <div class="step"><strong>Match lengths, or mismatch them deliberately.</strong> 8, 16 and 32 interlock. 10 and 13 do not, and will not for a long time — which is either the effect you want or a mistake.</div>
+        <div class="step"><strong>Pair a dense pattern with a sparse one.</strong> Cinquillo against tresillo, or jungleRim against jungleKick. Two dense patterns become mud; two sparse ones leave a hole.</div>
+        <div class="step"><strong>Substitute within a family.</strong> Son clave and rumba clave, tresillo and cinquillo, adowa and shiko — swapping one for a relative changes the feel without breaking the arrangement.</div>
+      </div>
+
+      <p>A worked example using nothing but rhythms from this page:</p>
+
+<pre><code>p freq: <span class="num">126</span> bpm.
+
+<span class="num">16</span> tumbao   to: #bd.      <span class="cmt">"habanera bass drum"</span>
+<span class="num">16</span> claveSon to: #cp.      <span class="cmt">"the timeline — set and forget"</span>
+<span class="num">16</span> shiko    to: #hh.      <span class="cmt">"steady bell underneath"</span>
+<span class="num">8</span>  tresillo to: #perc.    <span class="cmt">"the seed, twice per cycle"</span>
+
+p play.
+
+<span class="cmt">"then, while it plays — one stroke changes"</span>
+<span class="num">16</span> rumba to: #cp.</code></pre>
+
+      <p>
+        Four patterns from one tradition, three of them structurally related, and a final line that
+        alters the feel of the whole thing by moving a single stroke.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>10. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>The same 31 rhythms as a filterable reference, with step visualisations.</td></tr>
+          <tr><td><a href="rhythms-basics.html">Rhythms: Basics</a></td><td>How to build and route these patterns.</td></tr>
+          <tr><td><a href="rhythms-advanced.html">Rhythms: Advanced</a></td><td>Euclidean generation, offsets and Mondo notation.</td></tr>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>Complete patterns using these together.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>11. Troubleshooting</h2>
+
+      <h4>My clave and my kick keep colliding</h4>
+      <p>
+        A timeline wants space. Thin the kick — <code>tumbao</code> or <code>downbeats</code> rather
+        than something busy — and keep the clave quiet but present. §1.
+      </p>
+
+      <h4>The aksak patterns sound broken</h4>
+      <p>
+        They are being truncated. Give <code>trueAksak</code> a multiple of 13 and
+        <code>aksak</code> a multiple of 10 — §6.
+      </p>
+
+      <h4>Everything sounds like it is in the wrong place</h4>
+      <p>
+        Try the other clave orientation: <code>offset: 8</code> flips 3–2 to 2–3, and a phrase that
+        felt wrong often simply needed the other one — §2.3.
+      </p>
+
+      <h4>The jungle patterns sound thin</h4>
+      <p>They are meant to run together, at 160–175 BPM, all three at once — §7.</p>
+
+      <h4>Two of these rhythms sound identical</h4>
+      <p>
+        <code>adowa</code> and <code>sikyi</code> are identical in the current source, as are
+        <code>semiquavers</code> and <code>trigs</code> — §5.5, §8.
+      </p>
+
+      <h4>Which one should I start with?</h4>
+      <p>
+        <code>claveSon</code> on a clave sound and <code>downbeats</code> on a kick. Then swap the
+        clave for <code>rumba</code> and listen — §2.4.
+      </p>
+    </section>
+
+    <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
+    <p class="edit-link"><!-- injected --></p>
+
+  </div>
+</div>
+
+<script src="coypu-nav.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

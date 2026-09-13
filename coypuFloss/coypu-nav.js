@@ -22,6 +22,8 @@ const COYPU_PAGES = [
     desc: 'Binary arrays, named rhythms, hex beats, and routing a Sequencer to an instrument.' },
   { category: 'Guides', title: 'Rhythms: Advanced',                href: 'rhythms-advanced.html',
     desc: 'Euclidean patterns, offsets, polymetre, Mondo mini-notation and random walks.' },
+  { category: 'Guides', title: 'The Rhythms Explained',            href: 'rhythms-explained.html',
+    desc: 'Where each named rhythm comes from, how it is built, and how to use it musically.' },
   { category: 'Guides', title: 'Melody & Scales',                  href: 'melody.html',
     desc: 'Notes, scales, chords, arpeggios and the generative melody tools.' },
   { category: 'Guides', title: 'Effects & Mixing',                 href: 'effects.html',
