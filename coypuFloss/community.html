@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — Community</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="community.html">
 
@@ -19,12 +19,273 @@
 
   <div class="content">
 
-    <p class="lede">Where to ask, how to report a bug, and how to contribute.</p>
+    <p class="lede">
+      Where the code lives, where to ask, and how to report something in a way that gets it fixed.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#project">The project</a>
+          <ol>
+            <li><a href="#project-family">The wider family</a></li>
+          </ol>
+        </li>
+        <li><a href="#asking">Where to ask</a></li>
+        <li><a href="#reporting">Reporting a problem</a></li>
+        <li><a href="#contributing">Contributing</a>
+          <ol>
+            <li><a href="#contributing-docs">To this manual</a></li>
+            <li><a href="#contributing-rhythms">Adding a rhythm</a></li>
+          </ol>
+        </li>
+        <li><a href="#credit">Credit where it is due</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="project">
+      <h2>1. The project</h2>
+
+      <p>
+        Coypu is written by <strong>Domenico Cipriani</strong>, who performs and publishes as
+        <em>Lucretio</em>. It has been public since January 2021 and was originally built to drive
+        SymbolicSound Kyma over OSC.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Resource</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/lucretiomsp/coypu">lucretiomsp/coypu</a></td><td>The source, on branch <code>master</code></td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/coypu/issues">Issues</a></td><td>Bug reports and feature discussion</td></tr>
+          <tr><td><a href="https://lucretiomsp.github.io/musicwithpharo/">Music with Pharo</a></td><td>This site, with a development blog</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <section id="project-family">
+        <h3>1.1 The wider family</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Package</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://github.com/lucretiomsp/coypu">Coypu</a></td><td>Patterns and sequencing — this manual</td></tr>
+            <tr><td><a href="https://github.com/lucretiomsp/phausto">Phausto</a></td><td>The DSP engine Coypu can drive. <a href="../phaustoFloss/index.html">Its manual</a></td></tr>
+            <tr><td><a href="https://github.com/pharo-contributions/pharo-sound">Pharo-Sound</a></td><td>MIDI send and receive via PortMidi</td></tr>
+            <tr><td><a href="https://github.com/lucretiomsp/MasterLu">MasterLu</a></td><td>An in-image tutorial, currently covering Phausto</td></tr>
+            <tr><td><a href="https://github.com/pharo-graphics/CoypuIDE">CoypuIDE</a></td><td>Editor and browser tooling for live coding</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Beyond Pharo, Coypu sits in the live-coding tradition alongside
+          <a href="https://tidalcycles.org/">TidalCycles</a>, which its string notation is modelled
+          on, and can drive <a href="https://github.com/musikinformatik/SuperDirt">SuperDirt</a>,
+          the sampler most of that community uses.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="asking">
+      <h2>2. Where to ask</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Question</th><th>Best place</th></tr></thead>
+        <tbody>
+          <tr><td>Something in Coypu is broken</td><td><a href="https://github.com/lucretiomsp/coypu/issues">Coypu issues</a></td></tr>
+          <tr><td>A DSP or synthesis question</td><td><a href="https://github.com/lucretiomsp/phausto/issues">Phausto issues</a>, or <a href="../phaustoFloss/community.html">its community page</a></td></tr>
+          <tr><td>A general Pharo question</td><td><a href="https://discord.gg/QewZMZa">Pharo Discord</a> or <a href="https://discourse.pharo.org/">Pharo Discourse</a></td></tr>
+          <tr><td>A SuperDirt or SuperCollider question</td><td>The SuperCollider forum and the TidalCycles community</td></tr>
+          <tr><td>An error on this page</td><td>The edit link at the foot of it</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Work out which layer first</span>
+        A silent pattern can be Coypu not sending, or the backend not receiving. Switching to
+        <code>PerformerSuperDirt</code> and trying <code>16 downbeats to: #bd</code> is the quickest
+        way to find out which half is at fault.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="reporting">
+      <h2>3. Reporting a problem</h2>
+
+      <p>
+        Coypu is maintained by one person. A report that reproduces in thirty seconds is far more
+        likely to be fixed than one that needs a conversation first.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Include</th><th>Because</th></tr></thead>
+        <tbody>
+          <tr><td>A minimal snippet</td><td>The shortest pattern that shows the problem, ready to paste</td></tr>
+          <tr><td>Pharo version</td><td>11, 12 and 13 are all supported and can differ</td></tr>
+          <tr><td>Which Performer</td><td>Most behaviour is backend-specific</td></tr>
+          <tr><td>How Coypu was installed</td><td>Metacello from which commit, or the Pharo Music image</td></tr>
+          <tr><td>Expected versus actual</td><td>Silence, an exception and the wrong sound are three different bugs</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Check the known quirks first</span>
+        Several surprising behaviours are already documented in
+        <a href="changelog.html">Changelog §3</a> — <code>unmute:</code> restoring everything,
+        <code>squiz:</code> setting the reverb, <code>bomba:</code> raising. If yours is on that
+        list, it is known.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="contributing">
+      <h2>4. Contributing</h2>
+
+      <section id="contributing-docs">
+        <h3>4.1 To this manual</h3>
+
+        <p>
+          Every page has an <strong>Edit this page on GitHub</strong> link at the foot, which opens
+          the source directly in GitHub's editor. A typo fix is a two-minute pull request.
+        </p>
+
+        <div class="steps">
+          <div class="step"><strong>Corrections</strong> — a selector that does not exist, a pattern that does not match the source, a snippet that no longer runs.</div>
+          <div class="step"><strong>Ethnomusicology</strong> — the <a href="rhythm-library.html">Rhythm Library</a> notes are curated by hand. Corrections from people who play these traditions are especially welcome.</div>
+          <div class="step"><strong>Troubleshooting entries</strong> — if something confused you it will confuse the next person. Symptom-first phrasing, one or two sentences.</div>
+          <div class="step"><strong>Gallery patterns</strong> — short, runnable, verified against the current package.</div>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Two files are generated</span>
+          <code>rhythm-library.html</code> comes from
+          <code>_tools/generate-rhythm-library.cjs</code>, and navigation from
+          <code>coypu-nav.js</code>. Editing either page by hand will be overwritten — change the
+          generator or the nav array instead.
+        </div>
+      </section>
+
+      <section id="contributing-rhythms">
+        <h3>4.2 Adding a rhythm</h3>
+
+        <p>
+          A new rhythm is an <code>Integer</code> extension carrying the
+          <code>&lt;rhythmCreation&gt;</code> pragma, which is what puts it in
+          <code>Rhythm list</code> and in this manual:
+        </p>
+
+<pre><code><span class="cmt">"Integer >> myRhythm"</span>
+<span class="str">" a one-line comment describing the rhythm and its origin"</span>
+
+&lt;rhythmCreation&gt;
+&lt;onTheFlyEssentials&gt;
+| pattern |
+pattern := #( <span class="num">1 0 0 1 0 1 0 0</span> ).
+
+^ ((<span class="num">0</span> to: self - <span class="num">1</span>) collect: [ :i |
+     pattern at: (i rem: pattern size) + <span class="num">1</span> ]) asRhythm asSeq</code></pre>
+
+        <p>
+          Then rerun the generator and the rhythm appears with its pattern, onsets and grouping
+          computed automatically. Add an entry to <code>NOTES</code> in the generator for the prose,
+          and to <code>REGIONS</code> for where it belongs — the generator warns about any rhythm
+          not placed in a region.
+        </p>
+
+        <div class="callout tip">
+          <span class="callout-title">Say where it comes from</span>
+          The most valuable part of a rhythm contribution is not the array — it is knowing which
+          tradition it belongs to, what it is called there, and what it is for. That is the part
+          nobody can derive from the source.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="credit">
+      <h2>5. Credit where it is due</h2>
+
+      <p>
+        Coypu's rhythm library is a collection of other people's music. The patterns come from living
+        traditions with their own names, functions and practitioners, and the library is a pointer to
+        them rather than a substitute.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Whose work</th><th>What it gave us</th></tr></thead>
+        <tbody>
+          <tr><td>Afro-Cuban, Puerto Rican, Haitian and Brazilian musicians</td><td>The clave family and its relatives — the majority of the library</td></tr>
+          <tr><td>Ashanti, Ewe, Yoruba and Congolese traditions</td><td>The bell timelines those patterns descend from</td></tr>
+          <tr><td>Balkan and Anatolian musicians</td><td>The additive metres</td></tr>
+          <tr><td>Godfried Toussaint</td><td>The Euclidean analysis, and the 16-pulse bembé adaptation Coypu implements</td></tr>
+          <tr><td>The TidalCycles community</td><td>The mini-notation tradition Mondo follows</td></tr>
+          <tr><td>SymbolicSound</td><td>Kyma and Capytalk, which Coypu was first written for and named after</td></tr>
+          <tr><td>The Pharo community</td><td>The live image that makes editing while it plays possible</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        If you use Coypu in a performance, a release or a paper, crediting Coypu is appreciated —
+        and hearing about it more so.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="faq.html">FAQ</a></td><td>Short answers before you open an issue.</td></tr>
+          <tr><td><a href="changelog.html">Changelog</a></td><td>Known quirks and how to pin a version.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>The collection this page is about crediting.</td></tr>
+          <tr><td><a href="api.html">Player &amp; Message API</a></td><td>Background before filing a deep bug.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>Is my problem Coypu or the backend?</h4>
+      <p>Try a known-good pattern on SuperDirt — §2.</p>
+
+      <h4>My issue has had no reply</h4>
+      <p>
+        The project is maintained by one person alongside other work. A minimal reproducible snippet
+        is the single biggest thing that speeds up a response — §3.
+      </p>
+
+      <h4>I found a mistake in this manual</h4>
+      <p>Use the edit link at the foot of the page — §4.1.</p>
+
+      <h4>I edited rhythm-library.html and my change vanished</h4>
+      <p>It is generated. Change the generator — §4.1.</p>
+
+      <h4>I know one of these rhythms is misdescribed</h4>
+      <p>
+        Please say so. The patterns are verified against source, but the prose about origins is
+        curated and is exactly where an error would hide — §4.1.
+      </p>
+
+      <h4>Can I use Coypu commercially?</h4>
+      <p>
+        The repository carries no licence file at present. Ask the author before assuming either way.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

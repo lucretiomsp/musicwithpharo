@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coypu — Phausto & MIDI</title>
+  <title>Coypu — Phausto &amp; MIDI</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="phausto-midi.html">
 
@@ -13,18 +13,341 @@
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Phausto & MIDI</div>
-    <h1>Phausto & MIDI</h1>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Phausto &amp; MIDI</div>
+    <h1>Phausto &amp; MIDI</h1>
   </div>
 
   <div class="content">
 
-    <p class="lede">Driving the Phausto DSP engine, external MIDI hardware, Kyma and Pure Data.</p>
+    <p class="lede">
+      What actually leaves Coypu when a step triggers. Five Performers, five wire formats — and the
+      details that decide whether your instrument names line up with the other end.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#performer">The Performer contract</a></li>
+        <li><a href="#phausto">Phausto</a>
+          <ol>
+            <li><a href="#phausto-destinations">Gate and note destinations</a></li>
+          </ol>
+        </li>
+        <li><a href="#superdirt">SuperDirt</a></li>
+        <li><a href="#midi">MIDI hardware</a>
+          <ol>
+            <li><a href="#midi-clock">Clock and transport</a></li>
+          </ol>
+        </li>
+        <li><a href="#kyma">Kyma</a></li>
+        <li><a href="#local">Generic OSC</a></li>
+        <li><a href="#ports">Ports at a glance</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="performer">
+      <h2>1. The Performer contract</h2>
+
+      <p>
+        A Performer is an adapter. The transport walks the steps and, on each trigger, hands the
+        Sequencer and an index to the Performer's <code>playEventAt:in:</code>. Everything
+        backend-specific lives behind that one method.
+      </p>
+
+<pre><code>p performer: <span class="cls">PerformerSuperDirt</span> new.</code></pre>
+
+      <p>Two details of the contract are worth knowing because they shape what you can express:</p>
+
+      <div class="steps">
+        <div class="step"><strong>Values wrap independently.</strong> Notes, durations, gate times and every effect parameter are read with <code>wrap:</code> at the note index, so each can have its own length.</div>
+        <div class="step"><strong>The note index advances only on triggers.</strong> A rest does not consume a note, which is why a four-note list over a five-trigger rhythm rotates rather than stalling.</div>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Default note differs by backend</span>
+        <code>PerformerSuperDirt</code> defaults to note <strong>0</strong> — a sample index —
+        while the others default to <strong>60</strong>, a pitch. That is why a bare rhythm plays
+        the first sample in a folder on SuperDirt but middle C everywhere else.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="phausto">
+      <h2>2. Phausto</h2>
+
+      <p>
+        The only backend with no network hop: Coypu writes directly into a DSP compiled inside the
+        same image. Set up the rack, then point the Performance at it:
+      </p>
+
+<pre><code><span class="cls">TurboPhausto</span> start.
+tp := <span class="cls">TurboPhausto</span> new.
+
+p := <span class="cls">Performance</span> uniqueInstance.
+p performer: <span class="cls">PerformerPhausto</span> new.
+p activeDSP: tp.</code></pre>
+
+      <p>
+        On each trigger Coypu converts the note to a frequency with <code>midiNoteToFreq</code>,
+        writes it to the DSP, then fires the gate for
+        <code>duration × step-length × gateTime</code> seconds.
+      </p>
+
+      <section id="phausto-destinations">
+        <h3>2.1 Gate and note destinations</h3>
+
+        <p>
+          A Phausto Sequencer carries two lists of parameter names —
+          <code>phaustoGateDestinations</code> and <code>phaustoNoteDestinations</code> — saying
+          which DSP parameters to drive. The string notations fill these in automatically, appending
+          <code>Trigger</code> and <code>Freq</code> to each sound name:
+        </p>
+
+<pre><code><span class="str">'bd sd bd sd'</span> asDirtSounds to: #drums.
+<span class="cmt">"drives bdTrigger/bdFreq and sdTrigger/sdFreq in the DSP"</span></code></pre>
+
+        <p>
+          Effect parameters follow the same convention: a <code>#Cutoff</code> entry is written to
+          the note destination with <code>Freq</code> replaced by <code>Cutoff</code>, so
+          <code>bdFreq</code> becomes <code>bdCutoff</code>. Your Phausto instrument has to expose
+          parameters under those names — check with <code>tp traceAllParams</code>.
+        </p>
+
+        <div class="callout warning">
+          <span class="callout-title">An active DSP is required</span>
+          <code>PerformerPhausto</code> raises <em>“There must be an active DSP for this
+          performance”</em> if <code>activeDSP:</code> was never set. Setting the Performer alone is
+          not enough.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="superdirt">
+      <h2>3. SuperDirt</h2>
+
+      <p>
+        Coypu builds one OSC message per trigger, addressed <code>/dirt/play</code>, and sends it to
+        <code>127.0.0.1</code> on port <strong>57120</strong>:
+      </p>
+
+<pre><code>/dirt/play  delta &lt;seconds&gt;  s &lt;sound&gt;  n &lt;index&gt;  gain &lt;…&gt;  …</code></pre>
+
+      <p>
+        <code>delta</code> is computed as the step length times the note's duration, so a Sequencer
+        with longer durations tells SuperDirt to space events further apart. Everything else comes
+        from the Sequencer's <code>dirtMessage</code> — every key you set with <code>gain:</code>,
+        <code>room:</code>, <code>dirt:</code> and the rest, each read at the current note index.
+      </p>
+
+      <p>
+        Instrument keys are SuperDirt sample folders. <code>sound:</code> overrides the key when you
+        want a different folder or an explicit index:
+      </p>
+
+<pre><code>(<span class="num">16</span> downbeats sound: <span class="str">'bd:3'</span>) to: #kick.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Chords send several messages</span>
+        A <code>SequencerPoly</code> — anything built with <code>chords:</code> — sends one OSC
+        message per chord tone inside a single bundle, each with its own <code>n</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="midi">
+      <h2>4. MIDI hardware</h2>
+
+      <p>
+        Requires <a href="https://github.com/pharo-contributions/pharo-sound">Pharo-Sound</a>. The
+        MIDI sender lives on the class side of <code>PerformerMIDI</code>:
+      </p>
+
+<pre><code>p performer: <span class="cls">PerformerMIDI</span> new.
+<span class="cls">PerformerMIDI</span> midiOut: aMidiSender.</code></pre>
+
+      <p>
+        Each trigger sends a note on the Sequencer's own MIDI channel, held for
+        <code>duration × step-length × 0.9</code>. Route parts to channels when you build them:
+      </p>
+
+<pre><code><span class="num">16</span> downbeats midiCh: <span class="num">10</span> to: #drums.
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 43</span> )) midiCh: <span class="num">1</span>; to: #bass.</code></pre>
+
+      <p>
+        Effect parameters become control changes. <code>PerformerMIDI</code> maps
+        <code>level:</code> to CC 7 and <code>index:</code> to CC 20, and
+        <code>ccn:ccv:</code> sets any controller directly:
+      </p>
+
+<pre><code>(<span class="num">16</span> quavers ccn: <span class="num">74</span> ccv: #( <span class="num">40 80 120</span> )) to: #lead.</code></pre>
+
+      <section id="midi-clock">
+        <h3>4.1 Clock and transport</h3>
+
+        <p>
+          <code>PerformerMIDI</code> runs a second thread emitting MIDI clock at six pulses per step
+          and sends a Start message when the transport begins. Hardware sequencers, arpeggiators and
+          delays set to external sync will follow Coypu's tempo, including changes made mid-set.
+        </p>
+
+        <div class="callout tip">
+          <span class="callout-title">Six pulses, not twenty-four</span>
+          MIDI clock is conventionally 24 pulses per quarter note. A Coypu step is a sixteenth, so
+          six pulses per step comes to the same thing.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="kyma">
+      <h2>5. Kyma</h2>
+
+      <p>
+        The backend Coypu was written for. It resolves a Paca(rana) by Bonjour name and sends OSC to
+        port <strong>8000</strong>, addressing the Virtual Control Surface:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>What</th><th>OSC address</th></tr></thead>
+        <tbody>
+          <tr><td>Note for <code>#bass</code></td><td><code>/vcs/bassNote/1</code></td></tr>
+          <tr><td>Gate for <code>#bass</code></td><td><code>/vcs/bassGate/1</code></td></tr>
+          <tr><td>A <code>#Cutoff</code> parameter</td><td><code>/vcs/bassCutoff/1</code></td></tr>
+          <tr><td>Tempo</td><td><code>/vcs/BPM/1</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        The gate goes to 1, waits the note's duration, and returns to 0 — a note-off is sent first to
+        handle voice stealing. Your Kyma Sound needs VCS controls named to match; the name is
+        the instrument key with <code>Note</code>, <code>Gate</code> or the parameter name appended.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">The address is resolved, not configured</span>
+        Coypu looks up a hostname of the form <code>beslime-NN.local</code>. If your Paca(rana) has a
+        different serial number you will need to set <code>PacaAddress</code> accordingly, or use
+        <code>'x' asPacaAddress</code> to prime it.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="local">
+      <h2>6. Generic OSC</h2>
+
+      <p>
+        <code>PerformerLocal</code> targets any OSC listener on localhost — Pure Data, Max/MSP,
+        ChucK, a browser. Each trigger sends a note and then a gate pair:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><code>/bassNote</code></td><td>The MIDI note number as a float</td></tr>
+          <tr><td><code>/bassGate</code></td><td>1.0, then 0.0 after the note's duration</td></tr>
+          <tr><td><code>/bassCutoff</code></td><td>Any extra parameter, by name</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        This is the simplest protocol Coypu speaks and the easiest to receive: in Pure Data an
+        <code>[oscparse]</code> into a <code>[route bassNote bassGate]</code> is the whole receiving
+        end.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">Several ports appear in the source</span>
+        The local sending helpers variously use 57120, 57110 and 8000 depending on which convenience
+        method is called. If a listener sees nothing, try the others before assuming the message is
+        malformed — §7.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="ports">
+      <h2>7. Ports at a glance</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Port</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td>57120</td><td>SuperDirt — sclang's OSC port. Also several local helpers</td></tr>
+          <tr><td>8000</td><td>Kyma's VCS, and some local gate helpers</td></tr>
+          <tr><td>57110</td><td>scsynth — used by the <code>toSC…</code> helpers</td></tr>
+          <tr><td>57142</td><td>A generic local OSC client</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        All sending is to <code>127.0.0.1</code> except Kyma, which resolves the Paca(rana) over the
+        network. There is no configuration layer: the ports are written into the sending methods.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="effects.html">Effects &amp; Mixing</a></td><td>Which parameter family each backend reads.</td></tr>
+          <tr><td><a href="api.html">Player &amp; Message API</a></td><td>The Performer classes in full.</td></tr>
+          <tr><td><a href="../phaustoFloss/index.html">Phausto manual</a></td><td>Building the instruments Coypu drives.</td></tr>
+          <tr><td><a href="setup.html">Setup</a></td><td>Getting each backend installed.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4>“There must be an active DSP for this performance”</h4>
+      <p><code>p activeDSP: tp</code> as well as setting the Performer — §2.1.</p>
+
+      <h4>SuperDirt plays the wrong sample</h4>
+      <p>
+        Its default note is 0, so a bare rhythm plays the first sample in the folder. Use
+        <code>sound: 'bd:3'</code> or <code>dirtNotes:</code> to choose — §1, §3.
+      </p>
+
+      <h4>MIDI notes never stop</h4>
+      <p>
+        The note-off is scheduled after the note's duration; if the transport was stopped in between
+        it may not arrive. Send an all-notes-off from your sender, or restart the transport briefly.
+      </p>
+
+      <h4>My hardware does not follow the tempo</h4>
+      <p>
+        It needs to be set to external sync, and only <code>PerformerMIDI</code> emits clock — §4.1.
+      </p>
+
+      <h4>Kyma receives nothing</h4>
+      <p>
+        Check the Paca(rana) is reachable at its <code>beslime-NN.local</code> name, and that the
+        VCS labels match instrument key plus <code>Note</code>/<code>Gate</code> — §5.
+      </p>
+
+      <h4>My Pure Data patch sees no messages</h4>
+      <p>
+        Check the port. Coypu's local helpers use 57120, 8000 and 57110 in different places — §7.
+      </p>
+
+      <h4>Phausto parameters are ignored</h4>
+      <p>
+        The DSP must expose parameters named <em>sound + parameter</em>, such as
+        <code>bdCutoff</code>. List what exists with <code>tp traceAllParams</code> — §2.1.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

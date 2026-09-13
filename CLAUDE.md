@@ -42,7 +42,9 @@ No Gemfile or package.json — GitHub Pages handles Jekyll and the minima theme 
 matter, no layout; they link their own stylesheet and are served as-is. `documentation/phausto.md`
 and `documentation/coypu.md` link into them.
 
-**`phaustoFloss/` is the reference implementation** (27 pages). Its conventions:
+Both follow the same conventions. `phaustoFloss/` has 27 pages, `coypuFloss/` has 17; each has its
+own nav file (`phausto-nav.js`, `coypu-nav.js`), its own palette in its shared stylesheet, and its
+own theme key (`phausto-theme`, `coypu-theme`). The conventions:
 
 - **`phausto-nav.js` is the single source of truth.** One ordered `PHAUSTO_PAGES` array drives the
   sidebar, quick links, prev/next footer, ⌘K search index and the index card grid. Adding a page is
@@ -58,22 +60,38 @@ and `documentation/coypu.md` link into them.
 - `phausto-shared.css` holds the palette as custom properties. The dark theme (`html.dark`, stored
   under `phausto-theme`) is a pure custom-property swap — add new rules, do not restructure old ones.
 
-**`phaustoFloss/ugen-library.html` is generated, not hand-written.** Regenerate it after any Phausto
-package change:
+**Two pages are generated, not hand-written.** Regenerate after any package change; editing them by
+hand will be overwritten.
 
 ```bash
-node _tools/generate-ugen-library.cjs <path-to-Phausto-source-dir>
-# e.g. .../pharo-local/iceberg/lucretiomsp/phausto/Phausto
+node _tools/generate-ugen-library.cjs   <path-to-Phausto-source-dir>
+node _tools/generate-rhythm-library.cjs <path-to-Coypu-src-dir>
 ```
 
-It reads the Tonel `*.class.st` files and emits every class with its superclass and the first
-sentence of its class comment. Tests, the Cmajor exporters and the FFI layer are excluded by design.
+- `phaustoFloss/ugen-library.html` — every class with its superclass and the first sentence of its
+  class comment. Tests, Cmajor exporters and the FFI layer are excluded by design.
+- `coypuFloss/rhythm-library.html` — every `<rhythmCreation>` rhythm, with step pattern, onsets and
+  grouping **computed from source**. The prose (origins, ethnomusicological notes) is curated in
+  `NOTES` inside the generator; `REGIONS` groups them, and the script warns about any rhythm not
+  placed in a region.
 
-**Accuracy rule**: verify class and selector names against the Phausto source before documenting
-them. Invented UGens and hallucinated selectors have been a recurring failure. Two traps worth
-knowing: most classes carry a `Ph` prefix (`PhImpulsify`, `PhModeFilter`, `PhFlangerMono`), and the
-fluid setter API lives in **22 traits**, not on the classes — `SineOsc` defines only `initialize`,
-so browsing a class reveals nothing. `dsp traceAllParams` is the ground truth.
+**Accuracy rule**: verify class and selector names against the package source before documenting
+them. Invented UGens and hallucinated rhythms have both happened. Get canonical source from GitHub
+rather than a local Iceberg checkout — every on-disk Coypu checkout was found to be months stale.
+
+Traps that have caused real errors:
+
+| Where | Trap |
+|---|---|
+| Phausto | Most classes carry a `Ph` prefix (`PhImpulsify`, `PhModeFilter`, `PhFlangerMono`) |
+| Phausto | The fluid setter API lives in **22 traits**, not on the classes — `SineOsc` defines only `initialize`. `dsp traceAllParams` is ground truth |
+| Coypu | Branch is `master` (Phausto is `main`) |
+| Coypu | Rhythm receivers are **step counts, not trigger counts** — `8 quavers` gives 4 triggers |
+| Coypu | `#(5 16) euclidean` is *not* cinquillo and *not* bossa; Coypu uses Bresenham, not Bjorklund. `#(3 8)`=tresillo and `#(6 16)`=bembe are exact |
+| Coypu | `Performance>>unmute:`/`unsolo:` discard their argument and restore the whole snapshot |
+| Coypu | `Integer>>bomba:` never assigns its pattern and always raises |
+| Coypu | `Sequencer>>squiz:` writes to the `'room'` key |
+| Coypu | `asMidiNote` and `asMidiNN` disagree by an octave (`'c4'` → 60 vs 72) |
 
 ## The Three Packages Documented
 
@@ -91,6 +109,7 @@ All three require Pharo 11–13 and are installed via Metacello.
 - **Update docs**: edit the relevant file in `documentation/`
 - **New nav link**: update `_layouts/home2.html`
 - **Assets** (PDFs, slides): place in `assets/`
-- **New manual page**: add one line to `PHAUSTO_PAGES` in `phaustoFloss/phausto-nav.js`, then copy
-  the skeleton from an existing page. Navigation follows automatically.
-- **Phausto package changed**: rerun `_tools/generate-ugen-library.cjs` (see above)
+- **New manual page**: add one line to `PHAUSTO_PAGES` in `phaustoFloss/phausto-nav.js` (or
+  `COYPU_PAGES` in `coypuFloss/coypu-nav.js`), then copy the skeleton from an existing page.
+  Navigation follows automatically.
+- **Package changed**: rerun the matching generator in `_tools/` (see above)

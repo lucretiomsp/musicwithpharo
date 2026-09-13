@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — Gallery</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="gallery.html">
 
@@ -19,12 +19,280 @@
 
   <div class="content">
 
-    <p class="lede">Complete patterns worth stealing, each one runnable as written.</p>
+    <p class="lede">
+      Complete patterns, each runnable as written. Take them apart, change one thing, and listen to
+      what it did — the fastest way to learn the vocabulary.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#builtin">The built-in examples</a></li>
+        <li><a href="#grooves">Grooves</a>
+          <ol>
+            <li><a href="#grooves-house">Four-to-the-floor</a></li>
+            <li><a href="#grooves-clave">Clave-driven</a></li>
+            <li><a href="#grooves-jungle">Jungle</a></li>
+            <li><a href="#grooves-polymetre">Polymetre</a></li>
+          </ol>
+        </li>
+        <li><a href="#melodic">Melodic patterns</a></li>
+        <li><a href="#mondo">Mondo patterns</a></li>
+        <li><a href="#texture">Textures</a></li>
+        <li><a href="#finding">Finding sounds</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="builtin">
+      <h2>1. The built-in examples</h2>
+
+      <p>
+        Coypu ships runnable examples in the image. Each opens a Playground already filled in, so you
+        can evaluate it line by line:
+      </p>
+
+<pre><code><span class="cls">SuperDirtExamples</span> new dirtNotes101.
+<span class="cls">SuperDirtExamples</span> new randomotes101.
+<span class="cls">SuperDirtExamples</span> new techno101.</code></pre>
+
+      <p>
+        All three assume SuperCollider with SuperDirt running — see
+        <a href="setup.html">Setup §4.2</a>. They are also browsable as class-side scripts in Pharo.
+      </p>
+
+      <p>Everything below uses SuperDirt sample names, and all of it starts from this preamble:</p>
+
+<pre><code>p := <span class="cls">Performance</span> uniqueInstance.
+p performer: <span class="cls">PerformerSuperDirt</span> new.
+p freq: <span class="num">126</span> bpm.
+p play.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="grooves">
+      <h2>2. Grooves</h2>
+
+      <section id="grooves-house">
+        <h3>2.1 Four-to-the-floor</h3>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.
+<span class="num">16</span> upbeats   to: #hh.
+#( <span class="num">0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0</span> ) asSeq to: #cp.
+(<span class="num">16</span> quavers gain: <span class="num">0.8</span>; pan: #( <span class="num">0.3 0.7</span> )) to: #hh27.</code></pre>
+
+        <p>
+          The kick on every fourth step, the hat on the offbeats between them, a clap on two and
+          four. The second hat alternates left and right because its pan list is shorter than its
+          trigger count.
+        </p>
+      </section>
+
+      <section id="grooves-clave">
+        <h3>2.2 Clave-driven</h3>
+
+<pre><code><span class="num">16</span> tumbao    to: #bd.
+<span class="num">16</span> claveSon  to: #cp.
+<span class="num">16</span> bembe     to: #hh.
+(<span class="num">16</span> tresillo notes: #( <span class="num">36 36 43</span> ); room: <span class="num">0.2</span>) to: #bass.</code></pre>
+
+        <p>
+          Four Afro-Atlantic timelines at once, each a different length of the same tradition. Swap
+          <code>claveSon</code> for <code>rumba</code> and the whole thing leans differently.
+        </p>
+      </section>
+
+      <section id="grooves-jungle">
+        <h3>2.3 Jungle</h3>
+
+<pre><code>p freq: <span class="num">170</span> bpm.
+
+<span class="num">32</span> jungleKick  to: #bd.
+<span class="num">32</span> jungleSnare to: #sn.
+<span class="num">32</span> jungleRim   to: #rim.
+(<span class="num">32</span> semiquavers gain: <span class="num">0.6</span>; speed: #( <span class="num">1 1 2 1</span> )) to: #hh.
+
+<span class="cmt">"a half-time bass underneath"</span>
+(<span class="num">32</span> downbeats notes: #( <span class="num">28 28 31 26</span> ); pitch: #( <span class="num">0</span> )) to: #bass.</code></pre>
+
+        <div class="callout warning">
+          <span class="callout-title">All 32 steps</span>
+          The three jungle patterns are 32 steps long, so everything alongside them should be a
+          multiple of 32 or it will fall out of phase.
+        </div>
+      </section>
+
+      <section id="grooves-polymetre">
+        <h3>2.4 Polymetre</h3>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.      <span class="cmt">"16 steps"</span>
+<span class="num">13</span> trueAksak to: #perc.    <span class="cmt">"13"</span>
+<span class="num">10</span> aksak     to: #cp.      <span class="cmt">"10"</span>
+<span class="num">8</span>  tresillo  to: #hh.      <span class="cmt">"8"</span></code></pre>
+
+        <p>
+          Four lengths with no common factor beyond 2 — the whole arrangement realigns only after
+          hundreds of steps, so it never quite repeats. This is the cheapest way to get music that
+          evolves without any generative machinery.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="melodic">
+      <h2>3. Melodic patterns</h2>
+
+<pre><code><span class="cmt">"a bass line with a harmonic cycle"</span>
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 36 43 41</span> ))
+  progression: #( <span class="num">0 0 5 7</span> ); to: #bass.
+
+<span class="cmt">"a pentatonic line that is different every time you evaluate it"</span>
+(<span class="num">16</span> quavers notes: (<span class="num">8</span> randomWalksOn: <span class="cls">Scale</span> pentaMinor octaves: <span class="num">2</span> root: <span class="num">60</span>))
+  to: #arpy.
+
+<span class="cmt">"an arpeggio over two chords"</span>
+(<span class="num">16</span> semiquavers arpeggiate: <span class="str">'0-min7 5-maj7'</span>; gain: <span class="num">0.7</span>) to: #psg.
+
+<span class="cmt">"a sparse, wide melody from a Japanese scale"</span>
+((<span class="num">16</span> randomTrigsWithProbability: <span class="num">35</span>)
+  notes: (<span class="num">6</span> randomWalksOn: <span class="cls">Scale</span> sakura octaves: <span class="num">3</span> root: <span class="num">48</span>);
+  room: <span class="num">0.5</span>) to: #arpy.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Fewer notes than triggers</span>
+        Every one of these gives the Sequencer fewer notes than it has triggers, so the figure
+        rotates each cycle. It is the single cheapest source of variation in Coypu.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="mondo">
+      <h2>4. Mondo patterns</h2>
+
+      <p>These need the cyclic transport — <code>p playCyclicFor: 64</code> rather than <code>p play</code>.</p>
+
+<pre><code><span class="cmt">"a kit that varies its second beat each cycle"</span>
+<span class="str">'bd &lt;sd cp&gt; bd [sd sd]'</span> asMondoSounds to: #drums.
+
+<span class="cmt">"a melody with nested subdivision"</span>
+<span class="str">'c4 e4 [g4 b4] &lt;c5 a4&gt;'</span> asMondoNotes to: #arpy.
+
+<span class="cmt">"a fill that arrives once every four cycles"</span>
+<span class="str">'bd sd bd [sd sd sd]/4'</span> asMondoSounds to: #drums.
+
+<span class="cmt">"three-against-four inside one cycle"</span>
+<span class="str">'[bd bd bd] [hh hh hh hh]'</span> asMondoSounds to: #drums.
+
+p playCyclicFor: <span class="num">64</span>.</code></pre>
+
+      <p>
+        The last one is worth dwelling on: two groups sharing one cycle, one subdivided into three
+        and the other into four, with no tuplet notation and no tempo change.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="texture">
+      <h2>5. Textures</h2>
+
+<pre><code><span class="cmt">"a slowly opening filter over a dense hat"</span>
+(<span class="num">16</span> semiquavers
+  djf: #( <span class="num">0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8</span> );
+  gain: <span class="num">0.5</span>) to: #hh.
+
+<span class="cmt">"tempo-locked delay on a sparse percussion line"</span>
+((<span class="num">16</span> randomTrigsWithProbability: <span class="num">20</span>)
+  delay: <span class="num">0.6</span>; delayTime: <span class="num">0.125</span>; delayFb: <span class="num">0.7</span>; lock: <span class="num">1</span>) to: #perc.
+
+<span class="cmt">"pitched-down samples as a drone"</span>
+(<span class="num">16</span> wholes speed: <span class="num">0.25</span>; room: <span class="num">0.9</span>; size: <span class="num">0.9</span>; gain: <span class="num">0.7</span>) to: #pad.
+
+<span class="cmt">"the whole kit onto one rhythm — a section marker"</span>
+p rhythm: <span class="num">16</span> tresillo.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="finding">
+      <h2>6. Finding sounds</h2>
+
+      <p>
+        The examples above use common SuperDirt folders, but your installation decides what exists.
+        Coypu can list them:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Answers</th></tr></thead>
+        <tbody>
+          <tr><td>SuperDirt listOfSamples</td><td>Every sample folder available</td></tr>
+          <tr><td>SuperDirt listOfDrums</td><td>Just the drum folders</td></tr>
+          <tr><td>SuperDirt listOfSynths</td><td>SuperDirt's built-in synths</td></tr>
+          <tr><td>SuperDirt listOfDrumSynth</td><td>Its drum synths</td></tr>
+          <tr><td>SuperDirt openListOfSynths</td><td>The synth list in a window</td></tr>
+          <tr><td>SuperDirt samplesFolder</td><td>Where it is looking</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Synth names work as instrument keys just as sample folders do, so
+        <code>16 downbeats to: #superpiano</code> plays a synth rather than a sample.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Random sampling</span>
+        <code>16 randomSamplesFromFolder: 'cp'</code> builds a pattern of random samples from one
+        folder — a quick way to hear what is in it.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>7. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="by-example.html">Coypu by Example</a></td><td>One session built up with the reasoning for each move.</td></tr>
+          <tr><td><a href="performing.html">Performing</a></td><td>Taking these patterns through a set.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>Thirty-one rhythms to substitute into any of these.</td></tr>
+          <tr><td><a href="effects.html">Effects &amp; Mixing</a></td><td>The parameters used in §5.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>8. Troubleshooting</h2>
+
+      <h4>An instrument name produces nothing</h4>
+      <p>
+        That folder does not exist in your SuperDirt installation. Check
+        <code>SuperDirt listOfSamples</code> — §6.
+      </p>
+
+      <h4>The Mondo examples do not vary</h4>
+      <p>They need <code>playCyclicFor:</code>, not <code>play</code> — §4.</p>
+
+      <h4>The jungle example sounds like a mess</h4>
+      <p>Something alongside it is not a multiple of 32 steps — §2.3.</p>
+
+      <h4>The polymetre example never repeats</h4>
+      <p>That is the point — §2.4. Use <code>p loop: 64</code> if you want a fixed phrase.</p>
+
+      <h4>The built-in examples raise an error</h4>
+      <p>
+        All three need SuperDirt running in SuperCollider before you evaluate them — §1 and
+        <a href="setup.html">Setup §4.2</a>.
+      </p>
+
+      <h4>Everything is too loud together</h4>
+      <p>
+        Gains add up. Pull individual parts down with <code>gain:</code> rather than turning the
+        system volume down — you keep the balance that way.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

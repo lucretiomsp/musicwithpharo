@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — Changelog</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="changelog.html">
 
@@ -19,12 +19,191 @@
 
   <div class="content">
 
-    <p class="lede">How Coypu is versioned and what has changed.</p>
+    <p class="lede">
+      How Coypu is versioned, where to find what changed, and the known quirks in the current source
+      that this manual documents rather than hides.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#versioning">How Coypu is versioned</a>
+          <ol>
+            <li><a href="#versioning-pinning">Pinning a version</a></li>
+          </ol>
+        </li>
+        <li><a href="#themes">Recent development</a></li>
+        <li><a href="#quirks">Known quirks in the current source</a></li>
+        <li><a href="#manual">This manual</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="versioning">
+      <h2>1. How Coypu is versioned</h2>
+
+      <p>
+        Coypu has been developed in the open since January 2021 on a rolling basis. The working
+        branch is <code>master</code> and there is a single tag,
+        <code>v1.0-withoutRecording</code>, so the commit history is the real changelog.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Where</th><th>What it tells you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/lucretiomsp/coypu/commits/master">Commit history</a></td><td>Every change</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/coypu/issues">Issues</a></td><td>Known problems and what is being worked on</td></tr>
+          <tr><td><a href="https://github.com/lucretiomsp/coypu">Repository</a></td><td>Source, README and installation notes</td></tr>
+          <tr><td><a href="https://lucretiomsp.github.io/musicwithpharo/">Music with Pharo</a></td><td>This site, with a development blog</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">Coypu is <code>master</code>, Phausto is <code>main</code></span>
+        The two sibling packages use different default branch names. Getting it wrong produces a
+        Metacello error that does not make the cause obvious.
+      </div>
+
+      <section id="versioning-pinning">
+        <h3>1.1 Pinning a version</h3>
+
+        <p>For a piece you intend to perform again, pin the commit rather than tracking the branch:</p>
+
+<pre><code><span class="cls">Metacello</span> new
+  baseline: <span class="str">'Coypu'</span>;
+  repository: <span class="str">'github://lucretiomsp/coypu:&lt;commit-sha&gt;'</span>;
+  load.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title">Pin both</span>
+          Coypu's baseline pulls in Phausto, so a reproducible setup means pinning that too. Record
+          both commits alongside the piece.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="themes">
+      <h2>2. Recent development</h2>
+
+      <p>Rather than a version-by-version list, the themes the recent history shows:</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Theme</th><th>What changed</th></tr></thead>
+        <tbody>
+          <tr><td>Cycle-based playback</td><td>A second playback model alongside the original step-based one: <code>SequencerPlayer</code> as a Strategy, with <code>SequencerPlayerLinear</code> and <code>SequencerPlayerCyclic</code>. See <a href="api.html">Player API §5</a>.</td></tr>
+          <tr><td>Mondo mini-notation</td><td>A TidalCycles-style string notation with grouping, alternation and per-cycle divisors, built on <code>CoyArc</code>, <code>CoyEvent</code> and <code>MondoAlternation</code>. See <a href="rhythms-advanced.html">Rhythms: Advanced §4</a>.</td></tr>
+          <tr><td>Note-name parsing</td><td><code>asMidiNote</code>, accepting note names and both standard and TidalCycles accidental spellings.</td></tr>
+          <tr><td>Timing</td><td>The transport moved to an accumulating monotonic microsecond clock, so it does not drift, with event sending forked at lower priority.</td></tr>
+          <tr><td>Phausto integration</td><td>Per-sound gate and note destinations, so one Sequencer can address several instruments inside one DSP.</td></tr>
+          <tr><td>Tests</td><td>Fifteen test classes, including parser and dispatch tests for the newer cyclic machinery.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="quirks">
+      <h2>3. Known quirks in the current source</h2>
+
+      <p>
+        Behaviours that will cost you time if you meet them unprepared. All are verified against the
+        current <code>master</code>.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Where</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td><code>Integer&gt;&gt;bomba:</code></td><td>Never assigns its <code>pattern</code> variable, so it always raises. Plain <code>bomba</code> is fine — <a href="rhythm-library.html">Rhythm Library</a></td></tr>
+          <tr><td><code>Sequencer&gt;&gt;squiz:</code></td><td>Writes to the <code>'room'</code> key, so it sets reverb and overwrites <code>room:</code> — <a href="effects.html">Effects §5</a></td></tr>
+          <tr><td><code>Performance&gt;&gt;unmute:</code> / <code>unsolo:</code></td><td>Discard their argument and restore the whole snapshot — <a href="performing.html">Performing §4.1</a></td></tr>
+          <tr><td><code>asMidiNN</code> vs <code>asMidiNote</code></td><td>Disagree by an octave: <code>'c4'</code> is 72 and 60 respectively — <a href="operators.html">Operators §8</a></td></tr>
+          <tr><td><code>Sequencer&gt;&gt;size</code></td><td>Answers the trigger count, not the pattern length</td></tr>
+          <tr><td><code>adowa</code> / <code>sikyi</code></td><td>Identical patterns, so the two selectors sound the same</td></tr>
+          <tr><td><code>Scale pentaMinor</code> / <code>yo</code></td><td>Identical interval arrays</td></tr>
+          <tr><td><code>Scale minor</code></td><td>The only scale including its octave, so it has 8 elements where the others have 7</td></tr>
+          <tr><td><code>disortion:</code></td><td>A misspelt twin of <code>distortion:</code>; both work</td></tr>
+          <tr><td><code>Integer&gt;&gt;aksak</code> comment</td><td>Says “multiple of 8” but the pattern is 10 steps</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Documented, not worked around</span>
+        None of these is patched in the manual's examples. Where one bites, the page that covers that
+        area says so and gives the alternative.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="manual">
+      <h2>4. This manual</h2>
+
+      <p>
+        Part of the <a href="https://github.com/lucretiomsp/musicwithpharo">musicwithpharo</a> site.
+        Every page carries an “Edit this page on GitHub” link at the foot.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Revision</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Current</td><td>Restructured from 6 pages to 17 across five categories, with a single navigation source, per-page contents, stable anchors, search and a dark theme.</td></tr>
+          <tr><td>Current</td><td><a href="rhythm-library.html">Rhythm Library</a> rebuilt and generated from source: all 31 rhythms, with step patterns, onsets and groupings computed rather than transcribed.</td></tr>
+          <tr><td>Current</td><td>Corrected three wrong jungle step patterns, a mislabelled Euclidean rhythm, and two wrong trigger counts.</td></tr>
+          <tr><td>Current</td><td>Documented the Mondo mini-notation, previously absent entirely.</td></tr>
+          <tr><td>Current</td><td>Added melody, effects, backends, API, operators, gallery and project pages.</td></tr>
+          <tr><td>Earlier</td><td>Six pages: overview, setup, rhythm basics, rhythm library, advanced patterns, performing.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>5. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="community.html">Community</a></td><td>Where to ask and how to report a bug.</td></tr>
+          <tr><td><a href="faq.html">FAQ</a></td><td>Short answers to common questions.</td></tr>
+          <tr><td><a href="setup.html">Setup</a></td><td>Installing a current or pinned version.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>What exists in the package right now.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>6. Troubleshooting</h2>
+
+      <h4>Metacello cannot find the baseline</h4>
+      <p>The branch is <code>master</code> — §1.</p>
+
+      <h4>Code from an older tutorial no longer runs</h4>
+      <p>Check §3 first; several behaviours are surprising rather than broken.</p>
+
+      <h4>Metacello keeps loading a stale version</h4>
+      <p>
+        The repository is cached under <code>pharo-local/iceberg</code>. Delete the cached checkout
+        or pull <code>master</code> through Iceberg.
+      </p>
+
+      <h4>A feature in this manual is missing from my image</h4>
+      <p>Your copy predates it. Update, or check the commit history — §1.</p>
+
+      <h4>Something broke after updating</h4>
+      <p>
+        Open an issue with the snippet and the commit you moved to — see
+        <a href="community.html">Community</a>.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

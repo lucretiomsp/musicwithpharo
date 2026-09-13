@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — FAQ</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="faq.html">
 
@@ -19,12 +19,281 @@
 
   <div class="content">
 
-    <p class="lede">Short answers to the questions that come up most often.</p>
+    <p class="lede">
+      Short answers to the questions that come up most, each pointing at the page that answers them
+      properly.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#general">About the project</a></li>
+        <li><a href="#install">Installing</a></li>
+        <li><a href="#silence">Why is there no sound?</a></li>
+        <li><a href="#rhythms">Rhythms</a></li>
+        <li><a href="#patterns">Writing patterns</a></li>
+        <li><a href="#live">Playing live</a></li>
+        <li><a href="#comparisons">How it compares</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="general">
+      <h2>1. About the project</h2>
+
+      <h3>What is Coypu, in one sentence?</h3>
+      <p>
+        A live-coding sequencer for Pharo: you write patterns as expressions, it plays them
+        continuously, and you keep editing while they run.
+      </p>
+
+      <h3>Does Coypu make sound?</h3>
+      <p>
+        No. It decides when and what; a backend decides how it sounds. Choosing one is most of
+        <a href="setup.html">Setup</a>.
+      </p>
+
+      <h3>Which Pharo versions work?</h3>
+      <p>Pharo 11, 12 and 13.</p>
+
+      <h3>Why the name?</h3>
+      <p>
+        A tribute to Kyma's Capytalk dialect — the coypu being a rodent closely related to the
+        capybara. Coypu was originally written to drive Kyma over OSC.
+      </p>
+
+      <h3>How is it related to Phausto?</h3>
+      <p>
+        Coypu sequences; Phausto synthesises. Coypu's baseline pulls Phausto in as a dependency, so
+        installing one gives you both — see <a href="setup.html">Setup §3.2</a>.
+      </p>
+
+      <h3>Is it like TidalCycles?</h3>
+      <p>
+        The string notation is openly inspired by it, and both can drive SuperDirt. See §7 for where
+        they differ.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="install">
+      <h2>2. Installing</h2>
+
+      <h3>What is the install line?</h3>
+<pre><code><span class="cls">Metacello</span> new
+  baseline: <span class="str">'Coypu'</span>;
+  repository: <span class="str">'github://lucretiomsp/coypu:master'</span>;
+  load.</code></pre>
+
+      <h3>Metacello cannot find it</h3>
+      <p>
+        The branch is <code>master</code>. Phausto's is <code>main</code> — mixing them up is the
+        usual cause.
+      </p>
+
+      <h3>What comes with it?</h3>
+      <p>
+        Ducasse's OSC package and Phausto. MIDI does not — that needs Pharo-Sound separately. See
+        <a href="setup.html">Setup §3.2</a>.
+      </p>
+
+      <h3>Do I need SuperCollider?</h3>
+      <p>
+        Only for the SuperDirt backend. Phausto runs inside your image with no external software,
+        though it does need its native libraries in place.
+      </p>
+
+      <h3>Is there a ready-made image?</h3>
+      <p>
+        Yes — the Pharo Launcher offers a <strong>Pharo Music</strong> image with Coypu and Phausto
+        already installed.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="silence">
+      <h2>3. Why is there no sound?</h2>
+
+      <p>By far the most common question. In order:</p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Check</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Is a Performer set?</td><td><code>p performer: PerformerSuperDirt new</code> — without one, Coypu sends nowhere and reports nothing</td></tr>
+          <tr><td>Is the transport running?</td><td><code>p play</code></td></tr>
+          <tr><td>Is the backend up?</td><td><code>SuperDirt.start</code> in SuperCollider; an <code>activeDSP:</code> for Phausto</td></tr>
+          <tr><td>Does the instrument name exist?</td><td>Try <code>#bd</code>; check <code>SuperDirt listOfSamples</code></td></tr>
+          <tr><td>Does the pattern have triggers?</td><td><code>16 rests</code> is silent by design</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>One part is silent, the others play</h3>
+      <p>Almost always the instrument key — a misspelt sample folder or a missing synth.</p>
+
+      <h3>Sound continues after <code>stop</code></h3>
+      <p>
+        A second transport, or a note-off that never arrived. <code>p muteAll</code> then
+        <code>p stop</code>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="rhythms">
+      <h2>4. Rhythms</h2>
+
+      <h3>How many are there?</h3>
+      <p>
+        Thirty-one, all documented with verified step patterns in the
+        <a href="rhythm-library.html">Rhythm Library</a>. <code>Rhythm list</code> gives the same
+        list in the image.
+      </p>
+
+      <h3>Why does my rhythm sound cut off?</h3>
+      <p>
+        Its length does not divide the number you gave it. <code>trueAksak</code> is 13 steps and the
+        jungle patterns are 32 — use a multiple of the pattern's own length.
+      </p>
+
+      <h3><code>16 bomba: '36 38'</code> raises an error</h3>
+      <p>
+        A source bug — <code>bomba:</code> never assigns its pattern. Plain <code>16 bomba</code>
+        works; add notes with <code>notes:</code>.
+      </p>
+
+      <h3>Why do <code>adowa</code> and <code>sikyi</code> sound the same?</h3>
+      <p>They carry an identical pattern in the current source.</p>
+
+      <h3>Can I add my own?</h3>
+      <p>
+        Yes — an <code>Integer</code> extension with the <code>&lt;rhythmCreation&gt;</code> pragma.
+        See <a href="community.html">Community §4.2</a>.
+      </p>
+
+      <h3>Is <code>#(5 16) euclidean</code> the bossa clave?</h3>
+      <p>
+        No. Coypu uses a Bresenham variant that yields a rotation of it. Use <code>16 bossa</code>.
+        <code>#(3 8)</code> does give tresillo exactly, and <code>#(6 16)</code> gives bembé.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="patterns">
+      <h2>5. Writing patterns</h2>
+
+      <h3>What does the number before a rhythm mean?</h3>
+      <p>
+        Steps, not triggers. <code>8 quavers</code> is eight steps containing four triggers.
+      </p>
+
+      <h3>Why does my melody rotate each cycle?</h3>
+      <p>
+        You gave it fewer notes than the pattern has triggers, so the note list wraps. It is usually
+        a feature — match the counts if you want it fixed.
+      </p>
+
+      <h3>My melody is an octave out</h3>
+      <p>
+        <code>asMidiNote</code> treats <code>c4</code> as 60; the older <code>asMidiNN</code> treats
+        it as 72.
+      </p>
+
+      <h3>How do I layer two patterns on one sound?</h3>
+      <p>
+        Join them with <code>,</code>, or use two instrument keys pointing at the same sound. One key
+        holds one Sequencer.
+      </p>
+
+      <h3>What is the difference between the string notations?</h3>
+      <p>
+        The <code>asDirt…</code> family is step-based; Mondo is cycle-based and supports subdivision
+        and per-cycle alternation. See <a href="rhythms-advanced.html">Rhythms: Advanced §4</a>.
+      </p>
+
+      <h3>My Mondo alternation never changes</h3>
+      <p>
+        Alternations advance per cycle, so they need <code>playCyclicFor:</code> rather than
+        <code>play</code>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="live">
+      <h2>6. Playing live</h2>
+
+      <h3>Do I have to stop to change something?</h3>
+      <p>No. Re-evaluate the line and it changes at the next step. That is the whole point.</p>
+
+      <h3><code>unmute:</code> brought back everything</h3>
+      <p>
+        It ignores its argument and restores the whole snapshot. Re-send the one part you want
+        instead — see <a href="performing.html">Performing §4.1</a>.
+      </p>
+
+      <h3>How do I change tempo smoothly?</h3>
+      <p>
+        The transport re-reads the tempo every step, so repeated small <code>freq:</code> changes
+        from a forked loop give a ramp.
+      </p>
+
+      <h3>Can I sync hardware to Coypu?</h3>
+      <p>
+        Yes — <code>PerformerMIDI</code> emits MIDI clock and a start message. Set your hardware to
+        external sync.
+      </p>
+
+      <h3>Is there an undo?</h3>
+      <p>
+        One snapshot slot: <code>temporarySave</code> and <code>restore</code>. There is no stack, and
+        every mute or solo overwrites it.
+      </p>
+
+      <h3>What is the biggest single gesture?</h3>
+      <p>
+        <code>p rhythm: 16 tresillo</code> — every part in the Performance onto the same rhythm at
+        once.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="comparisons">
+      <h2>7. How it compares</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Compared with</th><th>Difference</th></tr></thead>
+        <tbody>
+          <tr><td>TidalCycles</td><td>Both are pattern languages driving SuperDirt. Tidal is Haskell and purely cycle-based; Coypu is Smalltalk and primarily step-based, with cycles available through Mondo. Coypu also drives Kyma, MIDI and in-image DSP.</td></tr>
+          <tr><td>SuperCollider alone</td><td>Coypu is a sequencer, not a synthesis language. It is a layer above, and SuperDirt is one of several things it can drive.</td></tr>
+          <tr><td>A DAW</td><td>No timeline, no arrangement view, no undo history. What you get instead is that the whole arrangement is text you can regenerate, and that it changes without stopping.</td></tr>
+          <tr><td>Phausto</td><td>Its sibling: Phausto builds instruments, Coypu plays them. Many sessions use both.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Why Smalltalk for this?</h3>
+      <p>
+        Because the image is live. There is no edit–compile–run cycle to interrupt the music, the
+        whole system is inspectable while it plays, and a pattern is an ordinary object you can
+        examine mid-performance.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="first-sounds.html">First Sounds</a></td><td>The four objects, and most silence problems.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>All 31 rhythms, filterable.</td></tr>
+          <tr><td><a href="changelog.html">Changelog</a></td><td>The known quirks referenced above.</td></tr>
+          <tr><td><a href="community.html">Community</a></td><td>Where to ask what is not answered here.</td></tr>
+        </tbody>
+      </table>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

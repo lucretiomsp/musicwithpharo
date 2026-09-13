@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coypu — Player & Message API</title>
+  <title>Coypu — Player &amp; Message API</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="api.html">
 
@@ -13,18 +13,407 @@
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Coypu</a> › Reference › Player & Message API</div>
-    <h1>Player & Message API</h1>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Reference › Player &amp; Message API</div>
+    <h1>Player &amp; Message API</h1>
   </div>
 
   <div class="content">
 
-    <p class="lede">Performance, Performer, Sequencer — the classes and the messages they answer.</p>
+    <p class="lede">
+      The classes Coypu is built from and the messages they answer — Performance, Performer,
+      Sequencer and the players that drive them.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#map">The class map</a></li>
+        <li><a href="#performance">Performance</a>
+          <ol>
+            <li><a href="#performance-transport">Transport and tempo</a></li>
+            <li><a href="#performance-mixing">Mute, solo and state</a></li>
+            <li><a href="#performance-contents">Contents</a></li>
+          </ol>
+        </li>
+        <li><a href="#performer">Performer</a></li>
+        <li><a href="#sequencer">Sequencer</a>
+          <ol>
+            <li><a href="#sequencer-data">The data it holds</a></li>
+            <li><a href="#sequencer-transform">Transformations</a></li>
+            <li><a href="#sequencer-subclasses">Mono, Poly and Mf</a></li>
+          </ol>
+        </li>
+        <li><a href="#players">Sequencer players</a></li>
+        <li><a href="#cyclic">The cyclic classes</a></li>
+        <li><a href="#support">Supporting classes</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="map">
+      <h2>1. The class map</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Family</th><th>Classes</th></tr></thead>
+        <tbody>
+          <tr><td>Performance</td><td><code>Performance</code>, <code>Transport</code>, <code>PerfType</code>, <code>PerfTypeMooflod</code>, <code>PacaAddress</code></td></tr>
+          <tr><td>Performer</td><td><code>Performer</code> and six subclasses</td></tr>
+          <tr><td>Sequencers</td><td><code>Sequencer</code>, <code>SequencerMono</code>, <code>SequencerPoly</code>, <code>MfSequencer</code>, <code>Rhythm</code></td></tr>
+          <tr><td>Players</td><td><code>SequencerPlayer</code>, <code>SequencerPlayerLinear</code>, <code>SequencerPlayerCyclic</code></td></tr>
+          <tr><td>Cyclic</td><td><code>CoyArc</code>, <code>CoyEvent</code>, <code>MondoAlternation</code></td></tr>
+          <tr><td>Scales &amp; chords</td><td><code>Scale</code>, <code>Chord</code>, <code>JazzMarkovMelody</code></td></tr>
+          <tr><td>SuperDirt</td><td><code>SuperDirt</code>, <code>SuperDirtSynth</code>, <code>DirtSingleEvent</code></td></tr>
+          <tr><td>MIDI</td><td><code>MIDISender</code>, <code>MIDIReceiver</code>, <code>PortMidi</code></td></tr>
+          <tr><td>GUI</td><td>The <code>VerticalFader</code> family, <code>FaderWindow</code>, keyboard controls</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        Coypu also extends the base classes heavily — <code>Integer</code>, <code>ByteString</code>,
+        <code>ByteSymbol</code>, <code>Array</code>, <code>Number</code> — which is where the terse
+        syntax lives. Those are catalogued in
+        <a href="operators.html">Pattern Operators</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="performance">
+      <h2>2. Performance</h2>
+
+      <p>
+        A singleton subclass of <code>Dictionary</code>, keyed by instrument name. Reach it with
+        <code>Performance uniqueInstance</code>; <code>Performance new</code> deliberately raises.
+      </p>
+
+      <section id="performance-transport">
+        <h3>2.1 Transport and tempo</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>play</td><td>Start the transport — about four days at 120 BPM</td></tr>
+            <tr><td>playFor: n</td><td>Run for <em>n</em> steps</td></tr>
+            <tr><td>playCyclicFor: n</td><td>Run for <em>n</em> cycles, resolving alternations</td></tr>
+            <tr><td>stop</td><td>Halt</td></tr>
+            <tr><td>freq: / freq</td><td>Step duration in seconds — use with <code>bpm</code></td></tr>
+            <tr><td>bpm: / bpm</td><td>Tempo in beats per minute</td></tr>
+            <tr><td>loop: n / unloop</td><td>Wrap the transport every <em>n</em> steps, or release</td></tr>
+            <tr><td>transportStep / transportStep:</td><td>The current step counter</td></tr>
+            <tr><td>incrementTransportStep</td><td>Advance it by one, modulo the loop length</td></tr>
+            <tr><td>maxStepNumber:</td><td>The loop length directly</td></tr>
+            <tr><td>activeProcess</td><td>The forked transport process</td></tr>
+            <tr><td>resetAllSequencers</td><td>Return every part to its first note</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="performance-mixing">
+        <h3>2.2 Mute, solo and state</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>mute: aKeyOrArray</td><td>Remove one or several parts, snapshotting first</td></tr>
+            <tr><td>muteAll</td><td>Remove everything</td></tr>
+            <tr><td>solo: aKeyOrArray</td><td>Remove everything else</td></tr>
+            <tr><td>unmute: / unsolo:</td><td>Call <code>restore</code> — the argument is ignored</td></tr>
+            <tr><td>restore</td><td>Reinstate the snapshot</td></tr>
+            <tr><td>temporarySave</td><td>Snapshot without changing anything</td></tr>
+            <tr><td>backup</td><td>The snapshot itself</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">One snapshot slot, and no per-key memory</span>
+          <code>mute:</code>, <code>muteAll</code>, <code>solo:</code> and
+          <code>temporarySave</code> all write the same single backup, and
+          <code>unmute:</code>/<code>unsolo:</code> discard their argument entirely and restore the
+          lot. See <a href="performing.html">Performing §4.1</a>.
+        </div>
+      </section>
+
+      <section id="performance-contents">
+        <h3>2.3 Contents</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>at: key put: aSequencer</td><td>Install a part — what <code>to:</code> does</td></tr>
+            <tr><td>remove: key</td><td>Take a part out</td></tr>
+            <tr><td>performer: / performer</td><td>The backend adapter. Setting it mutes everything</td></tr>
+            <tr><td>activeDSP: / activeDSP</td><td>The Phausto DSP, when using <code>PerformerPhausto</code></td></tr>
+            <tr><td>dirtMIDIDevice:</td><td>The SuperDirt MIDI device name</td></tr>
+            <tr><td>transpose: n</td><td>Shift every part</td></tr>
+            <tr><td>rhythm: aRhythmOrSeq</td><td>Give every part the same gates</td></tr>
+            <tr><td>swap: a with: b</td><td>Exchange two parts</td></tr>
+            <tr><td>length</td><td>The longest pattern in the Performance</td></tr>
+            <tr><td>logger</td><td>The <code>MyoLogger</code> used for performance messages</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="performer">
+      <h2>3. Performer</h2>
+
+      <p>
+        An abstract adapter. Subclasses implement <code>playEventAt:in:</code>, which is called once
+        per trigger with the Sequencer and the current note index.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Sends</th></tr></thead>
+        <tbody>
+          <tr><td>PerformerSuperDirt</td><td><code>/dirt/play</code> OSC to 127.0.0.1:57120. Default note 0</td></tr>
+          <tr><td>PerformerPhausto</td><td>Parameter writes and gate trigs into an in-image DSP</td></tr>
+          <tr><td>PerformerMIDI</td><td>MIDI notes and CCs, plus clock and start</td></tr>
+          <tr><td>PerformerKyma</td><td><code>/vcs/…</code> OSC to a Paca(rana) on port 8000</td></tr>
+          <tr><td>PerformerLocal</td><td>Gate and note OSC to a local listener</td></tr>
+          <tr><td>PerformerPhaustoMooflod</td><td>A Phausto variant for the Mooflod performance system</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>playEventAt: i in: seq</td><td>Send one event. Subclass responsibility</td></tr>
+          <tr><td>playFor: n</td><td>The transport loop — a forked process at timing priority</td></tr>
+          <tr><td>playCyclicFor: n</td><td>The cycle-based transport loop</td></tr>
+          <tr><td>defaultNote</td><td>60, except SuperDirt's 0</td></tr>
+          <tr><td>noteFromSoundToken:</td><td>Extract <code>n</code> from <code>'bd:3'</code>; SuperDirt only</td></tr>
+          <tr><td>index:to: / level:to:</td><td>Route those two parameters to the right place per backend</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Timing</span>
+        The transport computes each step's target time from a monotonic microsecond clock and
+        accumulates, rather than sleeping a fixed interval, so timing does not drift. Event sending
+        is forked at a lower priority so a slow backend cannot stall the clock.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="sequencer">
+      <h2>4. Sequencer</h2>
+
+      <section id="sequencer-data">
+        <h3>4.1 The data it holds</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Accessor</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td>gates</td><td>The pattern: 1 triggers, 0 rests</td></tr>
+            <tr><td>notes</td><td>MIDI note numbers, one consumed per trigger</td></tr>
+            <tr><td>durations</td><td>Length of each note, in steps</td></tr>
+            <tr><td>gateTimes</td><td>Proportion of the duration the gate stays open; 0.9 by default</td></tr>
+            <tr><td>noteIndex</td><td>How many triggers have fired — the wrap index</td></tr>
+            <tr><td>midiChannel</td><td>MIDI channel for this part</td></tr>
+            <tr><td>dirtMessage</td><td>SuperDirt parameters</td></tr>
+            <tr><td>extraParams</td><td>Synth parameters for Kyma, Phausto and MIDI CC</td></tr>
+            <tr><td>soundPattern</td><td>Sample folder names</td></tr>
+            <tr><td>seqKey</td><td>The instrument name it is filed under</td></tr>
+            <tr><td>orbit</td><td>SuperDirt orbit, assigned automatically</td></tr>
+            <tr><td>player</td><td>The <code>SequencerPlayer</code> driving it</td></tr>
+            <tr><td>cycleLengths / divisors</td><td>Cyclic playback data, set by the Mondo parser</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Counting messages: <code>trigs</code> and <code>numberOfTrigs</code> give the number of
+          triggers, <code>gatesSize</code> the pattern length, and <code>size</code> is a synonym for
+          the trigger count rather than the length — which surprises people.
+        </p>
+      </section>
+
+      <section id="sequencer-transform">
+        <h3>4.2 Transformations</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>to: aSymbol</td><td>Install into the Performance</td></tr>
+            <tr><td>, aSequencer</td><td>Concatenate gates, notes and durations</td></tr>
+            <tr><td>* n / times: n</td><td>Repeat</td></tr>
+            <tr><td>offset: n</td><td>Rotate the gates in place</td></tr>
+            <tr><td>flip</td><td>Invert triggers and rests</td></tr>
+            <tr><td>reverse</td><td>Reverse gates, notes, durations, indices and gate times</td></tr>
+            <tr><td>palindrome</td><td>Append the reverse to the original</td></tr>
+            <tr><td>transpose: n</td><td>Shift the notes</td></tr>
+            <tr><td>progression: intervals</td><td>Repeat once per interval, transposed</td></tr>
+            <tr><td>asPolySeq</td><td>Convert to a <code>SequencerPoly</code></td></tr>
+            <tr><td>queryFrom:to:cycle:</td><td>Ask for the events in a slice of a cycle</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="sequencer-subclasses">
+        <h3>4.3 Mono, Poly and Mf</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Class</th><th>Difference</th></tr></thead>
+          <tbody>
+            <tr><td>SequencerMono</td><td>One note per trigger. What <code>asSeq</code> and every named rhythm answer</td></tr>
+            <tr><td>SequencerPoly</td><td>A chord per trigger. What <code>chords:</code> answers</td></tr>
+            <tr><td>MfSequencer</td><td>A variant used by the Mooflod performance system</td></tr>
+            <tr><td>Rhythm</td><td>An <code>Array</code> subclass of gates, with the named-rhythm registry on the class side</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          <code>Rhythm list</code> is built by scanning for the <code>&lt;rhythmCreation&gt;</code>
+          pragma, which is also what generates the
+          <a href="rhythm-library.html">Rhythm Library</a>.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="players">
+      <h2>5. Sequencer players</h2>
+
+      <p>
+        A Strategy deciding what one transport tick means for a Sequencer. Each Sequencer holds one
+        in its <code>player</code> slot.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>SequencerPlayerLinear</td><td>The default. One step per tick; if the gate is 1, fire the note at <code>noteIndex</code> and advance it</td></tr>
+          <tr><td>SequencerPlayerCyclic</td><td>Queries the Sequencer for the events inside each slice of a cycle. Used by Mondo patterns; supports subdivision, alternation and per-event divisors</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Why a Strategy and not a subclass</span>
+        Sequencer already varies along another axis — Mono versus Poly — so playback behaviour lives
+        in a separate object. It also means a new playback mode can be added without touching
+        <code>Sequencer</code> or <code>Performance</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="cyclic">
+      <h2>6. The cyclic classes</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>CoyArc</td><td>A time span within a cycle, as a fraction from 0 to 1</td></tr>
+          <tr><td>CoyEvent</td><td>An event: an onset within the cycle and a note index</td></tr>
+          <tr><td>MondoAlternation</td><td>A <code>&lt;a b c&gt;</code> group — its choices and how fast it advances</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        These exist so a pattern can be <em>queried</em> rather than stepped: ask a Sequencer what
+        happens between 0.25 and 0.5 of cycle 3 and it answers a collection of
+        <code>CoyEvent</code>s. That is what makes Mondo's nested subdivisions possible.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="support">
+      <h2>7. Supporting classes</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Scale</td><td>18 scales as interval arrays — see <a href="melody.html">Melody &amp; Scales</a></td></tr>
+          <tr><td>Chord</td><td>64 chord entries, with <code>list</code> and <code>traceList</code></td></tr>
+          <tr><td>JazzMarkovMelody</td><td>Weighted scale-degree melody generation</td></tr>
+          <tr><td>SuperDirt</td><td>Sample folder location and helpers</td></tr>
+          <tr><td>MIDISender / MIDIReceiver</td><td>PortMidi wrappers</td></tr>
+          <tr><td>PacaAddress</td><td>Caches the resolved Kyma Paca(rana) address</td></tr>
+          <tr><td>Transport</td><td>Transport state</td></tr>
+          <tr><td>MyoLogger</td><td>Performance logging</td></tr>
+          <tr><td>VerticalFader family</td><td>On-screen faders for OSC, MIDI, Kyma and SuperDirt</td></tr>
+          <tr><td>KeyboardToOSC family</td><td>Computer-keyboard control surfaces</td></tr>
+          <tr><td>RanaTheme</td><td>A dark Pharo theme for live coding</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="operators.html">Pattern Operators</a></td><td>The base-class extensions that make the syntax terse.</td></tr>
+          <tr><td><a href="performing.html">Performing</a></td><td>These messages in live use.</td></tr>
+          <tr><td><a href="phausto-midi.html">Phausto &amp; MIDI</a></td><td>What each Performer sends.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>The rhythm registry, rendered.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4><code>Performance new</code> raises an error</h4>
+      <p>It is deliberate — it is a singleton. Use <code>Performance uniqueInstance</code> — §2.</p>
+
+      <h4><code>aSequencer size</code> returned the wrong number</h4>
+      <p>
+        <code>size</code> answers the <em>trigger</em> count, not the pattern length. Use
+        <code>gatesSize</code> for the length — §4.1.
+      </p>
+
+      <h4>A Sequencer plays the wrong notes after I changed its gates</h4>
+      <p>
+        <code>noteIndex</code> keeps counting across the change. <code>p resetAllSequencers</code>
+        realigns everything — §2.1.
+      </p>
+
+      <h4>My Mondo pattern behaves like a step pattern</h4>
+      <p>
+        Its player may have been replaced. The Mondo parsers install
+        <code>SequencerPlayerCyclic</code>; transformations that rebuild a Sequencer can drop back
+        to the linear default — §5.
+      </p>
+
+      <h4>Two parts have the same SuperDirt orbit</h4>
+      <p>
+        Orbits are assigned by a counter incremented per Sequencer and wrapped at 12, so heavy
+        session churn can collide. Set it explicitly with <code>orbit:</code>.
+      </p>
+
+      <h4>Where is the list of everything a Sequencer answers?</h4>
+      <p>
+        Browse <code>Sequencer</code> in Pharo — the protocols are grouped by purpose, and the
+        LiveCoding ones are what this manual documents.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

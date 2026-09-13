@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — Pattern Operators</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="operators.html">
 
@@ -19,12 +19,384 @@
 
   <div class="content">
 
-    <p class="lede">The symbols and conversion messages that turn plain Pharo values into patterns.</p>
+    <p class="lede">
+      Coypu's terseness comes from extending Pharo's own classes. An integer answers rhythms, a
+      string answers patterns, a symbol routes to an instrument — this page catalogues what each
+      base class gained.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#idea">Why it reads the way it does</a></li>
+        <li><a href="#integer">Integer</a></li>
+        <li><a href="#string">String</a>
+          <ol>
+            <li><a href="#string-notations">The six notations</a></li>
+            <li><a href="#string-notes">Note names</a></li>
+          </ol>
+        </li>
+        <li><a href="#symbol">Symbol</a></li>
+        <li><a href="#array">Array</a></li>
+        <li><a href="#number">Number and Collection</a></li>
+        <li><a href="#binary">Binary operators</a></li>
+        <li><a href="#traps">Traps</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="idea">
+      <h2>1. Why it reads the way it does</h2>
+
+      <p>
+        <code>16 downbeats to: #kick</code> contains no Coypu class name. That is deliberate: the
+        vocabulary is grafted onto the types you already have, so a pattern reads as a sentence
+        rather than as object construction.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Class</th><th>Gains</th></tr></thead>
+        <tbody>
+          <tr><td>Integer</td><td>Every named rhythm, random generators, note helpers</td></tr>
+          <tr><td>ByteString</td><td>Six pattern notations, note parsing, OSC helpers</td></tr>
+          <tr><td>ByteSymbol</td><td>Routing and live control of a part already playing</td></tr>
+          <tr><td>Array</td><td>Arithmetic, scales, Euclidean rhythms, conversion</td></tr>
+          <tr><td>Number</td><td>Tempo, MIDI conversion, OSC sending</td></tr>
+          <tr><td>SequenceableCollection</td><td><code>wrap:</code> — the indexing rule the whole system runs on</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title"><code>wrap:</code> is the one to understand</span>
+        <code>aCollection wrap: n</code> indexes modulo the size, one-based, so it never goes out of
+        bounds. Notes, durations, gate times and every effect parameter are read this way, which is
+        why lists of different lengths rotate against each other instead of failing.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="integer">
+      <h2>2. Integer</h2>
+
+      <p>
+        The receiver is almost always a <em>step count</em>. All 31 named rhythms are Integer
+        methods — see the <a href="rhythm-library.html">Rhythm Library</a> — alongside these:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Answers</th></tr></thead>
+        <tbody>
+          <tr><td>bpm</td><td>The step duration for that tempo — <code>p freq: 132 bpm</code></td></tr>
+          <tr><td>bars</td><td>A number of steps for that many bars</td></tr>
+          <tr><td>randomTrigs</td><td>A random gate pattern</td></tr>
+          <tr><td>randomTrigsWithProbability: n</td><td>The same at a chosen density</td></tr>
+          <tr><td>randomRhythm</td><td>A randomly chosen <em>named</em> rhythm</td></tr>
+          <tr><td>randomNotesFrom: array</td><td>Random notes from a collection</td></tr>
+          <tr><td>randomNotesFrom:octaves:</td><td>The same, octave-displaced</td></tr>
+          <tr><td>randomNotesIn: #( lo hi )</td><td>Uniform between two MIDI notes</td></tr>
+          <tr><td>randomWalksOn:octaves:root:</td><td>A scale-coherent melodic walk</td></tr>
+          <tr><td>melodyFrom: scale</td><td>A melody with resolved cadence points</td></tr>
+          <tr><td>randomSamplesFromFolder:</td><td>A pattern of random samples from a SuperDirt folder</td></tr>
+          <tr><td>copiesOf: n</td><td>An array of <em>self</em> copies</td></tr>
+          <tr><td>copiesOfEach: array</td><td>Each element repeated <em>self</em> times</td></tr>
+          <tr><td>spreadOver: n</td><td>Floats from 0 to <em>self</em> in <em>n</em> steps</td></tr>
+          <tr><td>modulo: n</td><td>One-based modulo, for indexing</td></tr>
+          <tr><td>asRisingArray</td><td><code>1</code> to <em>self</em></td></tr>
+          <tr><td>midiNoteToFreq</td><td>MIDI note number to hertz</td></tr>
+          <tr><td>semitonesToSpeed</td><td>Semitones to a playback-rate multiplier</td></tr>
+          <tr><td>dirtNoteToSpeed</td><td>The same, for SuperDirt</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="string">
+      <h2>3. String</h2>
+
+      <section id="string-notations">
+        <h3>3.1 The six notations</h3>
+
+        <p>
+          A string can be read six different ways. Which message you send decides what the tokens
+          mean:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Reads the string as</th></tr></thead>
+          <tbody>
+            <tr><td>hexBeat</td><td>Hex digits, four steps each</td></tr>
+            <tr><td>asDirtNotes</td><td>Comma-separated pitches with rests and durations</td></tr>
+            <tr><td>asDirtIndex</td><td>The same, but sample indices</td></tr>
+            <tr><td>asDirtSounds</td><td>Sound names for SuperDirt or Phausto</td></tr>
+            <tr><td>asDirtLevel</td><td>The same, but level values</td></tr>
+            <tr><td>asMondoNotes / asMondoSounds / asMondoIndex</td><td>Mondo mini-notation — cycle-based, with grouping and alternation</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code><span class="str">'F000'</span>              hexBeat      to: #kick.
+<span class="str">'36 , 38 , -/4 , 41'</span> asDirtNotes to: #bass.
+<span class="str">'bd [sd sd] bd &lt;sd cp&gt;'</span> asMondoSounds to: #drums.</code></pre>
+
+        <p>
+          The <code>asDirt…</code> family is step-based and the Mondo family is cycle-based — the
+          difference is explained in <a href="rhythms-advanced.html">Rhythms: Advanced §4</a>.
+        </p>
+
+        <p>Supporting pieces used by those parsers, occasionally useful alone:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Answers</th></tr></thead>
+          <tbody>
+            <tr><td>asSeqGates</td><td>Gates from a space-separated string, <code>~</code> being a rest</td></tr>
+            <tr><td>asDirtPureNotes</td><td>Just the parsed note numbers, as an array</td></tr>
+            <tr><td>splitTopLevelSlots</td><td>Split on spaces at bracket depth zero</td></tr>
+            <tr><td>parseMondoLeaves</td><td>Expand one Mondo slot into leaves</td></tr>
+            <tr><td>chordsToArrays</td><td>Parse <code>'c-maj d-min'</code> into interval arrays</td></tr>
+            <tr><td>parseChord</td><td>One chord to an interval array</td></tr>
+            <tr><td>multiplyStringsInString</td><td>Expand <code>x*3</code></td></tr>
+            <tr><td>withNRests</td><td>Expand <code>x/4</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="string-notes">
+        <h3>3.2 Note names</h3>
+
+        <p>
+          <code>asMidiNote</code> is the parser the string notations use. It accepts a bare number,
+          or a note letter with an optional accidental and octave:
+        </p>
+
+<pre><code><span class="str">'c4'</span>  asMidiNote.   <span class="cmt">"60"</span>
+<span class="str">'f#3'</span> asMidiNote.   <span class="cmt">"sharp"</span>
+<span class="str">'bb2'</span> asMidiNote.   <span class="cmt">"flat"</span>
+<span class="str">'cs5'</span> asMidiNote.   <span class="cmt">"TidalCycles-style sharp"</span>
+<span class="str">'c'</span>   asMidiNote.   <span class="cmt">"octave defaults to 4"</span></code></pre>
+
+        <p>
+          Accidentals accept both conventions: <code>#</code> or <code>s</code> for sharp,
+          <code>b</code> or <code>f</code> for flat, and <code>##</code>, <code>x</code>,
+          <code>ss</code>, <code>bb</code>, <code>ff</code> for the doubles. The result is clamped to
+          0–127.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="symbol">
+      <h2>4. Symbol</h2>
+
+      <p>
+        Symbols are instrument keys, and their extensions act on whatever is playing at that key —
+        the live-performance vocabulary:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>asRhythm</td><td>The named rhythm, always at 16 steps</td></tr>
+          <tr><td>to: aKey</td><td>Route the named rhythm to an instrument</td></tr>
+          <tr><td>to:index:</td><td>Route it and set sample indices</td></tr>
+          <tr><td>mute / unmute</td><td>Silence or restore</td></tr>
+          <tr><td>solo / unsolo</td><td>Isolate or release</td></tr>
+          <tr><td>flip</td><td>Invert the gates of the part playing there</td></tr>
+          <tr><td>rhythm: aName</td><td>Replace its gates with a named rhythm</td></tr>
+          <tr><td>gates: aRhythm</td><td>Replace its gates directly</td></tr>
+          <tr><td>notes: / index: / level:</td><td>Change its notes, sample indices or level</td></tr>
+          <tr><td>transpose: n</td><td>Shift its notes</td></tr>
+          <tr><td>swapWith: aKey</td><td>Exchange two parts</td></tr>
+          <tr><td>injectInto: aKey</td><td>Copy this part's gates, notes and durations to another key</td></tr>
+          <tr><td>x: / bw: / number:</td><td>Set synth parameters on a running part</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code>#kick flip.
+#bass transpose: <span class="num">-12</span>.
+#kick swapWith: #snare.
+#hh level: <span class="str">'0.4 0.8'</span>.</code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="array">
+      <h2>5. Array</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Answers</th></tr></thead>
+        <tbody>
+          <tr><td>asSeq</td><td>A Sequencer from gates, with defaults filled in</td></tr>
+          <tr><td>asRhythm</td><td>A <code>Rhythm</code></td></tr>
+          <tr><td>asNotes</td><td>A Sequencer where 0 means a rest and other values are notes</td></tr>
+          <tr><td>euclidean</td><td>A Euclidean rhythm from <code>#( onsets steps )</code></td></tr>
+          <tr><td>fullScale</td><td>A scale expanded across the MIDI range</td></tr>
+          <tr><td>intoScale: aSymbol</td><td>Map degrees onto a named scale</td></tr>
+          <tr><td>into: anArray</td><td>Index into another array, 0 staying a rest</td></tr>
+          <tr><td>of: anArray</td><td>Plain indexing</td></tr>
+          <tr><td>times: n</td><td>Repeat</td></tr>
+          <tr><td>offset: n</td><td>Rotate, wrapping</td></tr>
+          <tr><td>trigs / numberOfGates</td><td>Count the triggers</td></tr>
+          <tr><td>minDurationBetweenGates</td><td>The closest spacing — how <code>asSeq</code> picks a duration</td></tr>
+          <tr><td>randomOctaves: n</td><td>Displace each note randomly</td></tr>
+          <tr><td>arp: intervals</td><td>Arpeggiate over intervals</td></tr>
+          <tr><td>asSeries</td><td><code>#( 1 8 ) asSeries</code> → 1 to 8</td></tr>
+          <tr><td>root:octaves:</td><td>Expand a scale from a root over octaves</td></tr>
+          <tr><td>and: / and:and:</td><td>Build a Sequencer from gates, notes and durations</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="number">
+      <h2>6. Number and Collection</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Answers</th></tr></thead>
+        <tbody>
+          <tr><td>bpm</td><td>Step duration for a tempo</td></tr>
+          <tr><td>bars: n</td><td>Wait that many bars</td></tr>
+          <tr><td>midiNoteToFreq</td><td>MIDI note to hertz</td></tr>
+          <tr><td>asDirtArray</td><td>Wrap a scalar as a one-element array</td></tr>
+          <tr><td>toLocal: / toKyma:</td><td>Send the value as OSC to a named address</td></tr>
+          <tr><td>wait</td><td>Delay for that many seconds</td></tr>
+          <tr><td>randomsFromArray: #( lo hi )</td><td>Random integers in a range</td></tr>
+          <tr><td>secondsInStepAt:</td><td>Convert seconds to steps</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p>
+        On <code>SequenceableCollection</code>: <code>wrap:</code> as described in §1, and
+        <code>asOSCMessageForSuperDirt</code> to send a collection straight to SuperDirt.
+        <code>BlockClosure</code> gains <code>loopFor:</code>, which forks a block repeated a number
+        of times — handy for hand-rolled automation.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="binary">
+      <h2>7. Binary operators</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Operator</th><th>On</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>,</code></td><td>Sequencer</td><td>Concatenate gates, notes and durations</td></tr>
+          <tr><td><code>*</code></td><td>Sequencer</td><td>Repeat <em>n</em> times</td></tr>
+          <tr><td><code>*</code></td><td>String, Character</td><td>Repeat, space-separated</td></tr>
+          <tr><td><code>*</code> <code>+</code> <code>-</code></td><td>Array</td><td>Element-wise arithmetic with a number</td></tr>
+          <tr><td><code>+</code> <code>-</code></td><td>SequencerMono</td><td>Transpose. <code>+</code> answers a copy, <code>-</code> mutates</td></tr>
+          <tr><td><code>&lt;</code></td><td>Sequencer</td><td>Set notes — a binary form of <code>notes:</code></td></tr>
+          <tr><td><code>&gt;</code></td><td>Sequencer</td><td>Route to a key — a binary form of <code>to:</code></td></tr>
+          <tr><td><code>&gt;&gt;</code></td><td>Symbol, SequencerMono</td><td>Copy gates into another key</td></tr>
+          <tr><td><code>&lt;&lt;</code></td><td>String, Symbol</td><td>Send a value to that OSC parameter</td></tr>
+          <tr><td><code>/</code></td><td>String</td><td>Append <em>n</em>−1 rests</td></tr>
+          <tr><td><code>@</code></td><td>Array</td><td>Expand a scale by <code>#( root octaves )</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title"><code>+</code> and <code>-</code> are not symmetrical</span>
+        On <code>SequencerMono</code>, <code>+</code> deep-copies and answers a new Sequencer, while
+        <code>-</code> changes the receiver in place. Only one of them is safe to use on a part that
+        is already playing.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="traps">
+      <h2>8. Traps</h2>
+
+      <div class="callout warning">
+        <span class="callout-title"><code>asMidiNote</code> and <code>asMidiNN</code> disagree</span>
+        <code>'c4' asMidiNote</code> is 60; <code>'c4' asMidiNN</code> is 72. The string notations
+        use <code>asMidiNote</code>, so <code>c4</code> means middle C throughout this manual. If a
+        melody is an octave out, this is usually why.
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title"><code>Sequencer&gt;&gt;size</code> is the trigger count</span>
+        Not the pattern length. <code>gatesSize</code> gives the length.
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Symbol <code>asRhythm</code> is always 16 steps</span>
+        <code>#trueAksak asRhythm</code> truncates a 13-step pattern at 16. Send the rhythm to an
+        integer instead — <code>13 trueAksak</code>.
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Some extensions are experimental</span>
+        <code>Array&gt;&gt;&gt;</code> writes to the Transcript rather than doing anything musical,
+        and a few OSC helpers hard-code a Kyma hostname. Nothing here depends on them.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>9. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="api.html">Player &amp; Message API</a></td><td>The classes these operators build.</td></tr>
+          <tr><td><a href="rhythms-basics.html">Rhythms: Basics</a></td><td>The notations in use.</td></tr>
+          <tr><td><a href="melody.html">Melody &amp; Scales</a></td><td>Scale and chord operators in context.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>Every Integer rhythm message.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>10. Troubleshooting</h2>
+
+      <h4>A melody came out an octave high</h4>
+      <p><code>asMidiNN</code> rather than <code>asMidiNote</code> — §8.</p>
+
+      <h4><code>doesNotUnderstand</code> on a message this page lists</h4>
+      <p>
+        Check the receiver's class. Many messages exist on <code>ByteString</code> but not
+        <code>Symbol</code>, or on <code>SequencerMono</code> but not <code>Sequencer</code> — send
+        <code>asString</code> or <code>asRhythm</code> first.
+      </p>
+
+      <h4>Transposing with <code>-</code> changed a part that was playing</h4>
+      <p>It mutates in place; <code>+</code> copies — §7.</p>
+
+      <h4>My parameter list is not lining up with the notes</h4>
+      <p>
+        Each is read with <code>wrap:</code> independently, so different lengths rotate against each
+        other. Match the lengths if you want them locked — §1.
+      </p>
+
+      <h4><code>#( 3 8 ) euclidean</code> gave an unexpected rotation</h4>
+      <p>
+        Coypu uses a Bresenham variant rather than Bjorklund. See
+        <a href="rhythms-advanced.html">Rhythms: Advanced §1.1</a> for which named rhythms it
+        reproduces exactly.
+      </p>
+
+      <h4>Where do I see all of these in the image?</h4>
+      <p>
+        Browse the <code>*Coypu</code> extension protocols on <code>Integer</code>,
+        <code>ByteString</code>, <code>ByteSymbol</code>, <code>Array</code> and
+        <code>Number</code>.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>
