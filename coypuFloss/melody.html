@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coypu — Melody & Scales</title>
+  <title>Coypu — Melody &amp; Scales</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="melody.html">
 
@@ -13,18 +13,419 @@
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Melody & Scales</div>
-    <h1>Melody & Scales</h1>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Melody &amp; Scales</div>
+    <h1>Melody &amp; Scales</h1>
   </div>
 
   <div class="content">
 
-    <p class="lede">Notes, scales, chords, arpeggios and the generative melody tools.</p>
+    <p class="lede">
+      Giving a rhythm pitch — by hand, from a scale, as chords, or generated. Eighteen scales,
+      sixty-four chord types, and several ways to let the machine write the tune.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#notes">Notes by hand</a>
+          <ol>
+            <li><a href="#notes-names">Note names and the octave question</a></li>
+          </ol>
+        </li>
+        <li><a href="#scales">Scales</a>
+          <ol>
+            <li><a href="#scales-list">The eighteen scales</a></li>
+            <li><a href="#scales-using">Using a scale</a></li>
+            <li><a href="#scales-quirks">Two quirks worth knowing</a></li>
+          </ol>
+        </li>
+        <li><a href="#chords">Chords</a>
+          <ol>
+            <li><a href="#chords-notation">Chord notation</a></li>
+            <li><a href="#chords-arpeggios">Arpeggios</a></li>
+          </ol>
+        </li>
+        <li><a href="#generative">Generated melodies</a>
+          <ol>
+            <li><a href="#generative-walks">Random walks</a></li>
+            <li><a href="#generative-markov">Markov melodies</a></li>
+          </ol>
+        </li>
+        <li><a href="#transform">Transposing and progressions</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="notes">
+      <h2>1. Notes by hand</h2>
+
+      <p>
+        A Sequencer's notes are consumed one per trigger and wrap when they run out, so you never
+        need as many notes as steps:
+      </p>
+
+<pre><code>(<span class="num">16</span> claveSon notes: #( <span class="num">36 38 42 46</span> )) to: #perc.</code></pre>
+
+      <p>
+        Five triggers, four notes — the figure shifts by one each cycle, which is a cheap and
+        musical source of variation. Give it exactly five and it repeats identically.
+      </p>
+
+      <p>Many named rhythms take the notes inline as a string:</p>
+
+<pre><code><span class="num">16</span> claveSon: <span class="str">'36 38 42 46'</span> to: #perc.</code></pre>
+
+      <section id="notes-names">
+        <h3>1.1 Note names and the octave question</h3>
+
+        <p>
+          Where a string of notes is accepted, note names work as well as numbers.
+          <code>asMidiNote</code> handles a generous range of spellings:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Written</th><th>Means</th></tr></thead>
+          <tbody>
+            <tr><td><code>c4</code></td><td>MIDI 60 — middle C in Coypu's reckoning</td></tr>
+            <tr><td><code>c#4</code> <code>cs4</code></td><td>Sharp — <code>#</code> or TidalCycles-style <code>s</code></td></tr>
+            <tr><td><code>bb3</code> <code>bf3</code></td><td>Flat — <code>b</code> or <code>f</code></td></tr>
+            <tr><td><code>c##4</code> <code>cx4</code> <code>css4</code></td><td>Double sharp</td></tr>
+            <tr><td><code>cbb4</code> <code>cff4</code></td><td>Double flat</td></tr>
+            <tr><td><code>c</code></td><td>No octave digit defaults to octave 4</td></tr>
+            <tr><td><code>60</code></td><td>A bare number passes through unchanged</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">Two converters that disagree by an octave</span>
+          Coypu has both <code>asMidiNote</code> and an older <code>asMidiNN</code>, and they do not
+          agree: <code>'c4' asMidiNote</code> is 60, while <code>'c4' asMidiNN</code> is 72. The
+          string notations used throughout this manual go through <code>asMidiNote</code>, so
+          <code>c4</code> means 60. If a melody lands an octave high, check which one you called.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="scales">
+      <h2>2. Scales</h2>
+
+      <p>
+        A <code>Scale</code> is an array of semitone intervals from a root. Send the scale's name to
+        the <code>Scale</code> class to get it:
+      </p>
+
+<pre><code><span class="cls">Scale</span> pentaMinor.      <span class="cmt">"#(0 3 5 7 10)"</span>
+<span class="cls">Scale</span> pentaMinor: <span class="num">60</span>.  <span class="cmt">"the same, rooted at middle C"</span></code></pre>
+
+      <section id="scales-list">
+        <h3>2.1 The eighteen scales</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Scale</th><th>Intervals</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>major</td><td>0 2 4 5 7 9 11</td><td>The major scale</td></tr>
+            <tr><td>minor</td><td>0 2 3 5 7 8 10 12</td><td>Natural minor — see §2.3</td></tr>
+            <tr><td>pentaMajor</td><td>0 2 4 7 9</td><td>Major pentatonic</td></tr>
+            <tr><td>pentaMinor</td><td>0 3 5 7 10</td><td>Minor pentatonic</td></tr>
+            <tr><td>yo</td><td>0 3 5 7 10</td><td>Japanese <em>yo</em>, used in gagaku and shōmyō — identical to pentaMinor</td></tr>
+            <tr><td>blues</td><td>0 3 5 6 7 10</td><td>Minor pentatonic plus the flat fifth</td></tr>
+            <tr><td>bebop</td><td>0 2 4 5 7 9 10 11</td><td>Major with a chromatic passing tone</td></tr>
+            <tr><td>chromatic</td><td>0 1 2 … 11</td><td>Every semitone</td></tr>
+            <tr><td>augmented</td><td>0 3 4 7 8 11</td><td>Symmetrical, alternating minor and major thirds</td></tr>
+            <tr><td>gypsy</td><td>0 2 3 6 7 8 10</td><td>Hungarian/Romani minor, with its augmented second</td></tr>
+            <tr><td>flamenco</td><td>0 1 4 5 7 8 11</td><td>The Andalusian sound</td></tr>
+            <tr><td>persian</td><td>0 1 4 5 6 8 11</td><td>Persian</td></tr>
+            <tr><td>enigmatic</td><td>0 1 4 6 8 10 11</td><td>Verdi's <em>scala enigmatica</em></td></tr>
+            <tr><td>istrian</td><td>0 1 3 4 6</td><td>From the Istrian peninsula, Croatia</td></tr>
+            <tr><td>hirajoshi</td><td>0 4 6 7 11</td><td>Koto tuning adapted from shamisen music by Yatsuhashi Kengyō</td></tr>
+            <tr><td>insen</td><td>0 1 5 7 10</td><td>A koto tuning differing from hirajoshi by one note</td></tr>
+            <tr><td>sakura</td><td>0 1 5 7 8</td><td>The Japanese <em>in</em> scale — koto and shamisen</td></tr>
+            <tr><td>domenico</td><td>0 2 8 9 11</td><td>The author's own</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          Every one has a rooted variant taking a MIDI note — <code>Scale gypsy: 62</code> — and
+          <code>blues:octaves:</code> spans several octaves at once.
+        </p>
+      </section>
+
+      <section id="scales-using">
+        <h3>2.2 Using a scale</h3>
+
+        <p>A scale is just an array, so anything taking notes will take one:</p>
+
+<pre><code><span class="cmt">"pick random notes from a scale"</span>
+(<span class="num">16</span> quavers notes: (<span class="num">8</span> randomNotesFrom: (<span class="cls">Scale</span> pentaMinor: <span class="num">60</span>))) to: #arpy.</code></pre>
+
+        <p>
+          <code>fullScale</code> expands a scale across the whole MIDI range, which is what you want
+          when a generator needs room to move:
+        </p>
+
+<pre><code><span class="cls">Scale</span> pentaMinor fullScale.   <span class="cmt">"the pattern repeated up to 128 notes"</span></code></pre>
+
+        <p>
+          <code>intoScale:</code> goes the other way, mapping scale degrees onto pitches so you can
+          think in steps rather than semitones:
+        </p>
+
+<pre><code>#( <span class="num">0 2 4 2</span> ) intoScale: #pentaMinor.</code></pre>
+      </section>
+
+      <section id="scales-quirks">
+        <h3>2.3 Two quirks worth knowing</h3>
+
+        <div class="callout warning">
+          <span class="callout-title"><code>minor</code> includes its octave; nothing else does</span>
+          <code>Scale minor</code> is <code>#(0 2 3 5 7 8 10 12)</code> — eight elements, the last
+          being the octave. Every other scale stops below it. When a generator picks uniformly from
+          the array, <code>minor</code> therefore favours the root slightly and spans one note more
+          than you might expect.
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title"><code>yo</code> and <code>pentaMinor</code> are identical</span>
+          Both are <code>#(0 3 5 7 10)</code>. The two names are kept for what they mean
+          musically rather than for any difference in output — much as
+          <code>adowa</code> and <code>sikyi</code> share a rhythm.
+        </div>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="chords">
+      <h2>3. Chords</h2>
+
+      <p>
+        <code>Chord list</code> answers a Dictionary of 64 entries, from <code>major</code> to
+        <code>thirteen</code>, each an array of intervals. Many are aliases —
+        <code>major</code>/<code>maj</code>, <code>minor7</code>/<code>min7</code> — so the number
+        of distinct voicings is smaller than 64.
+      </p>
+
+<pre><code><span class="cls">Chord</span> list.        <span class="cmt">"inspect the whole table"</span>
+<span class="cls">Chord</span> traceList.   <span class="cmt">"print the names to the Transcript"</span></code></pre>
+
+      <section id="chords-notation">
+        <h3>3.1 Chord notation</h3>
+
+        <p>
+          Chords are written as strings in <code>root-quality</code> form, separated by spaces. The
+          root may be a note letter or a number:
+        </p>
+
+<pre><code><span class="str">'c-maj'</span> parseChord.       <span class="cmt">"#(0 4 7)"</span>
+<span class="str">'d-min7'</span> parseChord.     <span class="cmt">"rooted on D"</span>
+<span class="str">'12-sus4'</span> parseChord.    <span class="cmt">"root as a semitone offset"</span></code></pre>
+
+        <p>Send a whole progression to a Sequencer with <code>chords:</code>:</p>
+
+<pre><code>(<span class="num">16</span> downbeats chords: <span class="str">'c-maj a-min f-maj g-dom7'</span>) to: #piano.</code></pre>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Family</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td>Triads</td><td><code>maj</code> <code>min</code> <code>aug</code> <code>diminished</code> <code>five</code></td></tr>
+            <tr><td>Suspended</td><td><code>sus2</code> <code>sus4</code> <code>sevensus2</code> <code>ninesus4</code></td></tr>
+            <tr><td>Sixths</td><td><code>six</code> <code>six9</code> <code>minor5</code></td></tr>
+            <tr><td>Sevenths</td><td><code>maj7</code> <code>min7</code> <code>dom7</code> <code>diminished7</code> <code>minMaj7</code></td></tr>
+            <tr><td>Extensions</td><td><code>nine</code> <code>eleven</code> <code>thirteen</code> and their major/minor forms</td></tr>
+            <tr><td>Altered</td><td><code>sevenflat5</code> <code>sevensharp5</code> <code>sevenflat9</code> <code>min7flat5</code></td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout note">
+          <span class="callout-title">Chords make a polyphonic Sequencer</span>
+          <code>chords:</code> answers a <code>SequencerPoly</code>, which sends every note of the
+          chord on each trigger rather than one at a time. Not every backend handles that the same
+          way — SuperDirt gets one message per chord tone.
+        </div>
+      </section>
+
+      <section id="chords-arpeggios">
+        <h3>3.2 Arpeggios</h3>
+
+        <p>
+          <code>arpeggiate:</code> spreads the chord tones across successive triggers instead of
+          sounding them together:
+        </p>
+
+<pre><code>(<span class="num">16</span> semiquavers arpeggiate: <span class="str">'12-sus4 0-min'</span>) to: #psg.</code></pre>
+
+        <p>
+          The variant <code>arpeggiate:octave:</code> shifts the whole figure by octaves. Notes are
+          laid out in chord order and then consumed one per trigger like any other note list, so the
+          rhythm you choose decides the arpeggio's shape.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="generative">
+      <h2>4. Generated melodies</h2>
+
+      <section id="generative-walks">
+        <h3>4.1 Random walks</h3>
+
+        <p>
+          The difference between a random walk and random notes is that a walk moves by one scale
+          degree at a time. It stays coherent where free choice sounds scattered:
+        </p>
+
+<pre><code>(<span class="num">16</span> quavers notes: (<span class="num">8</span> randomWalksOn: <span class="cls">Scale</span> pentaMinor octaves: <span class="num">2</span> root: <span class="num">60</span>))
+  to: #arpy.</code></pre>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>Gives</th></tr></thead>
+          <tbody>
+            <tr><td>n randomWalksOn: scale</td><td>A walk within one octave of the scale</td></tr>
+            <tr><td>n randomWalksOn: scale octaves: o</td><td>A walk across <em>o</em> octaves</td></tr>
+            <tr><td>n randomWalksOn: scale octaves: o root: r</td><td>The same, rooted at MIDI note <em>r</em></td></tr>
+            <tr><td>n randomNotesFrom: array</td><td>Free choice, no step constraint</td></tr>
+            <tr><td>n randomNotesFrom: array octaves: o</td><td>Free choice, octave-displaced</td></tr>
+            <tr><td>n randomNotesIn: #( lo hi )</td><td>Uniform between two MIDI notes, ignoring any scale</td></tr>
+            <tr><td>n randomNotes: #( lo hi )</td><td>As above, by range</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          A Sequencer understands several of these directly, which avoids nesting the parentheses:
+        </p>
+
+<pre><code>(<span class="num">16</span> quavers randomNotesFrom: <span class="cls">Scale</span> pentaMinor fullScale) to: #arpy.
+(<span class="num">16</span> quavers withRandomNotesMin: <span class="num">48</span> max: <span class="num">72</span>) to: #arpy.</code></pre>
+      </section>
+
+      <section id="generative-markov">
+        <h3>4.2 Markov melodies</h3>
+
+        <p>
+          <code>JazzMarkovMelody</code> generates a line by weighted transitions between scale
+          degrees rather than by stepping at random. Motion tends upward and stepwise, which sounds
+          more deliberate than a walk:
+        </p>
+
+<pre><code>gen := <span class="cls">JazzMarkovMelody</span> new.
+melody := gen
+  generateMelodyFromScaleDegrees: <span class="cls">Scale</span> bebop
+  root: <span class="num">60</span>
+  startDegree: <span class="num">0</span>
+  length: <span class="num">32</span>.
+
+(<span class="num">32</span> quavers notes: melody) to: #arpy.</code></pre>
+
+        <p>
+          The transition table is seven degrees wide and built in <code>initialize</code>, so it
+          works with any seven-note scale. Feeding it a pentatonic will simply never reach the
+          higher degrees.
+        </p>
+
+        <p>
+          <code>melodyFrom:</code> is the simpler relative: it generates notes from a scale and then
+          nudges the note before each octave or second onto a more resolved degree.
+        </p>
+
+<pre><code>(<span class="num">16</span> quavers melodyFrom: (<span class="cls">Scale</span> major: <span class="num">60</span>)) to: #arpy.</code></pre>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="transform">
+      <h2>5. Transposing and progressions</h2>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Message</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>transpose: n</td><td>Shift a Sequencer's notes by <em>n</em> semitones</td></tr>
+          <tr><td>progression: intervals</td><td>Repeat the Sequencer once per interval, transposed each time</td></tr>
+          <tr><td>+ n / − n</td><td>Arithmetic transposition; <code>+</code> answers a copy</td></tr>
+          <tr><td>randomOctaves: n</td><td>Displace each note by a random number of octaves</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"a I–vi–IV–V from one bass figure"</span>
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 43</span> )) progression: #( <span class="num">0 9 5 7</span> ); to: #bass.
+
+<span class="cmt">"shift a whole part after the fact"</span>
+#bass transpose: <span class="num">-12</span>.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Progressions multiply length</span>
+        <code>progression: #( 0 9 5 7 )</code> makes the part four times longer. Against 16-step
+        drums that gives a four-bar harmonic cycle for free — but be aware which of your parts are
+        long, or they will seem to drift.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="rhythms-advanced.html">Rhythms: Advanced</a></td><td>Mondo notation, where pitch and rhythm are written together.</td></tr>
+          <tr><td><a href="operators.html">Pattern Operators</a></td><td>The conversion messages behind these notations.</td></tr>
+          <tr><td><a href="effects.html">Effects &amp; Mixing</a></td><td>Shaping how these notes sound.</td></tr>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>Melodic patterns worth stealing.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>My melody is an octave higher than expected</h4>
+      <p>
+        Probably <code>asMidiNN</code> rather than <code>asMidiNote</code> — they differ by twelve.
+        §1.1.
+      </p>
+
+      <h4>Fewer notes are sounding than I supplied</h4>
+      <p>
+        Notes are consumed one per <em>trigger</em>, not per step. A pattern with four triggers uses
+        four notes however many you give it, and the rest wait for the next cycle — §1.
+      </p>
+
+      <h4>The scale sounds right but one note keeps recurring</h4>
+      <p>
+        If it is <code>minor</code>, the octave is in the array twice over — as <code>0</code> and
+        as <code>12</code> — so uniform picking favours the root. §2.3.
+      </p>
+
+      <h4>A chord plays only one note</h4>
+      <p>
+        The backend may not handle polyphony the way <code>SequencerPoly</code> sends it. Try
+        <code>arpeggiate:</code> instead, which needs nothing special — §3.2.
+      </p>
+
+      <h4><code>parseChord</code> raises an error about an invalid chord</h4>
+      <p>
+        The quality is not in <code>Chord list</code>. Check spelling against
+        <code>Chord traceList</code>; the names are lowercase and unhyphenated —
+        <code>min7flat5</code>, not <code>m7b5</code>.
+      </p>
+
+      <h4>The Markov melody sounds stuck</h4>
+      <p>
+        Its table covers seven degrees. On a five-note scale the higher transitions fall outside the
+        array and the line stays low — give it a seven-note scale — §4.2.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

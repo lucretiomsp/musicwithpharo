@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — First Sounds</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="first-sounds.html">
 
@@ -19,12 +19,291 @@
 
   <div class="content">
 
-    <p class="lede">The Performance, the Performer and your first rhythm on an instrument.</p>
+    <p class="lede">
+      Four objects do all the work in Coypu. Learn what each one is for and the rest of this manual
+      is detail.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#four">The four objects</a></li>
+        <li><a href="#hello">Your first pattern</a>
+          <ol>
+            <li><a href="#hello-line">Reading the line</a></li>
+          </ol>
+        </li>
+        <li><a href="#keys">Instrument keys</a></li>
+        <li><a href="#adding">Adding parts</a></li>
+        <li><a href="#changing">Changing what is playing</a></li>
+        <li><a href="#notes">Giving a part pitch</a></li>
+        <li><a href="#stopping">Stopping cleanly</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="four">
+      <h2>1. The four objects</h2>
+
+      <div class="steps">
+        <div class="step"><strong>Sequencer</strong> — one part. It holds gates (when to trigger), notes, durations and gate times. Everything in <a href="rhythms-basics.html">Rhythms: Basics</a> builds one of these.</div>
+        <div class="step"><strong>Performance</strong> — a dictionary of Sequencers keyed by instrument name, plus the transport. There is exactly one, reached with <code>Performance uniqueInstance</code>.</div>
+        <div class="step"><strong>Performer</strong> — the backend adapter. It decides what a triggered step actually sends: an OSC message to SuperDirt, a MIDI note, a Phausto parameter change.</div>
+        <div class="step"><strong>Rhythm</strong> — an array of ones and zeros with a name. The 31 named rhythms are Rhythms; so is anything you write by hand.</div>
+      </div>
+
+      <p>
+        The flow is always the same. A Sequencer goes into the Performance under a key; the transport
+        walks the steps; on each trigger the Performer sends something to the outside world.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">The Performance is a Dictionary</span>
+        Literally — <code>Performance</code> is a subclass of <code>Dictionary</code>. Instrument
+        names are its keys and Sequencers are its values, which is why sending a new Sequencer to an
+        occupied key simply replaces the old one.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="hello">
+      <h2>2. Your first pattern</h2>
+
+      <p>
+        Assuming you have a backend working from <a href="setup.html">Setup</a>, open a Playground
+        and evaluate these line by line with <kbd>Cmd-D</kbd> / <kbd>Ctrl-D</kbd>:
+      </p>
+
+<pre><code><span class="cmt">"1. get the Performance"</span>
+p := <span class="cls">Performance</span> uniqueInstance.
+
+<span class="cmt">"2. choose where sound goes"</span>
+p performer: <span class="cls">PerformerSuperDirt</span> new.
+
+<span class="cmt">"3. set a tempo"</span>
+p freq: <span class="num">120</span> bpm.
+
+<span class="cmt">"4. put a pattern on an instrument"</span>
+<span class="num">16</span> downbeats to: #bd.
+
+<span class="cmt">"5. start the transport"</span>
+p play.</code></pre>
+
+      <p>Four evenly spaced kicks, looping. That is a working Coypu session.</p>
+
+      <section id="hello-line">
+        <h3>2.1 Reading the line</h3>
+
+        <p>
+          <code>16 downbeats to: #bd</code> is worth taking apart, because every pattern you write
+          will have this shape:
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>16</code></td><td>How many steps the pattern occupies</td></tr>
+            <tr><td><code>downbeats</code></td><td>The rule that fills those steps — here, a trigger every 4th</td></tr>
+            <tr><td><code>to: #bd</code></td><td>Which instrument key to file the resulting Sequencer under</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          The receiver is always the <em>step count</em>, never the trigger count. <code>16
+          downbeats</code> is sixteen steps containing four triggers — see
+          <a href="rhythms-basics.html">Rhythms: Basics §5</a>.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="keys">
+      <h2>3. Instrument keys</h2>
+
+      <p>
+        The symbol after <code>to:</code> is a key in the Performance, and what it means depends
+        entirely on your Performer:
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Performer</th><th>The key becomes</th></tr></thead>
+        <tbody>
+          <tr><td>PerformerSuperDirt</td><td>A SuperDirt sample folder name — <code>#bd</code>, <code>#sn</code>, <code>#cp</code></td></tr>
+          <tr><td>PerformerPhausto</td><td>An instrument in the Phausto rack</td></tr>
+          <tr><td>PerformerKyma</td><td>A Kyma VCS label — <code>#bass</code> drives <code>/vcs/bassGate/1</code></td></tr>
+          <tr><td>PerformerLocal</td><td>An OSC address — <code>#bass</code> sends <code>/bassGate</code> and <code>/bassNote</code></td></tr>
+          <tr><td>PerformerMIDI</td><td>A part on a MIDI channel, set with <code>midiCh:</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-title">Names that work everywhere</span>
+        With SuperDirt, <code>#bd</code>, <code>#sn</code>, <code>#hh</code>, <code>#cp</code> and
+        <code>#arpy</code> are all standard folders. If you hear nothing, a wrong folder name is as
+        likely as a wrong pattern.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="adding">
+      <h2>4. Adding parts</h2>
+
+      <p>Each new key is a new part. Add them while the transport runs:</p>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.
+<span class="num">16</span> claveSon  to: #cp.
+<span class="num">16</span> quavers   to: #hh.</code></pre>
+
+      <p>
+        Three patterns, three instruments, all locked to the same transport. There is no limit and no
+        setup — a key exists because you sent something to it.
+      </p>
+
+      <p>
+        Patterns of different lengths run happily together and drift against one another, realigning
+        at the least common multiple:
+      </p>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.    <span class="cmt">"16 steps"</span>
+<span class="num">13</span> trueAksak to: #perc.  <span class="cmt">"13 — realigns after 208 steps"</span></code></pre>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="changing">
+      <h2>5. Changing what is playing</h2>
+
+      <p>
+        This is the part that makes Coypu a live-coding system rather than a sequencer: re-evaluate
+        a line and the part changes at the next step. Nothing stops, nothing is rebuilt.
+      </p>
+
+<pre><code><span class="cmt">"with the transport running, evaluate this…"</span>
+<span class="num">16</span> claveSon to: #cp.
+
+<span class="cmt">"…then this"</span>
+<span class="num">16</span> rumba to: #cp.</code></pre>
+
+      <p>The same applies to tempo, and to taking a part away:</p>
+
+<pre><code>p freq: <span class="num">140</span> bpm.
+p mute: #hh.
+p remove: #cp.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Evaluate the line, not the file</span>
+        Coypu sessions are written as a Playground full of independent lines that you fire
+        individually — not as a script run top to bottom. Keeping every part on its own line is what
+        makes that practical.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="notes">
+      <h2>6. Giving a part pitch</h2>
+
+      <p>
+        A bare rhythm plays one repeated note — MIDI 60. <code>notes:</code> supplies pitches, taken
+        one per trigger and wrapping when they run out:
+      </p>
+
+<pre><code>(<span class="num">16</span> tumbao notes: #( <span class="num">36 43 36 41</span> )) to: #bass.</code></pre>
+
+      <p>Many named rhythms accept the notes inline, which reads better:</p>
+
+<pre><code><span class="num">16</span> tumbao: <span class="str">'36 43 36 41'</span> to: #bass.</code></pre>
+
+      <div class="callout warning">
+        <span class="callout-title">MIDI 60 is <code>c4</code> in Coypu</span>
+        Coypu's note-name parser treats <code>c4</code> as 60, so <code>'c4 e4 g4'</code> is a C
+        major triad from middle C. Some other systems call that C3 — if a melody comes out an octave
+        away from where you expected, this is usually why.
+      </div>
+
+      <p>
+        Scales, chords and generated melodies are covered in
+        <a href="melody.html">Melody &amp; Scales</a>.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="stopping">
+      <h2>7. Stopping cleanly</h2>
+
+<pre><code>p stop.        <span class="cmt">"halt the transport immediately"</span>
+p muteAll.     <span class="cmt">"silence everything but keep the parts"</span></code></pre>
+
+      <p>
+        <code>stop</code> is instant, with no fade and no wait for the bar. In performance you
+        usually want to thin the arrangement out first and stop into a gap — see
+        <a href="performing.html">Performing</a>.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">If sound continues after <code>stop</code></span>
+        Something else is still running — most often a second transport started by hand, or a
+        sustaining note on a backend that never received its note-off. <code>p muteAll</code>
+        followed by <code>p stop</code> clears the first; the second is backend-specific.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="by-example.html">Coypu by Example</a></td><td>A full session built up line by line, from one kick to an arrangement.</td></tr>
+          <tr><td><a href="rhythms-basics.html">Rhythms: Basics</a></td><td>Every notation for building a pattern.</td></tr>
+          <tr><td><a href="rhythm-library.html">Rhythm Library</a></td><td>All 31 named rhythms.</td></tr>
+          <tr><td><a href="performing.html">Performing</a></td><td>Transport, mute, solo and the moves you make live.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4>Everything runs without error but there is no sound</h4>
+      <p>
+        Work outwards: is the transport running (<code>p play</code>), is a Performer set
+        (<a href="setup.html">Setup §4</a>), and is the backend actually up? A Coypu session with no
+        Performer raises nothing — it simply sends nowhere.
+      </p>
+
+      <h4>One instrument is silent while the others play</h4>
+      <p>
+        The key probably does not exist on the backend — a misspelt SuperDirt folder, or a Phausto
+        instrument that is not in the rack. Try a name you know works, such as <code>#bd</code>.
+      </p>
+
+      <h4>My pattern plays once and stops</h4>
+      <p>
+        You used <code>playFor:</code> with a small number. <code>p play</code> runs effectively
+        indefinitely — see <a href="performing.html">Performing §2</a>.
+      </p>
+
+      <h4>Re-evaluating a line did not change anything</h4>
+      <p>
+        Check you evaluated the line rather than just saving it, and that the key matches — sending
+        to <code>#hh</code> will not alter a part filed under <code>#ch</code>.
+      </p>
+
+      <h4>The melody is an octave out</h4>
+      <p>Coypu treats <code>c4</code> as MIDI 60 — §6.</p>
+
+      <h4>Two parts will not stay in sync</h4>
+      <p>
+        They are different lengths and are meant to drift. Give them the same length, or a common
+        multiple — §4.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

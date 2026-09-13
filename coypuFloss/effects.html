@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coypu — Effects & Mixing</title>
+  <title>Coypu — Effects &amp; Mixing</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="effects.html">
 
@@ -13,18 +13,301 @@
 
 <div class="main">
   <div class="page-header">
-    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Effects & Mixing</div>
-    <h1>Effects & Mixing</h1>
+    <div class="breadcrumb"><a href="index.html">Coypu</a> › Guides › Effects &amp; Mixing</div>
+    <h1>Effects &amp; Mixing</h1>
   </div>
 
   <div class="content">
 
-    <p class="lede">SuperDirt effect parameters, levels, panning and per-track shaping.</p>
+    <p class="lede">
+      Shaping how a part sounds rather than when it plays — levels, panning, filters and effects.
+      Which messages are available depends on your backend, and this page is mostly about telling
+      the two families apart.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#families">Two families of parameter</a></li>
+        <li><a href="#dirt">SuperDirt parameters</a>
+          <ol>
+            <li><a href="#dirt-core">Level, pan and pitch</a></li>
+            <li><a href="#dirt-effects">Reverb, delay and filters</a></li>
+            <li><a href="#dirt-raw">Reaching anything else</a></li>
+          </ol>
+        </li>
+        <li><a href="#extra">Synth parameters</a></li>
+        <li><a href="#patterns">Parameters are patterns too</a></li>
+        <li><a href="#bugs">Two source bugs to know about</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="families">
+      <h2>1. Two families of parameter</h2>
+
+      <p>
+        A Sequencer carries two separate bags of settings, and a message writes into one or the
+        other. Knowing which is which explains why a message that works on one backend does nothing
+        on another.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Bag</th><th>Written by</th><th>Read by</th></tr></thead>
+        <tbody>
+          <tr><td><code>dirtMessage</code></td><td><code>gain:</code>, <code>pan:</code>, <code>room:</code>, <code>speed:</code> …</td><td><code>PerformerSuperDirt</code> only</td></tr>
+          <tr><td><code>extraParams</code></td><td><code>cutoff:</code>, <code>decay:</code>, <code>modIndex:</code>, <code>level:</code> …</td><td>Kyma, Phausto, local OSC and MIDI</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">Backend messages are silently ignored elsewhere</span>
+        Sending <code>room: 0.4</code> on a Kyma performance does not error — it writes into a
+        dictionary nothing will read. If an effect message appears to do nothing, check it belongs
+        to the family your Performer uses.
+      </div>
+
+      <p>
+        Two messages bridge the gap by asking the Performer where the value belongs:
+        <code>index:</code> and <code>level:</code>. <code>PerformerSuperDirt</code> and
+        <code>PerformerMIDI</code> each route them differently — the MIDI performer, for instance,
+        sends <code>level:</code> as CC 7 and <code>index:</code> as CC 20.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="dirt">
+      <h2>2. SuperDirt parameters</h2>
+
+      <section id="dirt-core">
+        <h3>2.1 Level, pan and pitch</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>SuperDirt key</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>gain:</td><td><code>gain</code></td><td>Level. 1.0 is unity; SuperDirt is happy above it</td></tr>
+            <tr><td>pan:</td><td><code>pan</code></td><td>0 left, 0.5 centre, 1 right</td></tr>
+            <tr><td>speed:</td><td><code>speed</code></td><td>Playback rate — changes pitch and length together</td></tr>
+            <tr><td>pitch:</td><td><code>speed</code></td><td>Same thing, but you give it semitones and Coypu converts</td></tr>
+            <tr><td>sound:</td><td><code>s</code>, <code>n</code></td><td>Sample folder and index, as <code>'bd:3 cp'</code></td></tr>
+            <tr><td>dirtNotes:</td><td><code>n</code></td><td>Note or sample index per trigger</td></tr>
+            <tr><td>voice:</td><td><code>voice</code></td><td>Voice variation on SuperDirt's synths</td></tr>
+            <tr><td>rel: / hold:</td><td><code>rel</code></td><td>Release of the amplitude envelope</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code>(<span class="num">16</span> downbeats gain: <span class="num">1.1</span>; pan: <span class="num">0.3</span>) to: #bd.
+
+<span class="cmt">"pitch: takes semitones — a fifth up"</span>
+(<span class="num">16</span> quavers pitch: #( <span class="num">0 7</span> )) to: #arpy.</code></pre>
+
+        <div class="callout tip">
+          <span class="callout-title"><code>pitch:</code> versus <code>speed:</code></span>
+          Both end up as SuperDirt's <code>speed</code>. <code>speed: 2</code> means “twice as fast”;
+          <code>pitch: 12</code> means “an octave up” and Coypu does the conversion. Reach for
+          <code>pitch:</code> whenever you are thinking musically.
+        </div>
+      </section>
+
+      <section id="dirt-effects">
+        <h3>2.2 Reverb, delay and filters</h3>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Message</th><th>SuperDirt key</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>room:</td><td><code>room</code></td><td>Reverb amount</td></tr>
+            <tr><td>size:</td><td><code>size</code></td><td>Reverb size</td></tr>
+            <tr><td>delay:</td><td><code>delay</code></td><td>Delay wet/dry</td></tr>
+            <tr><td>delayTime:</td><td><code>delaytime</code></td><td>Delay time</td></tr>
+            <tr><td>delayFb:</td><td><code>delayfb</code></td><td>Delay feedback</td></tr>
+            <tr><td>lock:</td><td><code>lock</code></td><td>1 locks delay time to the tempo grid</td></tr>
+            <tr><td>bpf:</td><td><code>bandf</code></td><td>Band-pass centre frequency</td></tr>
+            <tr><td>bpq:</td><td><code>bpq</code></td><td>Band-pass resonance</td></tr>
+            <tr><td>djf:</td><td><code>djf</code></td><td>Alex McLean's DJ filter — low pass below 0.5, high pass above</td></tr>
+            <tr><td>squiz:</td><td><code>room</code> ⚠</td><td>Intended as squiz distortion — see §5</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code>(<span class="num">16</span> claveSon room: <span class="num">0.4</span>; size: <span class="num">0.8</span>) to: #cp.
+
+<span class="cmt">"tempo-locked delay"</span>
+(<span class="num">16</span> quavers delay: <span class="num">0.5</span>; delayTime: <span class="num">0.25</span>; delayFb: <span class="num">0.6</span>; lock: <span class="num">1</span>) to: #arpy.
+
+<span class="cmt">"one knob sweep across the whole filter range"</span>
+(<span class="num">16</span> semiquavers djf: #( <span class="num">0.2 0.4 0.6 0.8</span> )) to: #hh.</code></pre>
+      </section>
+
+      <section id="dirt-raw">
+        <h3>2.3 Reaching anything else</h3>
+
+        <p>
+          SuperDirt accepts far more parameters than Coypu wraps. <code>dirt:</code> takes an array
+          of alternating keys and values and writes them straight into the message:
+        </p>
+
+<pre><code>(<span class="num">16</span> downbeats dirt: #( <span class="str">'crush'</span> <span class="num">4</span> <span class="str">'coarse'</span> <span class="num">2</span> <span class="str">'shape'</span> <span class="num">0.4</span> )) to: #bd.</code></pre>
+
+        <p>
+          The lower-level <code>add:</code> takes a single association, and
+          <code>dirt:to:</code> combines the two steps to avoid the parentheses. Anything SuperDirt
+          understands is reachable this way, whether or not Coypu has a named message for it.
+        </p>
+      </section>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="extra">
+      <h2>3. Synth parameters</h2>
+
+      <p>
+        The <code>extraParams</code> family targets a synthesiser rather than a sampler — Kyma VCS
+        controls, Phausto DSP parameters, or MIDI CCs. Each message stores its values under a
+        capitalised name that the Performer appends to the instrument key.
+      </p>
+
+      <div class="param-table-wrap">
+      <table class="param-table">
+        <thead><tr><th>Group</th><th>Messages</th></tr></thead>
+        <tbody>
+          <tr><td>Filter</td><td><code>cutoff:</code> <code>cutoffFreq:</code> <code>resonance:</code> <code>bw:</code> <code>envMod:</code></td></tr>
+          <tr><td>Envelope</td><td><code>decay:</code> <code>damping:</code> <code>pitchEnv:</code></td></tr>
+          <tr><td>Modulation</td><td><code>lfoFreq:</code> <code>lfoAmount:</code> <code>modIndex:</code> <code>modRatio:</code> <code>modPitch:</code></td></tr>
+          <tr><td>Shape</td><td><code>duty:</code> <code>mode:</code> <code>waveform</code> via <code>mode:</code></td></tr>
+          <tr><td>Drive</td><td><code>drive:</code> <code>distortion:</code> <code>ratio:</code> <code>amount:</code></td></tr>
+          <tr><td>Time</td><td><code>time:</code> <code>rate:</code> <code>fb:</code></td></tr>
+          <tr><td>Other</td><td><code>accent:</code> <code>effect:</code> <code>x:</code> <code>level:</code> <code>index:</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+<pre><code><span class="cmt">"an acid line on a Phausto or Kyma synth"</span>
+(<span class="num">16</span> tresillo notes: #( <span class="num">36 36 38 41</span> ))
+  cutoff: <span class="str">'0.2 0.5 0.8 0.4'</span>;
+  resonance: <span class="num">0.8</span>;
+  envMod: <span class="num">0.6</span>;
+  to: #acid.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Where the name goes</span>
+        A Sequencer at <code>#acid</code> with a <code>#Cutoff</code> entry addresses
+        <code>acidCutoff</code> — on Kyma that is a VCS label, on Phausto a DSP parameter name. Your
+        synth has to expose a parameter by that name for anything to happen, which is why these
+        messages are quiet when nothing matches.
+      </div>
+
+      <p>
+        <code>x:</code> and <code>bw:</code> exist for physical-model controls such as a modal bar's
+        strike position and bandwidth. The symbol shorthands <code>#name x:</code>,
+        <code>#name bw:</code> and <code>#name number:</code> set them on a part already playing.
+      </p>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="patterns">
+      <h2>4. Parameters are patterns too</h2>
+
+      <p>
+        Every one of these messages accepts a single value <em>or</em> a collection. Given a
+        collection, the values are consumed one per trigger and wrap — exactly like notes:
+      </p>
+
+<pre><code><span class="cmt">"one value: constant"</span>
+(<span class="num">16</span> quavers pan: <span class="num">0.5</span>) to: #hh.
+
+<span class="cmt">"a collection: a pattern in its own right"</span>
+(<span class="num">16</span> quavers pan: #( <span class="num">0.1 0.9 0.3 0.7</span> )) to: #hh.
+
+<span class="cmt">"a string works where the message takes one"</span>
+(<span class="num">16</span> quavers cutoff: <span class="str">'0.2 0.4 0.8'</span>) to: #hh.</code></pre>
+
+      <p>
+        This is where Coypu's terseness pays off: a four-value pan array against a five-trigger
+        rhythm gives a slowly rotating stereo image with no modulation source and no extra code.
+        Deliberately mismatched lengths are the technique, not a mistake.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Change a parameter live</span>
+        The symbol shorthands act on whatever is currently playing, so you can adjust a part without
+        re-sending it: <code>#acid level: 0.4</code>, <code>#bd index: '1 3 2'</code>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="bugs">
+      <h2>5. Two source bugs to know about</h2>
+
+      <div class="callout warning">
+        <span class="callout-title"><code>squiz:</code> sets the reverb, not the squiz</span>
+        <code>Sequencer&gt;&gt;squiz:</code> writes its value to the <code>'room'</code> key — a
+        copy-paste from <code>room:</code>. Sending it therefore changes reverb amount and silently
+        overwrites any <code>room:</code> you set. Until it is fixed, reach squiz through
+        <code>dirt: #( 'squiz' 2 )</code> instead.
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title"><code>disortion:</code> is a misspelt twin of <code>distortion:</code></span>
+        Both exist and both write <code>#Distortion</code>, so either works. The misspelling is
+        harmless, but <code>distortion:</code> is the one to type.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>6. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="phausto-midi.html">Phausto &amp; MIDI</a></td><td>What each backend does with these parameters.</td></tr>
+          <tr><td><a href="api.html">Player &amp; Message API</a></td><td>The full Sequencer protocol.</td></tr>
+          <tr><td><a href="performing.html">Performing</a></td><td>Changing parameters mid-set.</td></tr>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>Patterns that use these in context.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>7. Troubleshooting</h2>
+
+      <h4>An effect message does nothing</h4>
+      <p>
+        It probably belongs to the other family. <code>room:</code> and friends are SuperDirt-only;
+        <code>cutoff:</code> and friends need a synth exposing that parameter name — §1.
+      </p>
+
+      <h4>Setting <code>squiz:</code> changed the reverb</h4>
+      <p>That is the bug in §5. Use <code>dirt: #( 'squiz' 2 )</code>.</p>
+
+      <h4>My parameter pattern is out of step with the notes</h4>
+      <p>
+        Values are consumed per trigger and wrap independently, so a 4-value list against a
+        5-trigger rhythm rotates. If you want them locked, give both the same length — §4.
+      </p>
+
+      <h4><code>pitch:</code> raises an error on a single number</h4>
+      <p>
+        It maps over its argument, so it wants a collection. Use <code>pitch: #( 7 )</code>, or
+        <code>speed:</code> for a scalar — §2.1.
+      </p>
+
+      <h4>Nothing happens on Kyma however I set the parameters</h4>
+      <p>
+        The VCS label must match <em>instrument key + parameter name</em> exactly — a Sequencer at
+        <code>#bass</code> with <code>#Cutoff</code> needs a <code>bassCutoff</code> control — §3.
+      </p>
+
+      <h4>I need a SuperDirt parameter Coypu has no message for</h4>
+      <p>Use <code>dirt:</code> with raw key/value pairs — §2.3.</p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coypu — Coypu by Example</title>
   <link rel="stylesheet" href="coypu-shared.css">
-  <script>if (localStorage.getItem("coypu-theme") === "dark") document.documentElement.classList.add("dark");</script>
+  <script>if (localStorage.getItem('coypu-theme') === 'dark') document.documentElement.classList.add('dark');</script>
 </head>
 <body data-page="by-example.html">
 
@@ -19,12 +19,316 @@
 
   <div class="content">
 
-    <p class="lede">A worked session: from one kick drum to a full arrangement, line by line.</p>
+    <p class="lede">
+      One session, built from a single kick drum to a full arrangement, one line at a time — with
+      the reasoning for each move. Every line here is runnable as written.
+    </p>
 
-    <div class="callout warning">
-      <span class="callout-title">Being written</span>
-      This page is a placeholder. The navigation is complete so nothing is broken; the content is on its way.
-    </div>
+    <nav class="page-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#setup">Before you start</a></li>
+        <li><a href="#foundation">Laying a foundation</a></li>
+        <li><a href="#groove">Finding a groove</a></li>
+        <li><a href="#bass">Adding a bass</a></li>
+        <li><a href="#melody">A melody that changes</a></li>
+        <li><a href="#tension">Building tension</a></li>
+        <li><a href="#full">The finished session</a></li>
+        <li><a href="#next-steps">Where to go next</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ol>
+    </nav>
+
+    <!-- ======================================================= -->
+    <section id="setup">
+      <h2>1. Before you start</h2>
+
+      <p>
+        This session uses <code>PerformerSuperDirt</code> because its sample names are the most
+        widely recognisable. Everything works identically on other backends — only the instrument
+        keys change.
+      </p>
+
+<pre><code>p := <span class="cls">Performance</span> uniqueInstance.
+p performer: <span class="cls">PerformerSuperDirt</span> new.
+p freq: <span class="num">124</span> bpm.
+p play.</code></pre>
+
+      <p>
+        The transport is now running with nothing on it — silence, but a live clock. Every line from
+        here is evaluated <em>while it plays</em>.
+      </p>
+
+      <div class="callout tip">
+        <span class="callout-title">Keep them separate</span>
+        Put each line in the Playground on its own row and fire them individually with
+        <kbd>Cmd-D</kbd>. That is the working method the whole design assumes.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="foundation">
+      <h2>2. Laying a foundation</h2>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.</code></pre>
+
+      <p>
+        Four to the floor. Unglamorous, but it establishes where beat one is, which every later
+        decision depends on.
+      </p>
+
+      <p>Now a backbeat. Rather than writing an array by hand, invert the kick:</p>
+
+<pre><code>#( <span class="num">0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0</span> ) asSeq to: #sn.</code></pre>
+
+      <p>And a hat to carry the subdivision:</p>
+
+<pre><code><span class="num">16</span> quavers to: #hh.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Why quavers and not semiquavers</span>
+        <code>16 semiquavers</code> puts a hat on every step, which at 124 BPM is a wall. Eighth
+        notes leave room for the parts that come next. You can always thicken it later.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="groove">
+      <h2>3. Finding a groove</h2>
+
+      <p>
+        Straight four-to-the-floor is a grid, not a groove. Replacing the snare with a clave gives
+        the bar an internal shape:
+      </p>
+
+<pre><code><span class="num">16</span> claveSon to: #cp.</code></pre>
+
+      <p>
+        Now try the other clave and listen to the difference — one stroke moves, and the whole feel
+        changes:
+      </p>
+
+<pre><code><span class="num">16</span> rumba to: #cp.</code></pre>
+
+      <p>
+        The son clave places its third stroke on step 7; the rumba clave puts it on step 8, a
+        half-pulse later, which pushes harder against the kick. Keep whichever you prefer.
+      </p>
+
+      <p>Offsetting the hat against the kick opens the pattern up further:</p>
+
+<pre><code><span class="num">16</span> quavers offset: <span class="num">1</span>; to: #hh.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Change one thing at a time</span>
+        The reason to fire lines individually is that you can hear what each one did. Swapping two
+        parts at once and liking the result teaches you nothing about which change caused it.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="bass">
+      <h2>4. Adding a bass</h2>
+
+      <p>
+        A bass part needs both a rhythm and pitches. The habanera/tumbao cell is a natural fit
+        against a clave:
+      </p>
+
+<pre><code>(<span class="num">16</span> tumbao notes: #( <span class="num">36 36 43 41</span> )) to: #bass.</code></pre>
+
+      <p>
+        Four notes across the pattern's five triggers, so the notes wrap and the figure shifts each
+        time round — a small amount of variation for free.
+      </p>
+
+      <p>Give it a harmonic journey with <code>progression:</code>:</p>
+
+<pre><code>(<span class="num">16</span> tumbao notes: #( <span class="num">36 36 43 41</span> ))
+  progression: #( <span class="num">0 0 5 7</span> ); to: #bass.</code></pre>
+
+      <p>
+        That repeats the figure four times, transposed by 0, 0, 5 and 7 semitones — a I–I–IV–V
+        movement, and a 64-step part built from a 16-step one.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">The bass is now four times as long</span>
+        <code>progression:</code> concatenates, so this part wraps every 64 steps while the drums
+        wrap every 16. That is intentional here, but it is worth knowing which of your parts are
+        long — see <a href="rhythms-basics.html">Rhythms: Basics §8</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="melody">
+      <h2>5. A melody that changes</h2>
+
+      <p>
+        A fixed melody gets old quickly. A random walk stays in the scale but takes a different route
+        every time you evaluate it:
+      </p>
+
+<pre><code>(<span class="num">16</span> quavers notes: (<span class="num">8</span> randomWalksOn: <span class="cls">Scale</span> pentaMinor octaves: <span class="num">2</span> root: <span class="num">60</span>))
+  to: #arpy.</code></pre>
+
+      <p>
+        Re-evaluate that line whenever the melody stales. The pentatonic minor keeps it consonant
+        against almost anything.
+      </p>
+
+      <p>
+        For a part that varies without you touching it, use a Mondo alternation instead — the
+        bracketed choice advances one per cycle:
+      </p>
+
+<pre><code><span class="str">'c4 &lt;e4 g4&gt; a4 &lt;c5 b4 g4&gt;'</span> asMondoNotes to: #arpy.</code></pre>
+
+      <div class="callout note">
+        <span class="callout-title">Mondo needs the cyclic transport</span>
+        Alternations advance per cycle, so they only move under
+        <code>playCyclicFor:</code>. If you are on <code>play</code>, the first choice repeats —
+        see <a href="performing.html">Performing §2.1</a>.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="tension">
+      <h2>6. Building tension</h2>
+
+      <p>Three moves, in rough order of size.</p>
+
+      <p><strong>Thin it out.</strong> Solo the bass and let the room breathe:</p>
+
+<pre><code>p temporarySave.    <span class="cmt">"snapshot first, so you can get back"</span>
+p solo: #bass.</code></pre>
+
+      <p><strong>Bring it back and lift it.</strong></p>
+
+<pre><code>p restore.
+p freq: <span class="num">128</span> bpm.</code></pre>
+
+      <p><strong>Then the big gesture</strong> — put every part onto one rhythm:</p>
+
+<pre><code>p rhythm: <span class="num">16</span> tresillo.</code></pre>
+
+      <p>
+        Everything hits together on 3+3+2. It is blunt and extremely effective, and you undo it by
+        re-sending the parts you want back:
+      </p>
+
+<pre><code><span class="num">16</span> downbeats to: #bd.
+<span class="num">16</span> quavers offset: <span class="num">1</span>; to: #hh.</code></pre>
+
+      <p>For a change of texture rather than of rhythm, switch the kit to jungle:</p>
+
+<pre><code><span class="num">32</span> jungleKick  to: #bd.
+<span class="num">32</span> jungleSnare to: #sn.
+<span class="num">32</span> jungleRim   to: #hh.</code></pre>
+
+      <div class="callout warning">
+        <span class="callout-title">Those three are 32 steps</span>
+        The jungle patterns are twice the length of everything else here. That is what gives them
+        their half-time feel, but give them 32 rather than 16 or they truncate.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="full">
+      <h2>7. The finished session</h2>
+
+      <p>Everything above, in one place:</p>
+
+<pre><code><span class="cmt">"--- setup ------------------------------------------------"</span>
+p := <span class="cls">Performance</span> uniqueInstance.
+p performer: <span class="cls">PerformerSuperDirt</span> new.
+p freq: <span class="num">124</span> bpm.
+p play.
+
+<span class="cmt">"--- drums ------------------------------------------------"</span>
+<span class="num">16</span> downbeats to: #bd.
+<span class="num">16</span> rumba     to: #cp.
+<span class="num">16</span> quavers offset: <span class="num">1</span>; to: #hh.
+
+<span class="cmt">"--- bass -------------------------------------------------"</span>
+(<span class="num">16</span> tumbao notes: #( <span class="num">36 36 43 41</span> ))
+  progression: #( <span class="num">0 0 5 7</span> ); to: #bass.
+
+<span class="cmt">"--- melody -----------------------------------------------"</span>
+(<span class="num">16</span> quavers notes: (<span class="num">8</span> randomWalksOn: <span class="cls">Scale</span> pentaMinor octaves: <span class="num">2</span> root: <span class="num">60</span>))
+  to: #arpy.
+
+<span class="cmt">"--- moves ------------------------------------------------"</span>
+p temporarySave.
+p solo: #bass.
+p restore.
+p rhythm: <span class="num">16</span> tresillo.
+p freq: <span class="num">128</span> bpm.
+
+<span class="cmt">"--- out --------------------------------------------------"</span>
+p mute: #( #arpy #hh ).
+p stop.</code></pre>
+
+      <div class="callout tip">
+        <span class="callout-title">Make it yours</span>
+        Swap <code>rumba</code> for any of the 31 rhythms in the
+        <a href="rhythm-library.html">Rhythm Library</a>, or <code>pentaMinor</code> for any scale
+        in <a href="melody.html">Melody &amp; Scales</a>. The structure holds while the material
+        changes completely.
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="next-steps" class="next-steps">
+      <h2>8. Where to go next</h2>
+      <table>
+        <thead><tr><th>Document</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td><a href="gallery.html">Gallery</a></td><td>More complete patterns, each runnable as written.</td></tr>
+          <tr><td><a href="rhythms-advanced.html">Rhythms: Advanced</a></td><td>Euclidean patterns, Mondo notation and transforms.</td></tr>
+          <tr><td><a href="melody.html">Melody &amp; Scales</a></td><td>Scales, chords and generated melodies.</td></tr>
+          <tr><td><a href="performing.html">Performing</a></td><td>The live moves used in §6, in full.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================================================= -->
+    <section id="troubleshooting" class="troubleshooting">
+      <h2>9. Troubleshooting</h2>
+
+      <h4>The bass drifts out of phase with the drums</h4>
+      <p>
+        It is 64 steps after <code>progression:</code> while the drums are 16. They realign every
+        four bars, which is the intended effect — §4.
+      </p>
+
+      <h4><code>p restore</code> brought back more than I expected</h4>
+      <p>
+        Restore reinstates the whole snapshot. Take the snapshot immediately before the move you
+        mean to undo — see <a href="performing.html">Performing §4.1</a>.
+      </p>
+
+      <h4>The Mondo melody never changes</h4>
+      <p>Alternations need <code>playCyclicFor:</code> rather than <code>play</code> — §5.</p>
+
+      <h4>The jungle section sounds wrong against the bass</h4>
+      <p>
+        32-step drums against a 64-step bass line up fine; against 16-step parts they do not. Give
+        everything in that section a multiple of 32 — §6.
+      </p>
+
+      <h4>The random melody is too wide</h4>
+      <p>
+        Lower <code>octaves:</code> to 1, or use fewer notes so the walk has less room to wander —
+        §5.
+      </p>
+
+      <h4>I want the old melody back after re-evaluating</h4>
+      <p>
+        A random walk is generated fresh each time and the previous one is gone. If you find one you
+        like, inspect the Sequencer's <code>notes</code> and paste them in as a literal array.
+      </p>
+    </section>
 
     <footer class="page-nav" id="coypu-page-nav"><!-- injected --></footer>
     <p class="edit-link"><!-- injected --></p>
