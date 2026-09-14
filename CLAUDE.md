@@ -74,6 +74,15 @@ node _tools/generate-rhythm-library.cjs <path-to-Coypu-src-dir>
   grouping **computed from source**. The prose (origins, ethnomusicological notes) is curated in
   `NOTES` inside the generator; `REGIONS` groups them, and the script warns about any rhythm not
   placed in a region.
+- `coypuFloss/coypu-rhythms.js` — emitted by the same run: the pattern data as a plain object, so
+  other pages can draw rhythms without restating them. **No page should ever hand-write a rhythm's
+  steps**; that is what lets the manual and the package stay in step.
+
+`coypuFloss/coypu-tubs.js` renders TUBS (Time Unit Box System) notation from that data wherever a
+page contains `<div class="tubs" data-rhythm="NAME"></div>` — used throughout
+`rhythms-explained.html`. Group separators fall every 4 pulses for binary patterns and **at the
+onsets** for additive metres, so `trueAksak`'s 2+2+2+3+2+2 is visible rather than merely stated.
+Load order matters: `coypu-rhythms.js` before `coypu-tubs.js`.
 
 **Accuracy rule**: verify class and selector names against the package source before documenting
 them. Invented UGens and hallucinated rhythms have both happened. Get canonical source from GitHub
