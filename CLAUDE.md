@@ -84,6 +84,16 @@ page contains `<div class="tubs" data-rhythm="NAME"></div>` — used throughout
 onsets** for additive metres, so `trueAksak`'s 2+2+2+3+2+2 is visible rather than merely stated.
 Load order matters: `coypu-rhythms.js` before `coypu-tubs.js`.
 
+`coypuFloss/coypu-webchuck.js` is the rhythm-library audio preview (WebChucK + the STK `TubeBell`).
+The file itself is hand-written, but the **play button is emitted by the generator** — add or change
+it there, never in the page. It holds no pattern data: it reads the card's `data-name` and looks the
+steps up in `COYPU_RHYTHMS`, which is what keeps what you hear identical to what you see. Rhythms
+with no fixed pattern (`randomTrigs`, `randomTrigsWithProbability:`) get no button. Two traps worth
+keeping: `Chuck.init([])` **already connects to the destination** — calling `connect()` as well
+doubles the gain; and the WASM is fetched from `chuck.stanford.edu`, a *different* origin from the
+jsDelivr module, so the page depends on both being reachable and degrades to disabled buttons if
+either is not.
+
 **Accuracy rule**: verify class and selector names against the package source before documenting
 them. Invented UGens and hallucinated rhythms have both happened. Get canonical source from GitHub
 rather than a local Iceberg checkout — every on-disk Coypu checkout was found to be months stale.

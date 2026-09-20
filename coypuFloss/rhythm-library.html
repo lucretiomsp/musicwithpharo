@@ -35,6 +35,29 @@
     .step-vis .beat-sep { width: 4px; flex: 0 0 4px; }
     .step-vis-none { font-size: .78rem; color: var(--muted); font-style: italic; }
 
+    .step-row { display: flex; align-items: center; gap: .55rem; }
+    .step-row .step-vis { flex: 1 1 auto; min-width: 0; }
+
+    .rhythm-play-btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+                       width: 1.75rem; height: 1.75rem; padding: 0; font-size: .7rem; line-height: 1;
+                       border: 1px solid var(--sage); border-radius: 50%; background: transparent;
+                       color: var(--sage); cursor: pointer; transition: background .15s, color .15s, opacity .15s; }
+    .rhythm-play-btn:hover:not(:disabled) { background: var(--sage); color: var(--white); }
+    .rhythm-play-btn:focus-visible { outline: 2px solid var(--sage-pale); outline-offset: 2px; }
+    .rhythm-play-btn.playing { background: var(--sage); color: var(--white);
+                               animation: coypu-pulse 1.4s ease-out infinite; }
+    .rhythm-play-btn.loading { opacity: .5; cursor: progress; }
+    .rhythm-play-btn:disabled { opacity: .35; cursor: default; }
+
+    @keyframes coypu-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(78,124,95,.45); }
+      70%  { box-shadow: 0 0 0 6px rgba(78,124,95,0); }
+      100% { box-shadow: 0 0 0 0 rgba(78,124,95,0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rhythm-play-btn.playing { animation: none; }
+    }
+
     .rhythm-facts { font-family: var(--mono); font-size: .7rem; color: var(--muted); margin-bottom: .6rem; }
     .rhythm-code { font-family: var(--mono); font-size: .8rem; background: var(--code-bg);
                    color: #c8e6cf; padding: .5rem .7rem; border-radius: var(--radius); }
@@ -109,7 +132,7 @@
             <span class="rhythm-origin">Pan-Caribbean</span>
           </div>
           <p class="rhythm-desc">Three strokes over eight pulses, grouped 3+3+2. The most widespread rhythmic cell in Afro-Atlantic music: it underlies the Cuban son, Puerto Rican bomba, Brazilian maxixe, the New Orleans second line and modern reggaeton. In Cuban practice it is the first half of the son clave.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play tresillo" title="Play tresillo">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 1, 4, 7 · grouping 3+3+2</p>
           <div class="rhythm-code"><span>16</span> tresillo to: #perc.</div>
           <span class="variant">tresillo: '…notes…'</span>
@@ -120,7 +143,7 @@
             <span class="rhythm-origin">Cuba</span>
           </div>
           <p class="rhythm-desc">The five-stroke key pattern of Cuban son, and through it of salsa and most Afro-Cuban popular music. <em>Clave</em> means key or keystone: every other part in the ensemble orients to it. Its third stroke falls on step 7 — move that one stroke to step 8 and you have the rumba clave.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play claveSon" title="Play claveSon">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 7, 11, 13 · grouping 3+3+4+2+4</p>
           <div class="rhythm-code"><span>16</span> claveSon to: #perc.</div>
           <span class="variant">claveSon: '…notes…'</span>
@@ -131,7 +154,7 @@
             <span class="rhythm-origin">Cuba</span>
           </div>
           <p class="rhythm-desc">The rumba clave, spine of secular Afro-Cuban drumming — guaguancó, yambú and columbia. It differs from the son clave by a single stroke, the third landing on step 8 rather than 7, which gives it a harder push against the pulse. It took shape in the solares of Havana and Matanzas in the nineteenth century.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play rumba" title="Play rumba">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 8, 11, 13 · grouping 3+4+3+2+4</p>
           <div class="rhythm-code"><span>16</span> rumba to: #perc.</div>
           <span class="variant">rumba: '…notes…'</span>
@@ -142,7 +165,7 @@
             <span class="rhythm-origin">Cuba</span>
           </div>
           <p class="rhythm-desc">The habanera cell, and the bass tumbao derived from it. It travelled out of Cuba into Mexican danzón and Argentine tango, and — as Jelly Roll Morton’s “Spanish tinge” — into early jazz. Coypu’s name for it reflects its later life as a bass pattern in son and salsa.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play tumbao" title="Play tumbao">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 1, 4, 5, 7 · grouping 3+1+2+2</p>
           <div class="rhythm-code"><span>16</span> tumbao to: #perc.</div>
           <span class="variant">tumbao: '…notes…'</span>
@@ -153,7 +176,7 @@
             <span class="rhythm-origin">Haiti · Cuba · Guinea</span>
           </div>
           <p class="rhythm-desc">Five strokes in eight: <em>cinquillo</em> in Cuba, <em>banda</em> in Haitian Vodou drumming, and part of <em>moribayasa</em> among the Malinke of Guinea — three names for one rhythm, and a neat illustration of Atlantic circulation. Structurally it is tresillo with the gaps filled in.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play banda" title="Play banda">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 1, 3, 4, 6, 7 · grouping 2+1+2+1+2</p>
           <div class="rhythm-code"><span>16</span> banda to: #perc.</div>
           <span class="variant">banda: '…notes…'</span>
@@ -164,7 +187,7 @@
             <span class="rhythm-origin">Puerto Rico</span>
           </div>
           <p class="rhythm-desc">From the Puerto Rican bomba, among the oldest African-derived genres in the Caribbean, developed by enslaved people on the island’s sugar plantations. The dense cluster on steps 4–7 is its signature. Bomba is a dialogue form: the lead <em>subidor</em> drum answers the dancer rather than leading her.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play bomba" title="Play bomba">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 1, 4, 5, 6, 7 · grouping 3+1+1+1+2</p>
           <div class="rhythm-code"><span>16</span> bomba to: #perc.</div>
           <span class="variant broken" title="raises doesNotUnderstand — see Troubleshooting">bomba: — broken</span>
@@ -175,7 +198,7 @@
             <span class="rhythm-origin">Puerto Rico</span>
           </div>
           <p class="rhythm-desc">Puerto Rican plena — the “sung newspaper”, a topical narrative song form from early twentieth-century Ponce, played on hand-held <em>pandero</em> frame drums.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play plena" title="Play plena">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 6, 9, 12, 14 · grouping 3+2+3+3+2+3</p>
           <div class="rhythm-code"><span>16</span> plena to: #perc.</div>
           
@@ -194,7 +217,7 @@
             <span class="rhythm-origin">Brazil</span>
           </div>
           <p class="rhythm-desc">The bossa nova clave, from the Rio de Janeiro of the late 1950s — in essence João Gilberto’s guitar reduction of samba. Its five strokes sit as evenly as sixteen steps allow: the pattern usually cited as the Euclidean rhythm E(5,16). Note that Coypu’s own <code>#(5 16) euclidean</code> uses a Bresenham variant yielding a rotation of this rather than the bossa pattern itself — use <code>bossa</code> when you want the clave.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play bossa" title="Play bossa">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 7, 10, 13 · grouping 3+3+3+3+4</p>
           <div class="rhythm-code"><span>16</span> bossa to: #perc.</div>
           <span class="variant">bossa: '…notes…'</span>
@@ -205,7 +228,7 @@
             <span class="rhythm-origin">Colombia</span>
           </div>
           <p class="rhythm-desc">The key pattern of Colombian cumbia, a coastal form braiding Indigenous gaita flutes, African drumming and European song into one of Latin America’s most exported rhythms.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play cumbiaClave" title="Play cumbiaClave">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 5, 7, 9, 13, 15 · grouping 4+2+2+4+2+2</p>
           <div class="rhythm-code"><span>16</span> cumbiaClave to: #perc.</div>
           
@@ -224,7 +247,7 @@
             <span class="rhythm-origin">West Africa</span>
           </div>
           <p class="rhythm-desc">A bell timeline from West African practice, carried into Caribbean music. Like all timelines its job is to stay invariant: drummers, dancers and singers orient to it, and it does not change with the section.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play shiko" title="Play shiko">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 5, 7, 11, 13 · grouping 4+2+4+2+4</p>
           <div class="rhythm-code"><span>16</span> shiko to: #perc.</div>
           <span class="variant">shiko: '…notes…'</span>
@@ -235,7 +258,7 @@
             <span class="rhythm-origin">Ewe · Ghana, Togo, Benin</span>
           </div>
           <p class="rhythm-desc">From the Ewe <em>gahu</em>, a twentieth-century recreational dance said to have been carried home by Ewe traders returning from Nigeria.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play gahu" title="Play gahu">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 7, 11, 15 · grouping 3+3+4+4+2</p>
           <div class="rhythm-code"><span>16</span> gahu to: #perc.</div>
           
@@ -246,7 +269,7 @@
             <span class="rhythm-origin">Congo</span>
           </div>
           <p class="rhythm-desc">The pattern behind Congolese soukous — the guitar-led dance music that grew out of Cuban records re-imported to Kinshasa and Brazzaville in the 1940s and 50s, then swept the continent. The paired strokes give it a forward lurch.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play soukous" title="Play soukous">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 7, 11, 12 · grouping 3+3+4+1+5</p>
           <div class="rhythm-code"><span>16</span> soukous to: #perc.</div>
           
@@ -257,7 +280,7 @@
             <span class="rhythm-origin">Ashanti · Ghana</span>
           </div>
           <p class="rhythm-desc">Ashanti funeral and ceremonial music from Ghana, played on <em>atumpan</em> talking drums with a bell. Coypu’s pattern is back-weighted — its strokes fall at the end of the cycle, pulling toward the downbeat that follows.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play adowa" title="Play adowa">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 4, 6, 8 · grouping 2+2+4</p>
           <div class="rhythm-code"><span>16</span> adowa to: #perc.</div>
           <span class="variant">adowa: '…notes…'</span>
@@ -268,7 +291,7 @@
             <span class="rhythm-origin">Ashanti · Ghana</span>
           </div>
           <p class="rhythm-desc">An Ashanti recreational dance, lighter in function than adowa. Note that in the current Coypu source <code>sikyi</code> and <code>adowa</code> carry an identical pattern, so the two selectors sound the same — the distinction is documentary rather than rhythmic.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play sikyi" title="Play sikyi">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div></div>
           <p class="rhythm-facts">8 steps · onsets 4, 6, 8 · grouping 2+2+4</p>
           <div class="rhythm-code"><span>16</span> sikyi to: #perc.</div>
           
@@ -279,7 +302,7 @@
             <span class="rhythm-origin">Yoruba · Afro-Cuban</span>
           </div>
           <p class="rhythm-desc">In Afro-Cuban practice <em>bembé</em> names a Yoruba-derived ceremonial music whose bell pattern is normally a seven-stroke timeline in twelve pulses. Coypu implements Godfried Toussaint’s sixteen-pulse reinterpretation, which keeps the syncopation while fitting a binary grid. It is an adaptation, not the ternary original — and it is exactly what <code>#(6 16) euclidean</code> produces, so the Euclidean claim is verifiable rather than decorative.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play bembe" title="Play bembe">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 4, 7, 9, 12, 15 · grouping 3+3+2+3+3+2</p>
           <div class="rhythm-code"><span>16</span> bembe to: #perc.</div>
           <span class="variant">bembe: '…notes…'</span>
@@ -298,7 +321,7 @@
             <span class="rhythm-origin">Balkans · Anatolia</span>
           </div>
           <p class="rhythm-desc"><em>Aksak</em> is Turkish for “limping” — the family of Balkan and Anatolian metres that group pulses in uneven twos and threes rather than evenly. Coypu’s source calls this one a <em>pseudo</em> aksak: a ten-pulse approximation of the feel.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play aksak" title="Play aksak">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">10 steps · onsets 1, 3, 7 · grouping 2+4+4</p>
           <div class="rhythm-code"><span>16</span> aksak to: #perc.</div>
           <span class="variant">aksak: '…notes…'</span>
@@ -309,7 +332,7 @@
             <span class="rhythm-origin">Balkans · Anatolia</span>
           </div>
           <p class="rhythm-desc">A genuine additive metre in thirteen pulses rather than an approximation — and unplayable on any grid that assumes powers of two. This is the pattern to reach for when you want the real asymmetric lilt.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play trueAksak" title="Play trueAksak">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">13 steps · onsets 1, 3, 5, 7, 10, 12 · grouping 2+2+2+3+2+2</p>
           <div class="rhythm-code"><span>16</span> trueAksak to: #perc.</div>
           
@@ -328,7 +351,7 @@
             <span class="rhythm-origin">UK Jungle</span>
           </div>
           <p class="rhythm-desc">Jungle emerged in early-1990s London out of hardcore rave: heavily resequenced breakbeats — above all the Amen break — over slow, dub-derived basslines. The kick is sparse because the break carries the motion.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play jungleKick" title="Play jungleKick">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">32 steps · onsets 1, 5 · grouping 4+28</p>
           <div class="rhythm-code"><span>32</span> jungleKick to: #perc.</div>
           
@@ -339,7 +362,7 @@
             <span class="rhythm-origin">UK Jungle</span>
           </div>
           <p class="rhythm-desc">The displaced backbeat that gives jungle its lurching half-time feel against a doubled tempo.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play jungleSnare" title="Play jungleSnare">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">32 steps · onsets 9, 15, 21, 27 · grouping 6+6+6+14</p>
           <div class="rhythm-code"><span>32</span> jungleSnare to: #perc.</div>
           
@@ -350,7 +373,7 @@
             <span class="rhythm-origin">UK Jungle</span>
           </div>
           <p class="rhythm-desc">The busiest of the three jungle patterns, its strokes clustered in the second half of the cycle. Use it for ghost notes and rim work underneath the kick and snare.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play jungleRim" title="Play jungleRim">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="s on"></div></div></div>
           <p class="rhythm-facts">32 steps · onsets 12, 14, 18, 20, 24, 26, 30, 32 · grouping 2+4+2+4+2+4+2+12</p>
           <div class="rhythm-code"><span>32</span> jungleRim to: #perc.</div>
           
@@ -369,7 +392,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">Four-to-the-floor. <code>16 downbeats</code> gives four evenly spaced hits across sixteen steps — the foundation of house, techno and disco.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play downbeats" title="Play downbeats">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 5, 9, 13 · grouping 4+4+4+4 · a trigger on every 4th pulse</p>
           <div class="rhythm-code"><span>16</span> downbeats to: #perc.</div>
           <span class="variant">downbeats: '…notes…'</span>
@@ -380,7 +403,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">The complement of <code>downbeats</code>. Layer the two for the classic kick-and-offbeat-hat pairing.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play upbeats" title="Play upbeats">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 3, 7, 11, 15 · grouping 4+4+4+4 · a trigger on the 3rd pulse of each group of 4</p>
           <div class="rhythm-code"><span>16</span> upbeats to: #perc.</div>
           <span class="variant">upbeats: '…notes…'</span>
@@ -391,7 +414,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">Eighth notes.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play quavers" title="Play quavers">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div><div class="beat-sep"></div><div class="s on"></div><div class="s"></div><div class="s on"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 3, 5, 7, 9, 11, 13, 15 · grouping 2+2+2+2+2+2+2+2 · a trigger on pulses 1 and 3 of each group of 4</p>
           <div class="rhythm-code"><span>16</span> quavers to: #perc.</div>
           <span class="variant">quavers: '…notes…'</span>
@@ -402,7 +425,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">Sixteenth notes — a trigger on every step. Identical in output to <code>trigs</code>.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play semiquavers" title="Play semiquavers">▶</button><div class="step-vis"><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 · grouping 1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1 · every pulse triggered</p>
           <div class="rhythm-code"><span>16</span> semiquavers to: #perc.</div>
           <span class="variant">semiquavers: '…notes…'</span>
@@ -413,7 +436,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">Every pulse triggered. Identical to <code>semiquavers</code>; both names exist for readability — <code>trigs</code> when you mean “fire constantly”, <code>semiquavers</code> when you mean a note value.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play trigs" title="Play trigs">▶</button><div class="step-vis"><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="beat-sep"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div><div class="s on"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 · grouping 1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1 · every pulse triggered</p>
           <div class="rhythm-code"><span>16</span> trigs to: #perc.</div>
           
@@ -424,7 +447,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">No triggers at all. Use it to hold a slot in the Performance silently, or as a blank you fill in later.</p>
-          <div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play rests" title="Play rests">▶</button><div class="step-vis"><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · no triggers at all</p>
           <div class="rhythm-code"><span>16</span> rests to: #perc.</div>
           
@@ -435,7 +458,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">One trigger per bar, with a 16-step duration — a whole note that lasts its bar.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play wholes" title="Play wholes">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1</p>
           <div class="rhythm-code"><span>16</span> wholes to: #perc.</div>
           <span class="variant">wholes: '…notes…'</span>
@@ -446,7 +469,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">A semibreve <em>is</em> a whole note, but in Coypu the two are not identical: both fire once per sixteen steps, yet <code>semibreves</code> sets a 32-step duration and a 0.9 gate time while <code>wholes</code> sets 16. For a note that lasts exactly its bar, use <code>wholes</code>.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play semibreves" title="Play semibreves">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">16 steps · onsets 1</p>
           <div class="rhythm-code"><span>16</span> semibreves to: #perc.</div>
           <span class="variant">semibreves: '…notes…'</span>
@@ -457,7 +480,7 @@
             <span class="rhythm-origin">Metric</span>
           </div>
           <p class="rhythm-desc">A breve — double the whole note. One trigger per 32 steps, with a 32-step duration and a 0.8 gate time.</p>
-          <div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+          <div class="step-row"><button type="button" class="rhythm-play-btn" aria-pressed="false" aria-label="Play breves" title="Play breves">▶</button><div class="step-vis"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="beat-sep"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div></div>
           <p class="rhythm-facts">32 steps · onsets 1</p>
           <div class="rhythm-code"><span>32</span> breves to: #perc.</div>
           <span class="variant">breves: '…notes…'</span>
@@ -502,6 +525,15 @@
         Each card shows the rhythm as a row of steps: a filled cell is a trigger, an empty one a
         rest, with a small gap every four steps to mark the beat. Underneath, three facts computed
         from the pattern itself.
+      </p>
+
+      <p>
+        The ▶ button beside each row plays the pattern as a looping bell, at 120&nbsp;BPM on a
+        sixteenth-note grid, so you can hear the shape before you type it. Playing a second rhythm
+        swaps the pattern without stopping the audio, which makes it easy to compare two claves back
+        to back. It plays the same source-derived steps the row draws — the sound and the picture
+        cannot disagree. The two generative rhythms have no button, because they have no fixed
+        pattern to play.
       </p>
 
       <div class="param-table-wrap">
@@ -568,6 +600,23 @@
         alongside them a length that divides into it.
       </p>
 
+      <h4>The ▶ button does nothing, or greys itself out</h4>
+      <p>
+        The preview needs two hosts: the WebChucK module from <code>cdn.jsdelivr.net</code> and,
+        separately, <code>webchuck.wasm</code> — about 5&nbsp;MB — from
+        <code>chuck.stanford.edu</code>. If either is blocked or slow the buttons disable themselves
+        and the console carries a <code>[coypu]</code> warning. Nothing else on the page depends on
+        it. The first press is also the slowest: it downloads the WASM and starts the audio engine.
+      </p>
+
+      <h4>I hear nothing on the first press, then it works</h4>
+      <p>
+        Browsers refuse to start audio until you have interacted with the page, so the engine is
+        only built on that first press. If the page was loaded from <code>file://</code> it will
+        never work — the audio worklet and the WASM both need <code>http://</code> or
+        <code>https://</code>.
+      </p>
+
       <h4>I cannot find a rhythm I am sure exists</h4>
       <p>
         Clear the filter — it hides whole regions. Beyond these 31, rhythms can also be
@@ -591,6 +640,8 @@
 
 <script src="coypu-nav.js"></script>
 <script src="sidebar-toggle.js"></script>
+<script src="coypu-rhythms.js"></script>
+<script src="coypu-webchuck.js"></script>
 <script>
 (function () {
   var input = document.getElementById("rhythmFilter");

@@ -227,6 +227,18 @@ function visualise(bits) {
   return h + '</div>';
 }
 
+// The play button sits beside the pattern it plays. It carries no pattern data
+// of its own: coypu-webchuck.js reads the card's data-name and looks the steps
+// up in COYPU_RHYTHMS. Rhythms with no fixed pattern get no button.
+function playRow(sel, bits) {
+  const vis = visualise(bits);
+  if (!bits) return vis;
+  return `<div class="step-row">`
+    + `<button type="button" class="rhythm-play-btn" aria-pressed="false"`
+    + ` aria-label="Play ${esc(sel)}" title="Play ${esc(sel)}">\u25B6</button>`
+    + `${vis}</div>`;
+}
+
 let toc = '', body = '', n = 0, documented = 0;
 const seen = new Set();
 
@@ -270,7 +282,7 @@ for (const [id, title, flag, members, blurb] of REGIONS) {
             <span class="rhythm-origin">${origin}</span>
           </div>
           <p class="rhythm-desc">${prose}</p>
-          ${visualise(bits)}
+          ${playRow(sel, bits)}
           <p class="rhythm-facts">${facts.join(' · ')}</p>
           <div class="rhythm-code">${example}</div>
           ${variant}
@@ -321,6 +333,29 @@ const page = `<!DOCTYPE html>
     .step-vis .s.on { background: var(--sage); border-color: var(--sage); }
     .step-vis .beat-sep { width: 4px; flex: 0 0 4px; }
     .step-vis-none { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+    .step-row { display: flex; align-items: center; gap: .55rem; }
+    .step-row .step-vis { flex: 1 1 auto; min-width: 0; }
+
+    .rhythm-play-btn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+                       width: 1.75rem; height: 1.75rem; padding: 0; font-size: .7rem; line-height: 1;
+                       border: 1px solid var(--sage); border-radius: 50%; background: transparent;
+                       color: var(--sage); cursor: pointer; transition: background .15s, color .15s, opacity .15s; }
+    .rhythm-play-btn:hover:not(:disabled) { background: var(--sage); color: var(--white); }
+    .rhythm-play-btn:focus-visible { outline: 2px solid var(--sage-pale); outline-offset: 2px; }
+    .rhythm-play-btn.playing { background: var(--sage); color: var(--white);
+                               animation: coypu-pulse 1.4s ease-out infinite; }
+    .rhythm-play-btn.loading { opacity: .5; cursor: progress; }
+    .rhythm-play-btn:disabled { opacity: .35; cursor: default; }
+
+    @keyframes coypu-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(78,124,95,.45); }
+      70%  { box-shadow: 0 0 0 6px rgba(78,124,95,0); }
+      100% { box-shadow: 0 0 0 0 rgba(78,124,95,0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rhythm-play-btn.playing { animation: none; }
+    }
 
     .rhythm-facts { font-family: var(--mono); font-size: .7rem; color: var(--muted); margin-bottom: .6rem; }
     .rhythm-code { font-family: var(--mono); font-size: .8rem; background: var(--code-bg);
@@ -387,6 +422,15 @@ ${body}
         from the pattern itself.
       </p>
 
+      <p>
+        The ▶ button beside each row plays the pattern as a looping bell, at 120&nbsp;BPM on a
+        sixteenth-note grid, so you can hear the shape before you type it. Playing a second rhythm
+        swaps the pattern without stopping the audio, which makes it easy to compare two claves back
+        to back. It plays the same source-derived steps the row draws — the sound and the picture
+        cannot disagree. The two generative rhythms have no button, because they have no fixed
+        pattern to play.
+      </p>
+
       <div class="param-table-wrap">
       <table class="param-table">
         <thead><tr><th>Fact</th><th>Meaning</th></tr></thead>
@@ -451,6 +495,23 @@ ${body}
         alongside them a length that divides into it.
       </p>
 
+      <h4>The ▶ button does nothing, or greys itself out</h4>
+      <p>
+        The preview needs two hosts: the WebChucK module from <code>cdn.jsdelivr.net</code> and,
+        separately, <code>webchuck.wasm</code> — about 5&nbsp;MB — from
+        <code>chuck.stanford.edu</code>. If either is blocked or slow the buttons disable themselves
+        and the console carries a <code>[coypu]</code> warning. Nothing else on the page depends on
+        it. The first press is also the slowest: it downloads the WASM and starts the audio engine.
+      </p>
+
+      <h4>I hear nothing on the first press, then it works</h4>
+      <p>
+        Browsers refuse to start audio until you have interacted with the page, so the engine is
+        only built on that first press. If the page was loaded from <code>file://</code> it will
+        never work — the audio worklet and the WASM both need <code>http://</code> or
+        <code>https://</code>.
+      </p>
+
       <h4>I cannot find a rhythm I am sure exists</h4>
       <p>
         Clear the filter — it hides whole regions. Beyond these ${documented}, rhythms can also be
@@ -474,6 +535,8 @@ ${body}
 
 <${''}script src="coypu-nav.js"><${''}/script>
 <${''}script src="sidebar-toggle.js"><${''}/script>
+<${''}script src="coypu-rhythms.js"><${''}/script>
+<${''}script src="coypu-webchuck.js"><${''}/script>
 <${''}script>
 (function () {
   var input = document.getElementById("rhythmFilter");
