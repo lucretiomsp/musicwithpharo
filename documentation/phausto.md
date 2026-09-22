@@ -13,7 +13,7 @@ To have Phausto working in your Pharo image, you have two options:
 
 ### Option 1 — Music Image (easiest)
 
-Download [Pharo Launcher](https://pharo.org/download), then:
+Download [Pharo Launcher 3.4.4](https://github.com/pharo-project/pharo-launcher/releases/tag/3.4.4), then:
 
 1. Click **New** → select category **Pharo-Music distributions**
 2. Choose **Pharo Music (demo)** from the template list

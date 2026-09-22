@@ -26,7 +26,7 @@ Two ways to get started:
 
   <section class="install-section">
   <h2>Install via Pharo Launcher</h2>
-  <p>Download <a href="https://pharo.org/download">Pharo Launcher</a>, then:</p>
+  <p>Download <a href="https://github.com/pharo-project/pharo-launcher/releases/tag/3.4.4">Pharo Launcher 3.4.4</a>, then:</p>
   <ol>
     <li>Click <strong>New</strong> → select category <strong>Pharo-Music distributions</strong></li>
     <li>Choose <strong>Pharo Music (demo)</strong> from the template list</li>
