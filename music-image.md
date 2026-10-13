@@ -10,14 +10,14 @@ any of this.
 
 ## Install it
 
-Download [Pharo Launcher 3.4.4](https://github.com/pharo-project/pharo-launcher/releases/tag/3.4.4), then:
+Download the [Pharo Launcher](https://pharo.org/download), then:
 
 1. Click **New** → select category **Pharo-Music distributions**
 2. Choose **Pharo Music (demo)** from the template list
 3. Click **Create image**
 4. Double-click the new image to launch it
 
-<img src="{{ site.baseurl }}/assets/img/musicImgLaunchTemp.png" alt="Pharo Launcher – selecting Pharo Music demo template" class="launcher-screenshot">
+<img src="{{ site.baseurl }}/assets/img/musicImgLaunchTemp.png" alt="Pharo Launcher – selecting Pharo Music (beta)" class="launcher-screenshot">
 
 ## What is already in it
 
