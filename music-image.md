@@ -35,6 +35,9 @@ Open a Playground in the new image and start here:
 - [Coypu — First Sounds]({{ site.baseurl }}/coypuFloss/first-sounds.html) — your first rhythm on an instrument
 - [Coypu — Rhythm Library]({{ site.baseurl }}/coypuFloss/rhythm-library.html) — every rhythm, with audio previews you can play in the browser
 
+## ADC 2025 Workshop
+A comprehensive [2-hour workshop](https://www.youtube.com/watch?v=v95QYyUHNJ8&t=4536s) covering all the essentials for Phausto and Coypu. Installation is now simpler with the Music Image, so youcan skip that part of the video.
+
 ## If you would rather build your own image
 
 The Music Image is a convenience, not a requirement. Both packages install into any Pharo 11–13
