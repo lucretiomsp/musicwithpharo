@@ -39,8 +39,10 @@
         <li><a href="#juce">JUCE plugins</a>
           <ol>
             <li><a href="#juce-types">Plugin types</a></li>
-            <li><a href="#juce-apvts">APVTS: the parameter tree</a></li>
-            <li><a href="#juce-files">The generated files</a></li>
+            <li><a href="#juce-apvts">Parameters and the APVTS</a></li>
+            <li><a href="#juce-editors">Editors</a></li>
+            <li><a href="#juce-files">The generated project</a></li>
+            <li><a href="#juce-build">Building</a></li>
           </ol>
         </li>
         <li><a href="#bela">Bela</a></li>
@@ -190,108 +192,323 @@ dsp createFaustSynthFileNamed: <span class="str">'MySynth'</span>.</code></pre>
       <h2>4. JUCE plugins</h2>
 
       <p>
-        The most substantial exporter generates a complete
-        <a href="https://juce.com/">JUCE</a> project — processor, editor, parameter tree and build
-        files — ready to compile into a VST3 or Audio Unit.
+        The most substantial exporter writes a complete <a href="https://juce.com/">JUCE</a>
+        project: the audio processor, its parameter tree, an editor, a CMake build and a script
+        that runs the build with one command. The result compiles into a VST3, an Audio Unit (on
+        macOS) and a standalone app.
       </p>
 
       <div class="param-table-wrap">
       <table class="param-table">
-        <thead><tr><th>Message</th><th>Produces</th></tr></thead>
+        <thead><tr><th>Message</th><th>Writes</th></tr></thead>
         <tbody>
-          <tr><td>export2JuceWithName: aString type: aPluginType</td><td>A JUCE project</td></tr>
-          <tr><td>export2JuceAPVTSWithName: aString type: aPluginType</td><td>A project with a full parameter tree</td></tr>
-          <tr><td>export2JuceAPVTSWithName: aString for: aPluginType</td><td>The same, alternative form</td></tr>
+          <tr><td>export2JuceWithName: aString type: aPluginType</td><td>The project, with the generic editor</td></tr>
+          <tr><td>export2JuceWithName: aString type: aPluginType editor: anEditorExport</td><td>The project, with the editor you choose (§4.3)</td></tr>
         </tbody>
       </table>
       </div>
 
-<pre><code>dsp export2JuceAPVTSWithName: <span class="str">'MyPlugin'</span> type: aPluginType.</code></pre>
+<pre><code>fx := (<span class="cls">PhResonLp</span> new frequency: #Cutoff; q: #Resonance; yourself) stereo asDsp.
+fx init.
+fx export2JuceWithName: <span class="str">'ResonFilter'</span> type: <span class="cls">PhEffectPluginType</span> new.</code></pre>
+
+      <p>
+        The name becomes the plugin's product name and its CMake target, so use letters and digits
+        only. The project lands in <code>Documents/faust2Juce/ResonFilter/</code>, and
+        <code>cmake -P build.cmake</code> in that folder builds it (§4.5).
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-title">Once, before your first export</span>
+        Copy the <code>architecture</code> folder from the root of the Phausto repository into your
+        Documents folder. The exporter compiles your FAUST program against
+        <code>Documents/architecture/faustMinimalInlined.h</code>. Without it the export still
+        finishes, but leaves out the FAUST header, and the build stops at the missing file.
+      </div>
+
+      <div class="callout note">
+        <span class="callout-title">Export checks the patch first</span>
+        A soundfile, more channels than the plugin type takes (§4.1), two controls with the same
+        name, or a label containing a double quote or a backslash stops the export with an error
+        that says which, before any file is written. Exported plugins cannot load soundfiles yet.
+      </div>
 
       <section id="juce-types">
         <h3>4.1 Plugin types</h3>
 
         <p>
-          The plugin type selects which project template is used. Phausto ships three, corresponding
-          to the three shapes a plugin can take:
+          The <code>type:</code> argument is an object, not a string. It answers everything that
+          differs between an effect and an instrument (the buses, the MIDI handling, the flags the
+          host reads, which controls become parameters), so the exporter never tests which kind of
+          plugin it is writing. A misspelt type fails when you accept the code, not halfway through
+          an export.
         </p>
 
         <div class="param-table-wrap">
         <table class="param-table">
-          <thead><tr><th>Template</th><th>Shape</th></tr></thead>
+          <thead><tr><th>Type</th><th>Host sees</th><th>MIDI</th><th>Patch channels</th></tr></thead>
           <tbody>
-            <tr><td>Mono synth</td><td>MIDI in, audio out, one voice</td></tr>
-            <tr><td>Poly synth</td><td>MIDI in, audio out, multiple voices</td></tr>
-            <tr><td>Effects</td><td>Audio in, audio out</td></tr>
+            <tr><td>PhEffectPluginType new</td><td>An effect: audio in, audio out</td><td>None</td><td>Up to 2 in, up to 2 out</td></tr>
+            <tr><td>PhMonoSynthPluginType new</td><td>An instrument: MIDI in, audio out</td><td>Notes drive <code>freq</code>, <code>gate</code> and <code>gain</code></td><td>No inputs, up to 2 out</td></tr>
           </tbody>
         </table>
         </div>
 
         <p>
-          The templates live in <code>faus2JuceTemplates</code> in the Phausto repository, as
-          <code>Source_monoSynth</code>, <code>Source_polySynth</code> and
-          <code>Source_effects</code>. Reading them is the quickest way to see what the exporter
-          fills in.
+          The buses are stereo, and a host may also choose mono. A mono patch is fine either way:
+          the generated <code>PhaustoChannelAdapter.h</code> repeats the last channel when the bus
+          has more and averages when it has fewer, so a one-channel program feeds both sides.
         </p>
+
+        <p>
+          An instrument is played through three controls named exactly <code>freq</code>,
+          <code>gate</code> and <code>gain</code>, the FAUST convention. A note-on sets
+          <code>freq</code> from the note number and <code>gain</code> from the velocity, then
+          opens <code>gate</code>; the matching note-off closes it. The last note wins, and MIDI is
+          read once per audio block. Because MIDI drives those three, they never become host
+          parameters; the patch's other controls (here the envelope's attack and release) do.
+        </p>
+
+<pre><code>lead := ((<span class="cls">SquareOsc</span> new freq: #freq)
+    =&gt; (<span class="cls">AREnv</span> new trigger: #gate; release: #Release; yourself))
+    * (<span class="cls">PhHSlider</span> new label: #gain).
+dsp := lead stereo asDsp.
+dsp init.
+dsp export2JuceWithName: <span class="str">'SquareLead'</span> type: <span class="cls">PhMonoSynthPluginType</span> new.</code></pre>
+
+        <div class="callout note">
+          <span class="callout-title">Polyphony is in development</span>
+          A third type, <code>PhPolySynthPluginType voices: 8</code>, wraps the same single-voice
+          patch in FAUST's own voice allocator, with voice stealing, and every knob drives every
+          voice. It is not usable yet, so for now a JUCE instrument plays one note at a time. For a
+          polyphonic instrument today, export to CMajor with the poly wrapper (§3.2).
+        </div>
       </section>
 
       <section id="juce-apvts">
-        <h3>4.2 APVTS: the parameter tree</h3>
+        <h3>4.2 Parameters and the APVTS</h3>
 
         <p>
           JUCE's <code>AudioProcessorValueTreeState</code> is how a plugin exposes automatable
-          parameters to a host. Phausto builds it from your patch's own controls, which is why
-          declaring proper ranges on your <a href="ui-primitives.html">widgets</a> pays off at export
-          time.
+          parameters to a host. Phausto builds it from the compiled program: every control in the
+          DSP's FAUST UI description becomes one row of a generated table,
+          <code>PhaustoParams.h</code>, holding its id, FAUST path, label, range, default and step.
+          The processor creates its parameters from that table, and the generic editor creates its
+          widgets from the same table, so parameters and controls cannot drift apart.
         </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>In the patch</th><th>In the plugin</th></tr></thead>
+          <tbody>
+            <tr><td>PhHSlider, PhVSlider, PhNumEntry</td><td>An <code>AudioParameterFloat</code> with the range, step and default you declared</td></tr>
+            <tr><td>PhButton, PhCheckbox</td><td>An <code>AudioParameterBool</code></td></tr>
+            <tr><td>PhHBarGraph, PhVBarGraph</td><td>Nothing: a bar graph is an output, not a parameter</td></tr>
+            <tr><td>freq, gate, gain (instruments)</td><td>Nothing: MIDI drives them (§4.1)</td></tr>
+            <tr><td>A soundfile, as in samplers</td><td>The export stops</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          A parameter's id is its control's short name, and the host displays its label. Once per
+          audio block the processor writes each parameter's current value into the DSP through its
+          FAUST path, so automation runs at block rate. The values are saved with the host session
+          and restored when it reopens.
+        </p>
+
+        <div class="callout tip">
+          <span class="callout-title">Names are ids</span>
+          Renaming a control renames its parameter, and a session saved with the old plugin loses
+          that parameter's value and automation. Settle the names before you share a plugin.
+        </div>
+
+        <p>To see what the host will get without exporting anything:</p>
 
         <div class="param-table-wrap">
         <table class="param-table">
           <thead><tr><th>Message</th><th>Returns</th></tr></thead>
           <tbody>
-            <tr><td>apvtsControls</td><td>The controls to expose</td></tr>
-            <tr><td>apvtsParameterControls</td><td>Just the automatable parameters</td></tr>
-            <tr><td>apvtsControlsFrom: aJsonString</td><td>Controls parsed from a UI description</td></tr>
-            <tr><td>apvtsParameterControlsFrom: aJsonString</td><td>Parameters from a UI description</td></tr>
-            <tr><td>apvtsDescriptorRowFor: aControl</td><td>One row of the parameter descriptor</td></tr>
+            <tr><td>apvtsControls</td><td>Every control of the compiled DSP, one dictionary each</td></tr>
+            <tr><td>apvtsParameterControls</td><td>The controls that become parameters in an effect</td></tr>
+            <tr><td>apvtsParameterControlsFrom: aJsonString for: aPluginType</td><td>The same for any type, from a UI description</td></tr>
+            <tr><td>asPhaustoParamsHeaderFrom: aJsonString for: aPluginType</td><td>The text of <code>PhaustoParams.h</code></td></tr>
           </tbody>
         </table>
         </div>
 
+<pre><code>dsp apvtsParameterControlsFrom: dsp getJSON for: <span class="cls">PhMonoSynthPluginType</span> new.
+dsp asPhaustoParamsHeaderFrom: dsp getJSON for: <span class="cls">PhMonoSynthPluginType</span> new.</code></pre>
+
         <div class="callout note">
-          <span class="callout-title">This is what DSPParameter was for</span>
-          A parameter's label, range, step and default all travel into the plugin. The separation
-          between <code>DSPParameter</code> and <code>DSPParameterStore</code> described in
-          <a href="dsp-api.html">DSP &amp; Parameter API §8</a> exists precisely so this mapping is
-          straightforward.
+          <span class="callout-title">The compiled program is the source of truth</span>
+          The table is read from the FAUST JSON of the compiled DSP (<code>getJSON</code>, see
+          <a href="dsp-api.html">DSP &amp; Parameter API §7</a>), not from Pharo objects. A patch
+          built from UGens, from raw FAUST or with the <a href="faust-box.html">Box API</a> exports
+          the same way, and the plugin exposes exactly what the program declares.
+        </div>
+      </section>
+
+      <section id="juce-editors">
+        <h3>4.3 Editors</h3>
+
+        <p>
+          The <code>editor:</code> argument decides what the plugin window shows. It writes only
+          <code>PluginEditor.h</code> and <code>PluginEditor.cpp</code>: the processor and the rest
+          of the project are the same whichever editor you choose.
+        </p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Editor</th><th>Gives you</th></tr></thead>
+          <tbody>
+            <tr><td>PhGenericEditorExport new</td><td>The default. One labelled control per parameter: a rotary slider, or a toggle for buttons and checkboxes. Built from <code>PhaustoParams.h</code> at run time, and rewritten on every export.</td></tr>
+            <tr><td>PhSkeletonEditorExport new</td><td>An empty editor for a UI you write in C++. Written once: exporting again never overwrites it.</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+<pre><code>fx export2JuceWithName: <span class="str">'ResonFilter'</span>
+  type: <span class="cls">PhEffectPluginType</span> new
+  editor: <span class="cls">PhSkeletonEditorExport</span> new.</code></pre>
+
+        <p>
+          In the skeleton, parameters are reached through <code>audioProcessor.apvts</code>, and
+          their ids are listed in <code>PhaustoParams.h</code>. Bind a JUCE control to one with an
+          attachment, declared after the control so that it is destroyed first:
+        </p>
+
+<pre><code><span class="cmt">// PluginEditor.h, private members</span>
+using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+juce::Slider cutoff;
+std::unique_ptr&lt;SliderAttachment&gt; cutoffAttachment;
+
+<span class="cmt">// PluginEditor.cpp, in the constructor</span>
+addAndMakeVisible (cutoff);
+cutoffAttachment = std::make_unique&lt;SliderAttachment&gt; (
+    audioProcessor.apvts, <span class="str">"Cutoff"</span>, cutoff);
+
+<span class="cmt">// PluginEditor.cpp, in resized()</span>
+cutoff.setBounds (getLocalBounds().reduced (<span class="num">20</span>));</code></pre>
+
+        <p>
+          Keep the class name and constructor the skeleton gives you
+          (<code>EffectAudioProcessorEditor</code> or <code>MonoSynthAudioProcessorEditor</code>,
+          built from the processor): the generated <code>createEditor()</code> relies on both. To
+          generate an editor of your own from Pharo, subclass <code>PhEditorExport</code> and
+          answer <code>headerFor:</code> and <code>implementationFor:</code>; override
+          <code>write:to:</code> to change when the files are overwritten.
+        </p>
+
+        <div class="callout note">
+          <span class="callout-title">Coming next: an editor designed in Bloc</span>
+          JuBloc will add a third editor, so that a UI designed live in Pharo is emitted as JUCE
+          components bound to these same parameter ids. It ships with JuBloc, so Phausto itself
+          never depends on Bloc.
         </div>
       </section>
 
       <section id="juce-files">
-        <h3>4.3 The generated files</h3>
+        <h3>4.4 The generated project</h3>
+
+        <p>Everything is written to <code>Documents/faust2Juce/&lt;Name&gt;/</code>:</p>
 
         <div class="param-table-wrap">
         <table class="param-table">
-          <thead><tr><th>Message</th><th>Writes</th></tr></thead>
+          <thead><tr><th>File</th><th>Holds (written by)</th></tr></thead>
           <tbody>
-            <tr><td>createCppAPVTSFilesNamed:for:</td><td>Processor source with APVTS</td></tr>
-            <tr><td>createHeaderAPVTSFilesNamed:for:</td><td>Processor header</td></tr>
-            <tr><td>createCppEditorAPVTSFilesNamed:for:</td><td>Editor source</td></tr>
-            <tr><td>createHeaderEditorAPVTSFilesNamed:for:</td><td>Editor header</td></tr>
-            <tr><td>createPluginProcessorHeader:</td><td>Plugin processor header</td></tr>
-            <tr><td>createPhaustoParamsHeaderNamed:</td><td>A header of parameter definitions</td></tr>
-            <tr><td>createJucerFileNamed:for:</td><td>A Projucer project file</td></tr>
-            <tr><td>createCMakeFileNamed:for:</td><td>A CMake build file</td></tr>
+            <tr><td>CMakeLists.txt</td><td>The JUCE build: formats, plugin codes, JUCE version (<code>createCMakeFileNamed:for:</code>)</td></tr>
+            <tr><td>build.cmake</td><td>The one-command build, §4.5 (<code>createBuildScriptNamed:</code>)</td></tr>
+            <tr><td>&lt;Name&gt;.jucer</td><td>The same project for the Projucer (<code>createJucerFileNamed:for:</code>)</td></tr>
+            <tr><td>Source/Faust&lt;Type&gt;.h</td><td>Your FAUST program, compiled to C++ (<code>createFaustHeaderFileNamed:for:</code>)</td></tr>
+            <tr><td>Source/PhaustoParams.h</td><td>The parameter table, §4.2 (<code>createPhaustoParamsHeaderNamed:for:</code>)</td></tr>
+            <tr><td>Source/PhaustoChannelAdapter.h</td><td>The mapping between program channels and buses, §4.1 (<code>createChannelAdapterNamed:</code>)</td></tr>
+            <tr><td>Source/PluginProcessor.h, .cpp</td><td>The audio processor: parameters, MIDI, saved state (<code>createHeaderAPVTSFilesNamed:for:</code>, <code>createCppAPVTSFilesNamed:for:</code>)</td></tr>
+            <tr><td>Source/PluginEditor.h, .cpp</td><td>The plugin window, §4.3 (the editor export)</td></tr>
           </tbody>
         </table>
         </div>
 
         <p>
-          Setter code for the C++ side is generated from your parameter names through the
-          <code>String</code> and <code>Array</code> extensions —
-          <code>asCppSetterDefinition</code>, <code>asCppSetterImplementationFor:</code> and their
-          plural forms — so each Phausto parameter becomes a named C++ setter rather than a numeric
-          index.
+          <code>&lt;Type&gt;</code> is <code>Effect</code> or <code>MonoSynth</code>, which is also
+          the prefix of the processor class (<code>EffectAudioProcessor</code>). Every file but the
+          FAUST header also has a query that answers its text without writing anything, such as
+          <code>asCMakeListsFor:type:</code> or <code>asPluginProcessorCppAPVTSFor:</code>: inspect
+          those to read the C++ before you export.
+        </p>
+
+        <div class="callout warning">
+          <span class="callout-title">Exporting again overwrites</span>
+          Every file above is rewritten on each export, except an editor written by
+          <code>PhSkeletonEditorExport</code>. Keep hand-written C++ in a skeleton editor, never in
+          the generated files.
+        </div>
+
+        <p>The export name also decides how hosts tell the plugin apart:</p>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>From 'ResonFilter'</th><th>Used as</th></tr></thead>
+          <tbody>
+            <tr><td>ResonFilter</td><td>Product name and CMake target</td></tr>
+            <tr><td>Reso</td><td>Plugin code: the first four letters, one of them a capital (the AU rule)</td></tr>
+            <tr><td>Phausto, Phau</td><td>Manufacturer and its code, the same for every Phausto plugin</td></tr>
+            <tr><td>com.phausto.resonfilter</td><td>Bundle id</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout warning">
+          <span class="callout-title">The first four letters must differ</span>
+          A host identifies a plugin by its manufacturer code and plugin code, and the manufacturer
+          is shared. Two names that start with the same four letters, such as
+          <code>ResonFilter</code> and <code>ResonDrive</code>, give two plugins the host takes for
+          one. <code>(PhPluginIdentity productName: 'ResonFilter') pluginCode</code> shows the code
+          before you export.
+        </div>
+      </section>
+
+      <section id="juce-build">
+        <h3>4.5 Building</h3>
+
+        <p>
+          You need CMake 3.22 or newer and a C++ compiler: Xcode on macOS, Visual Studio on Windows,
+          GCC or Clang on Linux together with the packages in JUCE's
+          <a href="https://github.com/juce-framework/JUCE/blob/8.0.4/docs/Linux%20Dependencies.md">Linux dependencies</a>.
+          Then, in a terminal on any of the three:
+        </p>
+
+<pre><code>cd ~/Documents/faust2Juce/ResonFilter
+cmake -P build.cmake</code></pre>
+
+        <div class="param-table-wrap">
+        <table class="param-table">
+          <thead><tr><th>Command</th><th>Does</th></tr></thead>
+          <tbody>
+            <tr><td>cmake -P build.cmake</td><td>Configures once, builds Release on every core, installs the plugins</td></tr>
+            <tr><td>cmake -DJUCE_PATH=/path/to/JUCE -P build.cmake</td><td>The same with your own JUCE instead of a download (a <code>JUCE_PATH</code> environment variable works too)</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p>
+          JUCE copies the VST3 and the Audio Unit into the system plug-in folders, and the
+          standalone app stays in <code>build/ResonFilter_artefacts/Release/Standalone/</code>.
+          Rescan plug-ins in your host to find the new one. After a change in Pharo, export again and
+          rerun the script: only what changed is rebuilt.
+        </p>
+
+        <div class="callout tip">
+          <span class="callout-title">The first build downloads JUCE</span>
+          Without <code>JUCE_PATH</code>, CMake fetches JUCE 8.0.4 with git, which takes a few
+          minutes once. The script configures only on its first run, so delete the
+          <code>build</code> folder before switching between the download and your own JUCE.
+        </div>
+
+        <p>
+          The script is a convenience, not a requirement. <code>CMakeLists.txt</code> is an
+          ordinary JUCE CMake project that any CMake-aware IDE opens, and the <code>.jucer</code>
+          is there if you prefer the Projucer.
         </p>
       </section>
     </section>
@@ -349,7 +566,7 @@ cutoff := <span class="cls">PhHSlider</span> new
         <div class="step"><strong>Name things deliberately</strong> — parameter names become the names musicians see. Relabel your UGens, as in <a href="basics.html">Unit Generators §2.2</a>.</div>
         <div class="step"><strong>Express time in seconds</strong> — a delay fixed in samples changes pitch at a different sample rate. Use <code>PhSec2Samp</code> or <code>PhSampleRate</code>; see <a href="math.html">Math §6</a>.</div>
         <div class="step"><strong>Keep sequencing outside the patch</strong> — forked Pharo loops do not export. Rhythm that must survive belongs in the signal graph, as pulses and counters; see <a href="sequencing.html">Sequencing §1</a>.</div>
-        <div class="step"><strong>Declare MIDI bindings on the widget</strong> — <code>midiCtrl:</code> is honoured by the FAUST runtime, by the plugin and by the board alike.</div>
+        <div class="step"><strong>Declare MIDI bindings on the widget</strong>: <code>midiCtrl:</code> is honoured by the FAUST runtime and by the board. A JUCE plugin leaves controller mapping to the host, where you MIDI-learn the parameter instead.</div>
       </div>
 
       <div class="callout warning">
@@ -380,38 +597,103 @@ cutoff := <span class="cls">PhHSlider</span> new
 
       <h4>The exported plugin has no parameters</h4>
       <p>
-        The patch was built with literal numbers, so there was nothing to expose. Use widgets —
-        §6.
+        The program declares no control the host can see: its values are fixed inside the signal
+        graph, or it is an instrument whose only controls are <code>freq</code>, <code>gate</code>
+        and <code>gain</code>, which MIDI drives (§4.1). Expose what should be automatable as
+        widgets (§6). Give a JUCE plugin at least one parameter: one with none does not compile
+        with Visual Studio.
       </p>
 
       <h4>The plugin loads but is silent</h4>
       <p>
         If the sequencing lived in a forked Pharo loop, it did not come with you. Move the rhythm
-        into the signal graph, or drive the plugin from the host — §6.
+        into the signal graph, or drive the plugin from the host (§6).
+      </p>
+
+      <h4>The instrument ignores the notes I play</h4>
+      <p>
+        MIDI reaches only controls named exactly <code>freq</code>, <code>gate</code> and
+        <code>gain</code>. List the names with <code>dsp traceAllParams</code> (see
+        <a href="dsp-api.html">DSP &amp; Parameter API §4.2</a>), relabel what differs, and export
+        again with <code>PhMonoSynthPluginType</code> (§4.1).
+      </p>
+
+      <h4>A controller bound with midiCtrl: does nothing in the plugin</h4>
+      <p>
+        A JUCE plugin does not read MIDI metadata. Map the controller to the parameter in your
+        host, with its MIDI learn (§6).
       </p>
 
       <h4>Parameter ranges in the host look wrong</h4>
       <p>
-        They are whatever you declared on the widget. Check the <code>values:</code> array order —
+        They are whatever you declared on the widget. Check the <code>values:</code> array order:
         initial value first. See <a href="ui-primitives.html">UI Primitives §2.1</a>.
       </p>
 
       <h4>The exported instrument is monophonic</h4>
       <p>
-        Phausto patches are single-voice by construction. Use a polyphonic template for JUCE, or the
-        CMajor poly wrapper — §3.2 and §4.1.
+        Phausto patches are single-voice by construction, and JUCE export plays one note at a time
+        until the polyphonic type lands (§4.1). For polyphony today, use the CMajor poly wrapper
+        (§3.2).
+      </p>
+
+      <h4>The export stops with an error</h4>
+      <p>
+        The message names the check that failed, and no file was written: a soundfile, more
+        channels than the plugin type takes, two controls with the same name, or a double quote or
+        backslash in a label (§4). A stereo unit fed from a mono chain can declare more inputs than
+        it seems to; compare <code>dsp numberOfInputs</code> and <code>dsp numberOfOutputs</code>
+        with the limits in §4.1.
+      </p>
+
+      <h4>The build cannot find FaustEffect.h or FaustMonoSynth.h</h4>
+      <p>
+        The FAUST program was never compiled because <code>Documents/architecture</code> is
+        missing. Copy the folder from the Phausto repository and export again (§4).
       </p>
 
       <h4>The generated project will not build</h4>
       <p>
-        Export writes source, not binaries — the target's toolchain does the rest. Confirm JUCE,
-        CMake or the Bela toolchain is installed and that the template files are present — §1, §4.1.
+        Export writes source, not binaries: the target's toolchain does the rest (§1). For JUCE,
+        check CMake 3.22 or newer, a C++ compiler, and either git with a network connection for the
+        JUCE download or a valid <code>JUCE_PATH</code> (§4.5).
+      </p>
+
+      <h4>On Windows, the build fails while installing the plugin</h4>
+      <p>
+        The system VST3 folder may not be writable without administrator rights. Run the terminal
+        as administrator, or take the plugin from
+        <code>build/&lt;Name&gt;_artefacts/Release/VST3/</code> yourself (§4.5).
+      </p>
+
+      <h4>The new plugin does not appear in the host</h4>
+      <p>
+        Rescan plug-ins, or restart the host: Ableton Live may list a new plugin only after a
+        restart. On macOS, <code>auval -a</code> lists every Audio Unit the system can see.
+      </p>
+
+      <h4>Two exported plugins show up as one</h4>
+      <p>
+        Their names start with the same four letters, so they share a plugin code. Rename one and
+        export again (§4.4).
+      </p>
+
+      <h4>My changes to PluginEditor.cpp disappeared</h4>
+      <p>
+        The generic editor rewrites its files on every export. Write your own UI with
+        <code>PhSkeletonEditorExport</code>, whose files are never overwritten (§4.3).
+      </p>
+
+      <h4>A new control is missing from my hand-written editor</h4>
+      <p>
+        That is by design: export never touches a skeleton editor. Add the control in C++, with the
+        id listed in <code>PhaustoParams.h</code> (§4.3).
       </p>
 
       <h4>The exported patch sounds different from the one in Pharo</h4>
       <p>
         Most often a sample-rate assumption. Anything specified in samples will shift; express times
-        in seconds — §6.
+        in seconds (§6).
       </p>
     </section>
 
