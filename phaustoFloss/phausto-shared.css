@@ -821,6 +821,10 @@ hr.section-divider {
 
 .callout.note { background: #fdeaec; border-color: var(--sage); color: var(--ink-mid); }
 
+/* Callout bodies are bare text with inline code and links. Under the flex
+   layout above, every inline element became its own column. */
+.callout { display: block; }
+
 .callout-title {
   display: block;
   font-weight: 600;
